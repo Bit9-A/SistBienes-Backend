@@ -1,0 +1,28 @@
+{
+  "name": "01-bases",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "exports": "./dist/index.mjs",
+  "type": "module",
+  "scripts": {
+    "start": "node dist/index.mjs",
+    "dev": "tsx watch --clear-screen=false src/index.ts",
+    "build": "pkgroll"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "pkgroll": "^2.5.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.0",
+    "@types/pg": "^8.11.10",
+    "express": "^4.21.1",
+    "pg": "^8.13.1"
+  }
+}
