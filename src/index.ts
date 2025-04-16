@@ -2,12 +2,14 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import homeRoute from "./router/home.route";
+import authRoute from "./router/auth.route";
+import userRoute from "./router/user.route";
 import { db } from "./database/index";
 
 // Inicializar la conexión a la base de datos
 db()
-  .then(() => console.log("Database connected successfully"))
-  .catch((error) => console.error("Database connection failed:", error));
+  .then((): void => console.log("Database connected successfully"))
+  .catch((error: unknown): void => console.error("Database connection failed:", error));
 
 // Obtener el directorio actual
 const __filename = fileURLToPath(import.meta.url);
@@ -21,6 +23,8 @@ app.use(express.json());
 
 // Rutas
 app.use("/", homeRoute);
+app.use("/auth", authRoute);
+app.use("/user", userRoute);
 
 const PORT = process.env.PORT || 5000;
 
