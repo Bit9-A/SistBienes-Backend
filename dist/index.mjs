@@ -1,20 +1,26 @@
 import express, { Router } from 'express';
-import pg from 'pg';
+import mysql from 'mysql2/promise';
 
 const router = Router();
 router.get("/", (_, res) => {
   res.send("Hello World!");
 });
 
-const { Pool } = pg;
-const connectionString = "postgresql://postgres:root@localhost:5434/dbtest";
-const pool = new Pool({ connectionString });
+const connectionConfig = {
+  host: "localhost",
+  user: "root",
+  password: "1234",
+  database: "sistbienes",
+  port: 3306
+  // Cambia el puerto si es necesario
+};
+const pool = mysql.createPool(connectionConfig);
 const testConnection = async () => {
   try {
-    const { rows } = await pool.query("SELECT NOW()");
-    console.log("Postgres connected:", rows[0].now);
+    const [rows] = await pool.query("SELECT NOW()");
+    console.log("MySQL connected:", rows[0]["NOW()"]);
   } catch (error) {
-    console.log(error);
+    console.error("Error connecting to MySQL:", error);
   }
 };
 
@@ -23,7 +29,7 @@ const __dirname = import.meta.dirname;
 console.log(__dirname);
 const app = express();
 app.use("/", router);
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 5e3;
 app.listen(PORT, () => {
   console.log(`Server is running on port http://localhot:${PORT}`);
 });
