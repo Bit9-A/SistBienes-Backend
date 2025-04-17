@@ -4,7 +4,11 @@ import { fileURLToPath } from "url";
 import homeRoute from "./router/home.route";
 import authRoute from "./router/auth.route";
 import userRoute from "./router/user.route";
+import subgroupRoute from "./router/subgroup.route";
+import deptRoute from "./router/dept.route";
+import { config } from "dotenv";
 import { db } from "./database/index";
+import { verifyToken } from "./middlewares/jwt.middleware";
 
 // Inicializar la conexión a la base de datos
 db()
@@ -22,9 +26,13 @@ const app = express();
 app.use(express.json());
 
 // Rutas
+app.use(verifyToken)
 app.use("/", homeRoute);
 app.use("/auth", authRoute);
 app.use("/user", userRoute);
+app.use("/subgroup", subgroupRoute);
+app.use("/subgroup", deptRoute);
+
 
 const PORT = process.env.PORT || 5000;
 
