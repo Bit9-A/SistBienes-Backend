@@ -9,6 +9,8 @@ import deptRoute from "./router/dept.route";
 import { config } from "dotenv";
 import { db } from "./database/index";
 import { verifyToken } from "./middlewares/jwt.middleware";
+import cors from "cors";
+
 
 // Inicializar la conexión a la base de datos
 db()
@@ -24,6 +26,12 @@ const app = express();
 
 // Middleware para manejar JSON
 app.use(express.json());
+app.use(cors());
+app.use(cors({
+  origin: ["http://shuttle.proxy.rlwy.net:12546"], // Permitir solicitudes desde el frontend local
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
 // Rutas
 app.use(verifyToken)
