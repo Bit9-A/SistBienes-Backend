@@ -7,6 +7,9 @@ import userRoute from "./router/user.route";
 import subgroupRoute from "./router/subgroup.route";
 import deptRoute from "./router/dept.route";
 import incorpRoute from "./router/incorp.route";
+import parishRoute from "./router/parish.route";
+
+
 import { config } from "dotenv";
 import { db } from "./database/index";
 import { verifyToken } from "./middlewares/jwt.middleware";
@@ -35,16 +38,19 @@ app.use(cors({
 }));
 
 // Rutas
-app.use(verifyToken)
-app.use("/", homeRoute);
-app.use("/auth", authRoute);
+//app.use(verifyToken)
+
+app.use("/",homeRoute);
+app.use("/auth",authRoute);
 app.use("/user", userRoute);
 app.use("/subgroup", subgroupRoute);
 app.use("/subgroup", deptRoute);
 app.use("/incorp", incorpRoute);
+app.use("/dept", deptRoute);
+app.use("/parishes", parishRoute);
 
 
-const PORT = process.env.PORT || 12546;
+const PORT = process.env.PORT || 8000;
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
