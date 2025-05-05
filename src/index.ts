@@ -9,6 +9,8 @@ import deptRoute from "./router/dept.route";
 import incorpRoute from "./router/incorp.route";
 import goods_statusRoute from "./router/good-status.route";
 import user_roleRoute from "./router/user_role.route";
+import concepIncorpRoute from "./router/concept-inc.route";
+import concepDesRoute from "./router/concept-des.router";
 import { config } from "dotenv";
 import { db } from "./database/index";
 import { verifyToken } from "./middlewares/jwt.middleware";
@@ -46,6 +48,8 @@ app.use("/subgroup", deptRoute);
 app.use("/incorp", incorpRoute);
 app.use("/goods-status", goods_statusRoute);
 app.use("/user_role", user_roleRoute);
+app.use("/concept-incorp", concepIncorpRoute);
+app.use("/concept-desincorp", concepDesRoute);
 
 
 const PORT = process.env.PORT || 12546;
