@@ -8,7 +8,7 @@ import subgroupRoute from "./router/subgroup.route";
 import deptRoute from "./router/dept.route";
 import incorpRoute from "./router/incorp.route";
 import parishRoute from "./router/parish.route";
-
+import auditRoute from "./router/audit.route";
 
 import { config } from "dotenv";
 import { db } from "./database/index";
@@ -48,6 +48,7 @@ app.use("/subgroup", deptRoute);
 app.use("/incorp", incorpRoute);
 app.use("/dept", deptRoute);
 app.use("/parishes", parishRoute);
+app.use("/audit", auditRoute);
 
 
 const PORT = process.env.PORT || 8000;
