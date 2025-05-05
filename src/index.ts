@@ -7,12 +7,12 @@ import userRoute from "./router/user.route";
 import subgroupRoute from "./router/subgroup.route";
 import deptRoute from "./router/dept.route";
 import incorpRoute from "./router/incorp.route";
-import goods_statusRoute from "./router/good-status.route";
+import goods_statusRoute from "./router/goods-status.router";
 import userRoleRoute from "./router/user_role.route";
 import concepIncorpRoute from "./router/concept-inc.route";
 import concepDesRoute from "./router/concept-des.router";
 import parishRoute from "./router/parish.route";
-
+import auditRoute from "./router/audit.route";
 
 import { config } from "dotenv";
 import { db } from "./database/index";
@@ -56,6 +56,7 @@ app.use("/concept-incorp", concepIncorpRoute);
 app.use("/concept-desincorp", concepDesRoute);
 app.use("/dept", deptRoute);
 app.use("/parishes", parishRoute);
+app.use("/audit", auditRoute);
 
 
 const PORT = process.env.PORT || 8000;
