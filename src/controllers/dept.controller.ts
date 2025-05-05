@@ -1,4 +1,3 @@
-
 import { DeptModel } from "../models/dept.model";
 
 const getAllDepartments = async (req: any, res: any) => {
@@ -25,11 +24,11 @@ const getDepartmentById = async (req: any, res: any) => {
 
 const createDepartment = async (req: any, res: any) => {
   try {
-    const { nombre } = req.body;
-    if (!nombre) {
-      return res.status(400).json({ ok: false, message: "Department name is required" });
+    const { nombre, codigo } = req.body;
+    if (!nombre || !codigo) {
+      return res.status(400).json({ ok: false, message: "Both name and code are required" });
     }
-    const newDepartment = await DeptModel.createDepartment(nombre);
+    const newDepartment = await DeptModel.createDepartment(nombre, codigo);
     res.status(201).json({ ok: true, department: newDepartment });
   } catch (error) {
     res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
@@ -39,11 +38,11 @@ const createDepartment = async (req: any, res: any) => {
 const updateDepartment = async (req: any, res: any) => {
   try {
     const { id } = req.params;
-    const { nombre } = req.body;
-    if (!nombre) {
-      return res.status(400).json({ ok: false, message: "Department name is required" });
+    const { nombre, codigo } = req.body;
+    if (!nombre || !codigo) {
+      return res.status(400).json({ ok: false, message: "Both name and code are required" });
     }
-    const result = await DeptModel.updateDepartment(Number(id), nombre);
+    const result = await DeptModel.updateDepartment(Number(id), nombre, codigo);
     if ((result as any).affectedRows === 0) {
       return res.status(404).json({ ok: false, message: "Department not found" });
     }

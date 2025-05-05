@@ -47,7 +47,7 @@ app.use("/subgroup", subgroupRoute);
 app.use("/subgroup", deptRoute);
 app.use("/incorp", incorpRoute);
 app.use("/dept", deptRoute);
-app.use("/parishes", parishRoute);
+app.use("/parish", parishRoute);
 
 
 const PORT = process.env.PORT || 8000;
