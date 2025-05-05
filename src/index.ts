@@ -8,11 +8,11 @@ import subgroupRoute from "./router/subgroup.route";
 import deptRoute from "./router/dept.route";
 import incorpRoute from "./router/incorp.route";
 import goods_statusRoute from "./router/good-status.route";
-import user_roleRoute from "./router/user_role.route";
+import userRoleRoute from "./router/user_role.route";
 import concepIncorpRoute from "./router/concept-inc.route";
 import concepDesRoute from "./router/concept-des.router";
 import parishRoute from "./router/parish.route";
-
+import auditRoute from "./router/audit.route";
 
 import { config } from "dotenv";
 import { db } from "./database/index";
@@ -51,11 +51,12 @@ app.use("/subgroup", subgroupRoute);
 app.use("/subgroup", deptRoute);
 app.use("/incorp", incorpRoute);
 app.use("/goods-status", goods_statusRoute);
-app.use("/user_role", user_roleRoute);
+app.use("/user_role", userRoleRoute);
 app.use("/concept-incorp", concepIncorpRoute);
 app.use("/concept-desincorp", concepDesRoute);
 app.use("/dept", deptRoute);
 app.use("/parish", parishRoute);
+app.use("/audit", auditRoute);
 
 
 const PORT = process.env.PORT || 8000;
