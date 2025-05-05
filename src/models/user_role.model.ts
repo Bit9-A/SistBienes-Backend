@@ -1,27 +1,15 @@
 import { pool } from "../database/index";
 
-const createTipoUsuario = async ({
-  nombre,
-}: {
-  nombre: string;
-}) => {
+const getAllUserRoles = async () => {
   const query = `
-    INSERT INTO TipoUsuario (nombre)
-    VALUES (?)
-  `;
-  const [result] = await pool.execute(query, [nombre]);
-
-  // Recuperar el registro recién creado
-  const tipoUsuarioQuery = `
     SELECT id, nombre
     FROM TipoUsuario
-    WHERE id = ?
   `;
-  const [rows] = await pool.execute(tipoUsuarioQuery, [(result as any).insertId]);
-  return (rows as any[])[0];
+  const [rows] = await pool.execute(query);
+  return rows as any[];
 };
 
-const findTipoUsuarioById = async (id: number) => {
+const findUserRoleById = async (id: number) => {
   const query = `
     SELECT id, nombre
     FROM TipoUsuario
@@ -31,30 +19,41 @@ const findTipoUsuarioById = async (id: number) => {
   return (rows as any[])[0];
 };
 
-const updateTipoUsuario = async (id: number, updates: Partial<{
-  nombre: string;
-}>) => {
-  const fields = Object.keys(updates).map((key) => `${key} = ?`).join(", ");
-  const values = Object.values(updates);
+const createUserRole = async (name: string) => {
+  const query = `
+    INSERT INTO TipoUsuario (nombre)
+    VALUES (?)
+  `;
+  const [result] = await pool.execute(query, [name]);
+  return {
+    id: (result as any).insertId,
+    name,
+  };
+};
+
+const updateUserRole = async (id: number, name: string) => {
   const query = `
     UPDATE TipoUsuario
-    SET ${fields}
+    SET nombre = ?
     WHERE id = ?
   `;
-  await pool.execute(query, [...values, id]);
+  const [result] = await pool.execute(query, [name, id]);
+  return result;
 };
 
-const deleteTipoUsuario = async (id: number) => {
+const deleteUserRole = async (id: number) => {
   const query = `
-    DELETE FROM TipoUsuario
+    DELETE FROM UserRole
     WHERE id = ?
   `;
-  await pool.execute(query, [id]);
+  const [result] = await pool.execute(query, [id]);
+  return result;
 };
 
-export const TipoUsuarioModel = {
-  createTipoUsuario,
-  findTipoUsuarioById,
-  updateTipoUsuario,
-  deleteTipoUsuario,
+export const UserRoleModel = {
+  getAllUserRoles,
+  findUserRoleById,
+  createUserRole,
+  updateUserRole,
+  deleteUserRole,
 };

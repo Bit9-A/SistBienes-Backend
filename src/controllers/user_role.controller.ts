@@ -1,98 +1,109 @@
 import { Request, Response } from "express";
-import { TipoUsuarioModel } from "../models/user_role.model";
+import { UserRoleModel } from "../models/user_role.model";
 
-const createTipoUsuario = async (req: any, res: any) => {
+const getAllUserRoles = async (req: any, res: any) => {
   try {
-    const { nombre } = req.body;
-
-    if (!nombre) {
-      return res.status(400).json({ ok: false, message: "Please provide the 'nombre' field." });
-    }
-
-    const newTipoUsuario = await TipoUsuarioModel.createTipoUsuario({ nombre });
-
-    return res.status(201).json({
-      ok: true,
-      tipoUsuario: newTipoUsuario,
-    });
+    const roles = await UserRoleModel.getAllUserRoles();
+    res.status(200).json({ ok: true, roles });
   } catch (error) {
-    console.error("Create TipoUsuario error:", error);
-    return res.status(500).json({
+    console.error("Get All UserRoles error:", error);
+    res.status(500).json({
       ok: false,
-      msg: "Server Error",
+      message: "Server error",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 };
 
-const getTipoUsuarioById = async (req: any, res: any) => {
+const getUserRoleById = async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const userRole = await UserRoleModel.findUserRoleById(Number(id));
+    if (!userRole) {
+      return res.status(404).json({ ok: false, message: "UserRole not found" });
+    }
+    res.status(200).json({ ok: true, userRole });
+  } catch (error) {
+    console.error("Get UserRole error:", error);
+    res.status(500).json({
+      ok: false,
+      message: "Server error",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+const createUserRole = async (req: any, res: any) => {
+  try {
+    const { name } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ ok: false, message: "The 'name' field is required." });
+    }
+
+    const newUserRole = await UserRoleModel.createUserRole(name);
+    res.status(201).json({ ok: true, userRole: newUserRole });
+  } catch (error) {
+    console.error("Create UserRole error:", error);
+    res.status(500).json({
+      ok: false,
+      message: "Server error",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+const updateUserRole = async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ ok: false, message: "The 'name' field is required." });
+    }
+
+    const userRole = await UserRoleModel.findUserRoleById(Number(id));
+    if (!userRole) {
+      return res.status(404).json({ ok: false, message: "UserRole not found" });
+    }
+
+    await UserRoleModel.updateUserRole(Number(id), name);
+    res.status(200).json({ ok: true, message: "UserRole updated successfully" });
+  } catch (error) {
+    console.error("Update UserRole error:", error);
+    res.status(500).json({
+      ok: false,
+      message: "Server error",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+const deleteUserRole = async (req: any, res: any) => {
   try {
     const { id } = req.params;
 
-    const tipoUsuario = await TipoUsuarioModel.findTipoUsuarioById(Number(id));
-    if (!tipoUsuario) {
-      return res.status(404).json({ ok: false, message: "TipoUsuario not found" });
+    const userRole = await UserRoleModel.findUserRoleById(Number(id));
+    if (!userRole) {
+      return res.status(404).json({ ok: false, message: "UserRole not found" });
     }
 
-    return res.status(200).json({ ok: true, tipoUsuario });
+    await UserRoleModel.deleteUserRole(Number(id));
+    res.status(200).json({ ok: true, message: "UserRole deleted successfully" });
   } catch (error) {
-    console.error("Get TipoUsuario error:", error);
-    return res.status(500).json({
+    console.error("Delete UserRole error:", error);
+    res.status(500).json({
       ok: false,
-      msg: "Server Error",
+      message: "Server error",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
 };
 
-const updateTipoUsuario = async (req: any, res: any) => {
-  try {
-    const { id } = req.params;
-    const updates = req.body;
-
-    const tipoUsuario = await TipoUsuarioModel.findTipoUsuarioById(Number(id));
-    if (!tipoUsuario) {
-      return res.status(404).json({ ok: false, message: "TipoUsuario not found" });
-    }
-
-    await TipoUsuarioModel.updateTipoUsuario(Number(id), updates);
-
-    return res.status(200).json({ ok: true, message: "TipoUsuario updated successfully" });
-  } catch (error) {
-    console.error("Update TipoUsuario error:", error);
-    return res.status(500).json({
-      ok: false,
-      msg: "Server Error",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-};
-
-const deleteTipoUsuario = async (req: any, res: any) => {
-  try {
-    const { id } = req.params;
-
-    const tipoUsuario = await TipoUsuarioModel.findTipoUsuarioById(Number(id));
-    if (!tipoUsuario) {
-      return res.status(404).json({ ok: false, message: "TipoUsuario not found" });
-    }
-
-    await TipoUsuarioModel.deleteTipoUsuario(Number(id));
-
-    return res.status(200).json({ ok: true, message: "TipoUsuario deleted successfully" });
-  } catch (error) {
-    console.error("Delete TipoUsuario error:", error);
-    return res.status(500).json({
-      ok: false,
-      msg: "Server Error",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-};
-
-export const TipoUsuarioController = {
-  createTipoUsuario,
-  getTipoUsuarioById,
-  updateTipoUsuario,
-  deleteTipoUsuario,
+export const UserRoleController = {
+  getAllUserRoles,
+  getUserRoleById,
+  createUserRole,
+  updateUserRole,
+  deleteUserRole,
 };
