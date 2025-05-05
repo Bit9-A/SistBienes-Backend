@@ -7,12 +7,12 @@ const router = Router();
 router.post("/createIncorp", IncorpController.createIncorp);
 
 // Ruta para obtener un registro de Incorp por ID
-router.get("/incorp:id", IncorpController.getIncorpById);
+router.get("/incorp/:id", IncorpController.getIncorpById);
 
 // Ruta para actualizar un registro de Incorp por ID
-router.put("/updateIncorp:id", IncorpController.updateIncorp);
+router.put("/updateIncorp/:id", IncorpController.updateIncorp);
 
 // Ruta para eliminar un registro de Incorp por ID
-router.delete("/deleteIncorp:id", IncorpController.deleteIncorp);
+router.delete("/deleteIncorp/:id", IncorpController.deleteIncorp);
 
 export default router;

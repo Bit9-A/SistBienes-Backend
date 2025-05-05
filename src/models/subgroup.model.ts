@@ -3,7 +3,7 @@ import { pool } from "../database/index";
 // CRUD para SubGrupoMuebles
 const getAllSubGrupoMuebles = async () => {
   const query = `
-    SELECT id, nombre
+    SELECT id, nombre, codigo
     FROM SubGrupoMuebles
   `;
   const [rows] = await pool.execute(query);
@@ -12,7 +12,7 @@ const getAllSubGrupoMuebles = async () => {
 
 const getSubGrupoMueblesById = async (id: number) => {
   const query = `
-    SELECT id, nombre
+    SELECT id, nombre, codigo
     FROM SubGrupoMuebles
     WHERE id = ?
   `;
@@ -20,25 +20,26 @@ const getSubGrupoMueblesById = async (id: number) => {
   return (rows as any[])[0];
 };
 
-const createSubGrupoMuebles = async (nombre: string) => {
+const createSubGrupoMuebles = async (nombre: string, codigo: string) => {
   const query = `
-    INSERT INTO SubGrupoMuebles (nombre)
-    VALUES (?)
+    INSERT INTO SubGrupoMuebles (nombre, codigo)
+    VALUES (?, ?)
   `;
-  const [result] = await pool.execute(query, [nombre]);
+  const [result] = await pool.execute(query, [nombre, codigo]);
   return {
     id: (result as any).insertId,
     nombre,
+    codigo,
   };
 };
 
-const updateSubGrupoMuebles = async (id: number, nombre: string) => {
+const updateSubGrupoMuebles = async (id: number, nombre: string, codigo: string) => {
   const query = `
     UPDATE SubGrupoMuebles
-    SET nombre = ?
+    SET nombre = ?, codigo = ?
     WHERE id = ?
   `;
-  const [result] = await pool.execute(query, [nombre, id]);
+  const [result] = await pool.execute(query, [nombre, codigo, id]);
   return result;
 };
 
