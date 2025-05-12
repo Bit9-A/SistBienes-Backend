@@ -14,6 +14,7 @@ import concepDesRoute from "./router/concept-des.router";
 import parishRoute from "./router/parish.route";
 import auditRoute from "./router/audit.route";
 import furnitureRoute from "./router/furniture.route";
+import marcaModeloRoute from "./router/marca_modelo.route";
 
 import { config } from "dotenv";
 import { db } from "./database/index";
@@ -59,6 +60,7 @@ app.use("/dept", deptRoute);
 app.use("/parish", parishRoute);
 app.use("/audit", auditRoute);
 app.use("/furniture", furnitureRoute)
+app.use("/api", marcaModeloRoute);
 
 
 const PORT = process.env.PORT || 8000;

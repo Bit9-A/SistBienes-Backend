@@ -23,18 +23,31 @@ const getFurnitureById = async (req: any, res: any) => {
   }
 };
 
-const createFurniture = async (req: any, res: any) => {
+
+const createFurniture = async (req: Request, res: Response) => {
   try {
     const data = req.body;
-    if (!data.nombre || !data.cantidad || !data.numero_identificacion) {
-      return res.status(400).json({ ok: false, message: "Name, quantity, and identification number are required" });
+
+    // Validar los campos requeridos
+    if (!data.nombre_descripcion || !data.cantidad || !data.numero_identificacion) {
+      return res.status(400).json({
+        ok: false,
+        message: "Description, quantity, and identification number are required",
+      });
     }
+
+    // Crear el mueble
     const newFurniture = await FurnitureModel.createFurniture(data);
     res.status(201).json({ ok: true, furniture: newFurniture });
   } catch (error) {
-    res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
+    res.status(500).json({
+      ok: false,
+      message: "Server error",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
   }
 };
+
 
 const updateFurniture = async (req: any, res: any) => {
   try {
