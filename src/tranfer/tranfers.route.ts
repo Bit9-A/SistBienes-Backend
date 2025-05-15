@@ -1,4 +1,4 @@
-import { transfersController } from "../controllers/tranfers.controller";
+import { transfersController } from "./tranfers.controller";
 import { Router } from "express";
 
 const router = Router();

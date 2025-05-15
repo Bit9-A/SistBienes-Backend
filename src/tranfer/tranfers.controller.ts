@@ -1,4 +1,4 @@
-import { transfersModel} from "../tranfer/transfers.model";
+import { transfersModel} from "./transfers.model";
 
 const getAllTranfers = async (req: any, res:any) => {
     try{
