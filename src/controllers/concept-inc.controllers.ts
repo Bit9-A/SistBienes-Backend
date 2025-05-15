@@ -1,5 +1,5 @@
 import {Request, Response} from "express";
-import {ConcepIncorpModel} from "../models/concept-inc.model";
+import {ConcepIncorpModel} from "../concept-inc/concept-inc.model";
 
 const getAllConceptInc = async (req: any, res: any) => {
     try {

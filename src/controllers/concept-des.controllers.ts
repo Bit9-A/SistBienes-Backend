@@ -1,4 +1,4 @@
-import { ConceptDesModel } from "../models/concept-des.model";
+import { ConceptDesModel } from "../concept-des/concept-des.model";
 
 const getAllConceptDes = async (req: any, res:any) => {
     try {

@@ -1,5 +1,5 @@
 
-import { MarcaModeloModel } from "../models/marca_modelo.model";
+import { MarcaModeloModel } from "../marca_modelo/marca_modelo.model";
 
 // Controladores para `marca`
 const getAllMarcas = async (req: any, res: any) => {

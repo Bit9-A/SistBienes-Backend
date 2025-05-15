@@ -1,5 +1,5 @@
 
-import { ParishModel } from "../models/parish.model";
+import { ParishModel } from "../parish/parish.model";
 
 const getAllParishes = async (req: any, res: any) => {
   try {

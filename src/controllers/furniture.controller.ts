@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { FurnitureModel } from "../models/furniture.model";
+import { FurnitureModel } from "../furniture/furniture.model";
 
 const getAllFurniture = async (req: any, res: any) => {
   try {

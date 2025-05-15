@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { IncorpModel } from "../models/incorp.model";
+import { IncorpModel } from "../incorp/incorp.model";
 
 const createIncorp = async (req: any, res: any) => {
   try {

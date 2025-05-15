@@ -1,4 +1,4 @@
-import { statusGoodsModel } from "../models/goods-status.model";
+import { statusGoodsModel } from "../goods-status/goods-status.model";
 
 const getAllStatusGoods = async (req: any, res: any) => {
     try {

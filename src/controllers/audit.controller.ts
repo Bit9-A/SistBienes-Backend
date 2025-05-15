@@ -1,4 +1,4 @@
-import { auditModel } from "../models/audit.model";
+import { auditModel } from "../audit/audit.model";
 
 const getAllAudit = async (req: any, res: any) => {
     try {

@@ -1,4 +1,4 @@
-import { SubGroupModel } from "../models/subgroup.model";
+import { SubGroupModel } from "../subgroup/subgroup.model";
 
 // Controladores para SubGrupoMuebles
 const getAllSubGrupoMuebles = async (req: any, res: any) => {
