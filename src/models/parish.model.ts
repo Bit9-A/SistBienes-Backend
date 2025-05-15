@@ -28,7 +28,6 @@ const createParish = async (nombre: string) => {
   return {
     id: (result as any).insertId,
     nombre,
-    codigo: nombre,
   };
 };
 

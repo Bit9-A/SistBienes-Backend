@@ -43,7 +43,7 @@ const updateUserRole = async (id: number, name: string) => {
 
 const deleteUserRole = async (id: number) => {
   const query = `
-    DELETE FROM UserRole
+    DELETE FROM TipoUsuario
     WHERE id = ?
   `;
   const [result] = await pool.execute(query, [id]);
