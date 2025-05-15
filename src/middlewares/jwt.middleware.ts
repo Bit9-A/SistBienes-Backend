@@ -1,7 +1,7 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { NextFunction } from "express";
-import { AuthModel } from "../auth/auth.model";
-import { UserModel } from "../users/user.model";
+import { AuthModel } from "../modules/auth/auth.model";
+import { UserModel } from "../modules/users/user.model";
 
 const ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwicm9sZV9pZCI6MSwiaWF0IjoxNzM4NjgwNzcwLCJleHAiOjE3Mzg2ODQzNzB9.kHNI4ccrzs1g5vH3HO6y5vdIxpn7sedy3tgQA27qXKs";
 
