@@ -32,7 +32,11 @@ const createMarca = async (req: any, res: any) => {
     }
     const newMarca = await MarcaModeloModel.createMarca(nombre);
     res.status(201).json({ ok: true, marca: newMarca });
-  } catch (error) {
+  } catch (error:any) {
+    //error para marca que ya existe
+    if (error.code === "ER_DUP_ENTRY") {
+      return res.status(400).json({ ok: false, message: "Marca already exists" });
+    }
     res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
   }
 };
@@ -99,6 +103,7 @@ const createModelo = async (req: any, res: any) => {
     const newModelo = await MarcaModeloModel.createModelo(nombre, idmarca);
     res.status(201).json({ ok: true, modelo: newModelo });
   } catch (error) {
+    
     res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
   }
 };
