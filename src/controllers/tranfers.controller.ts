@@ -87,6 +87,12 @@ const getTranferById = async (req: any, res:any) => {
 const createTranfer = async (res:any, req:any) => {
     try {
         const {fecha, cantidad, origen_id, destino_id} = req.body;
+        if(!fecha || !cantidad || !origen_id || !destino_id){
+            return res.status(400).json({
+                ok:false,
+                message:'Faltan datos obligatorios'
+            });
+        }
         const tranfer = await transfersModel.createTranfer({fecha, cantidad, origen_id, destino_id});
         return res.status(201).json({
             ok:true,
@@ -105,6 +111,12 @@ const createTranfer = async (res:any, req:any) => {
 const createGoodTranfer = async (res:any, req:any) => {
     try {
         const {traslado_id, mueble_id} = req.body;
+        if(!traslado_id || !mueble_id){
+            return res.status(400).json({
+                ok:false,
+                message:'Faltan datos obligatorios'
+            });
+        }
         const tranfer = await transfersModel.createGoodTranfer({traslado_id, mueble_id});
         return res.status(201).json({
             ok:true,
