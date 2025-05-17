@@ -13,6 +13,7 @@ import concepIncorpRoute from "./modules/concept-inc/concept-inc.route";
 import concepDesRoute from "./modules/concept-des/concept-des.router";
 import parishRoute from "./modules/parish/parish.route";
 import auditRoute from "./modules/audit/audit.route";
+import missingGoods from "./modules/missing-goods/missing-goods.route";
 
 import { config } from "dotenv";
 import { db } from "./database/index";
@@ -57,6 +58,7 @@ app.use("/concept-desincorp", concepDesRoute);
 app.use("/dept", deptRoute);
 app.use("/parish", parishRoute);
 app.use("/audit", auditRoute);
+app.use("/missing-goods", missingGoods);
 
 
 const PORT = process.env.PORT || 8000;
