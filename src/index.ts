@@ -13,6 +13,9 @@ import concepIncorpRoute from "./modules/concept-inc/concept-inc.route";
 import concepDesRoute from "./modules/concept-des/concept-des.router";
 import parishRoute from "./modules/parish/parish.route";
 import auditRoute from "./modules/audit/audit.route";
+import furnitureRoute from "./modules/furniture/furniture.route";
+
+import brandRoute from "./modules/marca_modelo/marca_modelo.route";
 
 import { config } from "dotenv";
 import { db } from "./database/index";
@@ -54,6 +57,8 @@ app.use("/goods-status", goods_statusRoute);
 app.use("/user_role", userRoleRoute);
 app.use("/concept-incorp", concepIncorpRoute);
 app.use("/concept-desincorp", concepDesRoute);
+app.use("/furniture", furnitureRoute);
+app.use("/api", brandRoute);
 app.use("/dept", deptRoute);
 app.use("/parish", parishRoute);
 app.use("/audit", auditRoute);
