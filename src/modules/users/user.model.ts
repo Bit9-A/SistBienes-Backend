@@ -2,8 +2,10 @@ import { pool } from "../../database/index";
 
 const getAllUsers = async () => {
   const query = `
-    SELECT id, tipo_usuario, email, nombre, apellido, telefono, dept_id, cedula
-    FROM Usuarios
+    SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
+           u.dept_id, d.nombre as dept_nombre, u.cedula
+    FROM Usuarios u
+    LEFT JOIN Dept d ON u.dept_id = d.id
   `;
   const [rows] = await pool.execute(query);
   return rows as any[];
@@ -11,9 +13,11 @@ const getAllUsers = async () => {
 
 const getUserById = async (id: number) => {
   const query = `
-    SELECT id, tipo_usuario, email, nombre, apellido, telefono, dept_id, cedula
-    FROM Usuarios
-    WHERE id = ?
+    SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
+           u.dept_id, d.nombre as dept_nombre, u.cedula
+    FROM Usuarios u
+    LEFT JOIN Dept d ON u.dept_id = d.id
+    WHERE u.id = ?
   `;
   const [rows] = await pool.execute(query, [id]);
   return (rows as any[])[0];
@@ -21,9 +25,11 @@ const getUserById = async (id: number) => {
 
 const getUsersByDeptId = async (dept_id: number) => {
   const query = `
-    SELECT id, tipo_usuario, email, nombre, apellido, telefono, dept_id, cedula
-    FROM Usuarios
-    WHERE dept_id = ?
+    SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
+           u.dept_id, d.nombre as dept_nombre, u.cedula
+    FROM Usuarios u
+    LEFT JOIN Dept d ON u.dept_id = d.id
+    WHERE u.dept_id = ?
   `;
   const [rows] = await pool.execute(query, [dept_id]);
   return rows as any[];

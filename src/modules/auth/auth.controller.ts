@@ -88,7 +88,8 @@ const login = async (req: any, res: any) => {
       maxAge: 3600000,
     });
 
-    res.json({ ok: true, token });
+    res.json({ ok: true, token});
+
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({
@@ -134,6 +135,53 @@ const logout = async (req: any, res: any) => {
   }
 };
 
+const profile = async (req: any, res: any) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ ok: false, message: "No token provided" });
+    }
+
+    const [bearer, token] = authHeader.split(" ");
+    if (bearer !== "Bearer" || !token) {
+      return res.status(401).json({ ok: false, message: "Invalid token format" });
+    }
+
+    const user = await AuthModel.findUserByLoginToken(token);
+    if (!user) {
+      return res.status(403).json({ ok: false, message: "Invalid token" });
+    }
+
+    // Verificar si el token ha expirado
+    if (user.login_token_expiration && new Date(user.login_token_expiration) < new Date()) {
+      return res.status(403).json({ ok: false, message: "Token has expired" });
+    }
+
+    // Combinar nombre y apellido en un solo campo
+    const nombreCompleto = `${user.nombre} ${user.apellido}`;
+
+    const userProfile = {
+      id: user.id,
+      tipo_usuario: user.tipo_usuario,
+      email: user.email,
+      nombre_completo: nombreCompleto,
+      telefono: user.telefono,
+      dept_id: user.dept_id,
+      cedula: user.cedula,
+      dept_nombre: user.dept_nombre
+    };
+
+    res.json({ user: userProfile });
+  } catch (error) {
+    console.error("Profile error:", error);
+    res.status(500).json({
+      ok: false,
+      msg: "Server Error",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
 const resetPassword = async (req: any, res: any) => {
   try {
     const { newPassword, token } = req.body;
@@ -165,9 +213,11 @@ const resetPassword = async (req: any, res: any) => {
   }
 };
 
+
 export const AuthController = {
   register,
   login,
   logout,
   resetPassword,
+  profile
 };

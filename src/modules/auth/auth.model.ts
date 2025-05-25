@@ -65,9 +65,11 @@ const saveLoginToken = async (id: number, token: string, expiration: Date) => {
 
 const findUserByLoginToken = async (token: string) => {
   const query = `
-    SELECT id, tipo_usuario, email, nombre, apellido, telefono, dept_id, cedula, login_token, login_token_expiration
-    FROM Usuarios
-    WHERE login_token = ?
+    SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
+           u.dept_id, d.nombre as dept_nombre, u.cedula, u.login_token, u.login_token_expiration
+    FROM Usuarios u
+    LEFT JOIN Dept d ON u.dept_id = d.id
+    WHERE u.login_token = ?
   `;
   const [rows] = await pool.execute(query, [token]);
   return (rows as any[])[0];
@@ -93,9 +95,11 @@ const savePasswordResetToken = async (id: number, token: string, expiration: Dat
 
 const findUserByResetToken = async (token: string) => {
   const query = `
-    SELECT id, tipo_usuario, email, nombre, apellido, telefono, dept_id, cedula, reset_token, reset_token_expiration
-    FROM Usuarios
-    WHERE reset_token = ?
+    SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
+           u.dept_id, d.nombre as dept_nombre, u.cedula, u.reset_token, u.reset_token_expiration
+    FROM Usuarios u
+    LEFT JOIN Dept d ON u.dept_id = d.id
+    WHERE u.reset_token = ?
   `;
   const [rows] = await pool.execute(query, [token]);
   return (rows as any[])[0];
