@@ -225,7 +225,27 @@ CREATE TABLE `caracteristicas_inmueble_terreno` (
   `caracteristica_id` INT DEFAULT null,
   `observaciones` TEXT
 );
+CREATE TABLE `notificaciones` (
+  `id` int NOT NULL  AUTO_INCREMENT,
+  `dept_id` int NOT NULL,
+  `descripcion` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  KEY `departament_idx` (`dept_id`),
+  CONSTRAINT `departament` FOREIGN KEY (`dept_id`) REFERENCES `Dept` (`id`)
+) 
 
+CREATE TABLE `config` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `fecha` date NOT NULL,
+  `colorprimario` varchar(45) DEFAULT NULL,
+  `colorsecundario` varchar(45) DEFAULT NULL,
+  `url_banner` varchar(150) DEFAULT NULL,
+  `url_logo` varchar(150) DEFAULT NULL,
+  `url_favicon` varchar(150) DEFAULT NULL,
+  `nombre_institucion` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) 
 CREATE UNIQUE INDEX `email_UNIQUE` ON `Usuarios` (`email`);
 
 CREATE UNIQUE INDEX `cedula_UNIQUE` ON `Usuarios` (`cedula`);
