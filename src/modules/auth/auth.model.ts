@@ -66,9 +66,10 @@ const saveLoginToken = async (id: number, token: string, expiration: Date) => {
 const findUserByLoginToken = async (token: string) => {
   const query = `
     SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
-           u.dept_id, d.nombre as dept_nombre, u.cedula, u.login_token, u.login_token_expiration
+           u.dept_id, d.nombre as dept_nombre, u.cedula, u.login_token, u.login_token_expiration, ts.nombre as nombre_tipo_usuario
     FROM Usuarios u
     LEFT JOIN Dept d ON u.dept_id = d.id
+    LEFT JOIN TipoUsuario ts ON u.tipo_usuario = ts.id
     WHERE u.login_token = ?
   `;
   const [rows] = await pool.execute(query, [token]);

@@ -168,7 +168,8 @@ const profile = async (req: any, res: any) => {
       telefono: user.telefono,
       dept_id: user.dept_id,
       cedula: user.cedula,
-      dept_nombre: user.dept_nombre
+      dept_nombre: user.dept_nombre,
+      nombre_tipo_usuario: user.nombre_tipo_usuario
     };
 
     res.json({ user: userProfile });
