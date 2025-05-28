@@ -73,10 +73,33 @@ const deleteAudit = async (id: number) => {
     return result;
 }
 
+const registerIn = async (usuario_id: number, ip: string) => {
+    const query = `
+        INSERT INTO Auditoria (usuario_id, entrada, ip)
+        VALUES (?, NOW(), ?)
+    `;
+    const [result] = await pool.execute(query, [usuario_id, ip]);
+    return (result as any).insertId;
+};
+
+const registerOut = async (usuario_id: number) => {
+    const query = `
+        UPDATE Auditoria
+        SET salida = NOW()
+        WHERE usuario_id = ? AND salida IS NULL
+        ORDER BY entrada DESC
+        LIMIT 1
+    `;
+    const [result] = await pool.execute(query, [usuario_id]);
+    return result;
+};
+
 export const auditModel = {
     getAllAudit,
     getAuditById,
     createAudit,
     updateAudit,
     deleteAudit,
+    registerIn,
+    registerOut,
 }

@@ -87,10 +87,39 @@ const deleteAudit = async (req: any, res:any) => {
     }
 }
 
+const registerIn = async (req: any, res: any) => {
+    try {
+        const { usuario_id } = req.body;
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        if (!usuario_id) {
+            return res.status(400).json({ ok: false, message: "usuario_id es obligatorio" });
+        }
+        const id = await auditModel.registerIn(usuario_id, ip);
+        res.status(201).json({ ok: true, message: "Entrada registrada", id });
+    } catch (error) {
+        res.status(500).json({ ok: false, error: error instanceof Error ? error.message : String(error) });
+    }
+};
+
+const registerOut = async (req: any, res: any) => {
+    try {
+        const { usuario_id } = req.body;
+        if (!usuario_id) {
+            return res.status(400).json({ ok: false, message: "usuario_id es obligatorio" });
+        }
+        await auditModel.registerOut(usuario_id);
+        res.status(200).json({ ok: true, message: "Salida registrada" });
+    } catch (error) {
+        res.status(500).json({ ok: false, error: error instanceof Error ? error.message : String(error) });
+    }
+};
+
 export const auditController = {
     getAllAudit,
     getAuditById,
     createAudit,
     updateAudit,
     deleteAudit,
+    registerIn,
+    registerOut,
 }
