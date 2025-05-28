@@ -14,6 +14,7 @@ import concepDesRoute from "./modules/concept-des/concept-des.router";
 import parishRoute from "./modules/parish/parish.route";
 import auditRoute from "./modules/audit/audit.route";
 import furnitureRoute from "./modules/furniture/furniture.route";
+import transferRoute from "./modules/tranfer/tranfers.route";
 
 import brandRoute from "./modules/marca_modelo/marca_modelo.route";
 
@@ -45,10 +46,12 @@ app.use(cors({
 }));
 
 // Rutas
-//app.use(verifyToken)
+
 
 app.use("/",homeRoute);
 app.use("/auth",authRoute);
+
+app.use(verifyToken)
 app.use("/user", userRoute);
 app.use("/subgroup", subgroupRoute);
 app.use("/subgroup", deptRoute);
@@ -62,6 +65,7 @@ app.use("/api", brandRoute);
 app.use("/dept", deptRoute);
 app.use("/parish", parishRoute);
 app.use("/audit", auditRoute);
+app.use("/trasfers", transferRoute);
 
 
 const PORT = process.env.PORT || 8000;

@@ -1,218 +1,71 @@
-import { transfersModel} from "./transfers.model";
 
-const getAllTranfers = async (req: any, res:any) => {
-    try{
-        const tranfers = await transfersModel.getAllTranfers();
-        if(tranfers.length === 0){
-            return res.status(404).json({
-                ok: false,
-                message: "No hay traslados registrados"
-            });
+import { transfersModel } from "./transfers.model";
+
+const getAllTransfers = async (req: any, res: any) => {
+    try {
+        const transfers = await transfersModel.getAllTransfers();
+        res.status(200).json({ ok: true, transfers });
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ ok: false, error: errorMessage });
+    }
+};
+
+const getTransferById = async (req: any, res: any) => {
+    try {
+        const { id } = req.params;
+        const transfer = await transfersModel.getTransferById(Number(id));
+        if (!transfer) {
+            return res.status(404).json({ ok: false, message: "Traslado no encontrado" });
         }
-    }
-    catch (error) {
-        console.error("Error al obtener los traslados:", error);
-        return res.status(500).json({
-            ok: false,
-            msg: "Error en el servidor",
-            error: error instanceof Error ? error.message : "Error desconocido"
-        });
+        res.status(200).json({ ok: true, transfer });
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ ok: false, error: errorMessage });
     }
 };
 
-const getAllGoodTranfers = async (req: any, res:any) => {
-    try{
-        const tranfers = await transfersModel.getAllGoodTranfers();
-        if(tranfers.length === 0){
-            return res.status(404).json({
-                ok: false,
-                message: "No hay traslados registrados"
-            });
+
+const createTransfer = async (req: any, res: any) => {
+    try {
+        const { fecha, cantidad, origen_id, destino_id, bienes } = req.body;
+        if (!fecha || !cantidad || !origen_id || !destino_id || !Array.isArray(bienes) || bienes.length === 0) {
+            return res.status(400).json({ ok: false, message: "Datos incompletos o bienes no seleccionados" });
         }
-    }
-    catch (error) {
-        console.error("Error al obtener los traslados:", error);
-        return res.status(500).json({
-            ok: false,
-            msg: "Error en el servidor",
-            error: error instanceof Error ? error.message : "Error desconocido"
-        });
+        const trasladoId = await transfersModel.createTransfer({ fecha, cantidad, origen_id, destino_id, bienes });
+        res.status(201).json({ ok: true, message: "Traslado creado", trasladoId });
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ ok: false, error: errorMessage });
     }
 };
 
-const getGoodTranfersId = async (req: any, res:any) => {
+const updateTransfer = async (req: any, res: any) => {
     try {
-        const {id} = req.params;
-        const tranfer = await transfersModel.getGoodsTranferById(Number(id));
-        if(!tranfer){
-            return res.status(404).json({
-                ok:false,
-                message:'No existe el traslado',
-            })
-        }
-        return res.status(200).json({
-            ok:true,
-            tranfer
-        })
+        const { id } = req.params;
+        const result = await transfersModel.updateTransfer(Number(id), req.body);
+        res.status(200).json({ ok: true, message: "Traslado actualizado", result });
     } catch (error) {
-        return res.status(500).json({
-            ok:false,
-            message:'Error en el servidor',
-            error: error instanceof Error ? error.message : 'Error desconocido'
-        });
-
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ ok: false, error: errorMessage });
     }
 };
 
-const getTranferById = async (req: any, res:any) => {
+const deleteTransfer = async (req: any, res: any) => {
     try {
-        const {id} = req.params;
-        const tranfer = await transfersModel.getTranfersById(Number(id));
-        if(!tranfer){
-            return res.status(404).json({
-                ok:false,
-                message:'No existe el traslado',
-            })
-        }
-        return res.status(200).json({ok:true, tranfer});
+        const { id } = req.params;
+        const result = await transfersModel.deleteTransfer(Number(id));
+        res.status(200).json({ ok: true, message: "Traslado eliminado", result });
     } catch (error) {
-        return res.status(500).json({
-            ok:false,
-            message:'Error en el servidor',
-            error: error instanceof Error ? error.message : 'Error desconocido'
-        });
-    }
-};
-
-const createTranfer = async (res:any, req:any) => {
-    try {
-        const {fecha, cantidad, origen_id, destino_id} = req.body;
-        if(!fecha || !cantidad || !origen_id || !destino_id){
-            return res.status(400).json({
-                ok:false,
-                message:'Faltan datos obligatorios'
-            });
-        }
-        const tranfer = await transfersModel.createTranfer({fecha, cantidad, origen_id, destino_id});
-        return res.status(201).json({
-            ok:true,
-            message:'Traslado creado correctamente',
-            tranfer
-        });
-    } catch (error) {
-        return res.status(500).json({
-            ok:false,
-            message:'Error en el servidor',
-            error: error instanceof Error ? error.message : 'Error desconocido'
-        });
-    }
-};
-
-const createGoodTranfer = async (res:any, req:any) => {
-    try {
-        const {traslado_id, mueble_id} = req.body;
-        if(!traslado_id || !mueble_id){
-            return res.status(400).json({
-                ok:false,
-                message:'Faltan datos obligatorios'
-            });
-        }
-        const tranfer = await transfersModel.createGoodTranfer({traslado_id, mueble_id});
-        return res.status(201).json({
-            ok:true,
-            message:'Traslado creado correctamente',
-            tranfer
-        });
-    } catch (error) {
-        return res.status(500).json({
-            ok:false,
-            message:'Error en el servidor',
-            error: error instanceof Error ? error.message : 'Error desconocido'
-        });
-    }
-};
-
-const updateTranfer = async (req:any, res:any) => {
-    try {
-        const {id} = req.params;
-        const tranfer = await transfersModel.updatedTransfer(Number(id), req.body);
-        return res.status(200).json({
-            ok:true,
-            message:'Traslado actualizado correctamente',
-            tranfer
-        });
-    } catch (error) {
-        return res.status(500).json({
-            ok:false,
-            message:'Error en el servidor',
-            error: error instanceof Error ? error.message : 'Error desconocido'
-        });
-    }
-};
-
-const updatedGoodTransfer = async (req:any, res:any) => {
-    try {
-        const {id} = req.params;
-        const tranfer = await transfersModel.updatedGoodTransfer(Number(id), req.body);
-        return res.status(200).json({
-            ok:true,
-            message:'Traslado actualizado correctamente',
-            tranfer
-        });
-    } catch (error) {
-        return res.status(500).json({
-            ok:false,
-            message:'Error en el servidor',
-            error: error instanceof Error ? error.message : 'Error desconocido'
-        });
-    }
-}
-
-const deleteTranfer = async (req:any, res:any) => {
-    try {
-        const {id} = req.params;
-        const tranfer = await transfersModel.deleteTranfer(Number(id));
-        return res.status(200).json({
-            ok:true,
-            message:'Traslado eliminado correctamente',
-            tranfer
-        });
-    } catch (error) {
-        return res.status(500).json({
-            ok:false,
-            message:'Error en el servidor',
-            error: error instanceof Error ? error.message : 'Error desconocido'
-        });
-    }
-};
-
-const deleteGoodTransfer = async (req:any, res:any) => {
-    try {
-        const {id} = req.params;
-        const tranfer = await transfersModel.deleteGoodsTranfer(Number(id));
-        return res.status(200).json({
-            ok:true,
-            message:'Traslado eliminado correctamente',
-            tranfer
-        });
-    } catch (error) {
-        return res.status(500).json({
-            ok:false,
-            message:'Error en el servidor',
-            error: error instanceof Error ? error.message : 'Error desconocido'
-        });
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ ok: false, error: errorMessage });
     }
 };
 
 export const transfersController = {
-    getAllTranfers,
-    getAllGoodTranfers,
-    getGoodTranfersId,
-    getTranferById,
-    createTranfer,
-    createGoodTranfer,
-    updateTranfer,
-    updatedGoodTransfer,
-    deleteTranfer,
-    deleteGoodTransfer
-}
+    getAllTransfers,
+    getTransferById,
+    createTransfer,
+    updateTransfer,
+    deleteTransfer,
+};
