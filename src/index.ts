@@ -17,6 +17,7 @@ import furnitureRoute from "./modules/furniture/furniture.route";
 import transferRoute from "./modules/tranfer/tranfers.route";
 
 import brandRoute from "./modules/marca_modelo/marca_modelo.route";
+import notificationsRoute from "./modules/notifications/notifications.route";
 
 import { config } from "dotenv";
 import { db } from "./database/index";
@@ -66,6 +67,7 @@ app.use("/dept", deptRoute);
 app.use("/parish", parishRoute);
 app.use("/audit", auditRoute);
 app.use("/trasfers", transferRoute);
+app.use("/notifications", notificationsRoute);
 
 
 const PORT = process.env.PORT || 8000;
