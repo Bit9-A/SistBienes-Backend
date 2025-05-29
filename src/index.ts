@@ -69,7 +69,7 @@ app.use("/api", brandRoute);
 app.use("/dept", deptRoute);
 app.use("/parish", parishRoute);
 app.use("/audit", auditRoute);
-app.use("/trasfers", transferRoute);
+app.use("/transfers", transferRoute);
 app.use("/notifications", notificationsRoute);
 app.use("/config",configRoute);
 app.use("/missing-goods", missingGoods);
