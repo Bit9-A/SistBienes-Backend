@@ -58,7 +58,6 @@ app.use("/auth", authRoute);
 app.use(verifyToken)
 app.use("/user", userRoute);
 app.use("/subgroup", subgroupRoute);
-app.use("/subgroup", deptRoute);
 app.use("/incorp", incorpRoute);
 app.use("/goods-status", goods_statusRoute);
 app.use("/user_role", userRoleRoute);

@@ -15,7 +15,7 @@ const getAllTransfers = async () => {
 const getTransferById = async (id: number) => {
     const trasladoQuery = `SELECT * FROM Traslado WHERE id = ?`;
     const bienesQuery = `
-        SELECT bt.*, m.nombre, m.numero_identificacion
+        SELECT bt.*, m.nombre_descripcion, m.numero_identificacion
         FROM bien_traslado bt
         JOIN Muebles m ON bt.id_mueble = m.id
         WHERE bt.id_traslado = ?
