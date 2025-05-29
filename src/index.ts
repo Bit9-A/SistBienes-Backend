@@ -19,6 +19,8 @@ import transferRoute from "./modules/tranfer/tranfers.route";
 import brandRoute from "./modules/marca_modelo/marca_modelo.route";
 import notificationsRoute from "./modules/notifications/notifications.route";
 import configRoute from "./modules/config/config.route";
+import missingGoods from "./modules/missing-goods/missing-goods.route";
+import desincorp from "./modules/desincorp/desincorp.route";
 
 import { config } from "dotenv";
 import { db } from "./database/index";
@@ -70,6 +72,8 @@ app.use("/audit", auditRoute);
 app.use("/transfers", transferRoute);
 app.use("/notifications", notificationsRoute);
 app.use("/config", configRoute);
+app.use("/missing-goods", missingGoods);
+app.use("/desincorp", desincorp);
 
 
 const PORT = process.env.PORT || 8000;
