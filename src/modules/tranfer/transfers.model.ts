@@ -3,9 +3,9 @@ import { pool } from "../../database/index";
 // Obtener todos los traslados con sus bienes asociados
 const getAllTransfers = async () => {
     const query = `
-        SELECT t.*, bt.id as bien_traslado_id, bt.mueble_id
+        SELECT t.*, bt.id as bien_traslado_id, bt.id_mueble
         FROM Traslado t
-        LEFT JOIN bien_traslado bt ON t.id = bt.traslado_id
+        LEFT JOIN bien_traslado bt ON t.id = bt.id_traslado
     `;
     const [rows] = await pool.execute(query);
     return rows as any[];
@@ -15,10 +15,10 @@ const getAllTransfers = async () => {
 const getTransferById = async (id: number) => {
     const trasladoQuery = `SELECT * FROM Traslado WHERE id = ?`;
     const bienesQuery = `
-        SELECT bt.*, m.nombre, m.numero_identificacion
+        SELECT bt.*, m.nombre_descripcion, m.numero_identificacion
         FROM bien_traslado bt
-        JOIN Muebles m ON bt.mueble_id = m.id
-        WHERE bt.traslado_id = ?
+        JOIN Muebles m ON bt.id_mueble = m.id
+        WHERE bt.id_traslado = ?
     `;
     const [trasladoRows] = await pool.execute(trasladoQuery, [id]) as [any[], any];
     if (trasladoRows.length === 0) return null;
@@ -56,7 +56,7 @@ const createTransfer = async ({
     // 2. Asociar los bienes al traslado
     for (const mueble_id of bienes) {
         await pool.execute(
-            `INSERT INTO bien_traslado (traslado_id, mueble_id) VALUES (?, ?)`,
+            `INSERT INTO bien_traslado (id_traslado, id_mueble) VALUES (?, ?)`,
             [trasladoId, mueble_id]
         );
     }
@@ -100,7 +100,7 @@ const updateTransfer = async (
 
 // Eliminar traslado y sus bienes asociados
 const deleteTransfer = async (id: number) => {
-    await pool.execute(`DELETE FROM bien_traslado WHERE traslado_id = ?`, [id]);
+    await pool.execute(`DELETE FROM bien_traslado WHERE id_traslado = ?`, [id]);
     const [result] = await pool.execute(`DELETE FROM Traslado WHERE id = ?`, [id]);
     return result;
 };
