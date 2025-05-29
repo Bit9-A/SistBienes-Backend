@@ -21,6 +21,7 @@ import notificationsRoute from "./modules/notifications/notifications.route";
 import configRoute from "./modules/config/config.route";
 import missingGoods from "./modules/missing-goods/missing-goods.route";
 import desincorp from "./modules/desincorp/desincorp.route";
+import goodHistory from "./modules/history/history.router";
 
 import { config } from "dotenv";
 import { db } from "./database/index";
@@ -74,7 +75,7 @@ app.use("/notifications", notificationsRoute);
 app.use("/config",configRoute);
 app.use("/missing-goods", missingGoods);
 app.use("/desincorp", desincorp);
-
+app.use("/history", goodHistory);
 
 const PORT = process.env.PORT || 8000;
 
