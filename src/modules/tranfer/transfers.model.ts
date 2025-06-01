@@ -3,7 +3,7 @@ import { pool } from "../../database/index";
 // Obtener todos los traslados con sus bienes asociados
 const getAllTransfers = async () => {
     const query = `
-        SELECT t.*,CONCAT(u.nombre,' ',u.apellido) as responsable, bt.id as bien_traslado_id, bt.id_mueble, d.nombre as origen_nombre, d2.nombre as destino_nombre,
+        SELECT t.*,CONCAT(u.nombre,' ',u.apellido) as responsable, bt.id as bien_traslado_id, bt.id_mueble, d.nombre as origen_nombre, d2.nombre as destino_nombre
         FROM Traslado t
         LEFT JOIN bien_traslado bt ON t.id = bt.id_traslado
         JOIN Dept d ON t.origen_id = d.id

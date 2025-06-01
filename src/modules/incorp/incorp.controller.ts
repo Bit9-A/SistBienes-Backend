@@ -1,9 +1,29 @@
 import { Request, Response } from "express";
 import { IncorpModel } from "./incorp.model";
 
+
+//Obtener una lista de incorporaciones
+const getAllIncorps = async (req: any, res: any) => {
+  try {
+    const incorps = await IncorpModel.getAllIncorps();
+    return res.status(200).json({
+      ok: true,
+      incorps,
+    });
+  } catch (error) {
+    console.error("Get All Incorps error:", error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Server Error",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+}
 const createIncorp = async (req: any, res: any) => {
   try {
     const { bien_id, fecha, valor, cantidad, concepto_id, dept_id } = req.body;
+        console.log("Datos recibidos en backend:", req.body);
+
 
     if (!bien_id || !fecha || !valor || !cantidad || !concepto_id) {
       return res.status(400).json({ ok: false, message: "Please fill in all required fields." });
@@ -102,4 +122,5 @@ export const IncorpController = {
   getIncorpById,
   updateIncorp,
   deleteIncorp,
+  getAllIncorps,
 };
