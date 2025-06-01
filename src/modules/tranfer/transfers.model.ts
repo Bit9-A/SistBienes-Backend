@@ -34,23 +34,30 @@ const createTransfer = async ({
     origen_id,
     destino_id,
     bienes, // array de IDs de bienes
+    responsable_id, // Cambiar a number
+    observaciones,
 }: {
     fecha: Date;
     cantidad: number;
     origen_id: number;
     destino_id: number;
     bienes: number[];
+    responsable_id: number; // Cambiar a number
+    observaciones: string;
 }) => {
+
     // 1. Crear el traslado
     const query = `
-        INSERT INTO Traslado (fecha, cantidad, origen_id, destino_id,responsable_id,observaciones)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO Traslado (fecha, cantidad, origen_id, destino_id, responsable_id, observaciones)
+        VALUES (?, ?, ?, ?, ?, ?)
     `;
     const [result]: any = await pool.execute(query, [
         fecha,
         cantidad,
         origen_id,
         destino_id,
+        responsable_id, // Asegúrate de que este valor no sea undefined
+        observaciones || null, // Si observaciones es undefined, se pasará null
     ]);
     const trasladoId = result.insertId;
 

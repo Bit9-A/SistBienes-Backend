@@ -28,11 +28,11 @@ const getTransferById = async (req: any, res: any) => {
 
 const createTransfer = async (req: any, res: any) => {
     try {
-        const { fecha, cantidad, origen_id, destino_id, bienes } = req.body;
+        const { fecha, cantidad, origen_id, destino_id, responsable_id, observaciones, bienes } = req.body;
         if (!fecha || !cantidad || !origen_id || !destino_id || !Array.isArray(bienes) || bienes.length === 0) {
             return res.status(400).json({ ok: false, message: "Datos incompletos o bienes no seleccionados" });
         }
-        const trasladoId = await transfersModel.createTransfer({ fecha, cantidad, origen_id, destino_id, bienes });
+        const trasladoId = await transfersModel.createTransfer({ fecha, cantidad, origen_id, destino_id, responsable_id, observaciones, bienes });
         res.status(201).json({ ok: true, message: "Traslado creado", trasladoId });
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
