@@ -59,16 +59,6 @@ const createTransfer = async ({
         responsable_id, // Asegúrate de que este valor no sea undefined
         observaciones || null, // Si observaciones es undefined, se pasará null
     ]);
-
-    console.log("Valores a insertar en Traslado:");
-    console.log({
-        fecha,
-        cantidad,
-        origen_id,
-        destino_id,
-        responsable_id,
-        observaciones,
-    });
     const trasladoId = result.insertId;
 
     // 2. Asociar los bienes al traslado
