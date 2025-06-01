@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {desincorpController} from "./desincorp.controller";
+import { desincorpController } from "./desincorp.controller";
 
 const router = Router();
 

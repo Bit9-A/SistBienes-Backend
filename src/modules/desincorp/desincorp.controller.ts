@@ -2,66 +2,92 @@ import { desincorpModel } from "./desincorp.model";
 
 const getAllDesincorp = async (req: any, res: any) => {
     try {
-        const desincorpList = await desincorpModel.getAllDesincorp();
-        res.status(200).json({ ok: true, desincorp: desincorpList });
+        const desincorps = await desincorpModel.getAllDesincorp();
+        return res.status(200).json({ ok: true, desincorps });
     } catch (error) {
-        res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
+        return res.status(500).json({
+            ok: false,
+            msg: "Server Error",
+            error: error instanceof Error ? error.message : "Unknown error",
+        });
     }
 };
 
 const getDesincorpById = async (req: any, res: any) => {
     try {
         const { id } = req.params;
-        const desincorpItem = await desincorpModel.getDesincorpById(Number(id));
-        if (!desincorpItem) {
+        const desincorp = await desincorpModel.getDesincorpById(Number(id));
+        if (!desincorp) {
             return res.status(404).json({ ok: false, message: "Desincorp not found" });
         }
-        res.status(200).json({ ok: true, desincorp: desincorpItem });
+        return res.status(200).json({ ok: true, desincorp });
     } catch (error) {
-        res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
+        return res.status(500).json({
+            ok: false,
+            msg: "Server Error",
+            error: error instanceof Error ? error.message : "Unknown error",
+        });
     }
 };
 
 const createDesincorp = async (req: any, res: any) => {
     try {
         const { bien_id, fecha, valor, cantidad, concepto_id, dept_id } = req.body;
-        if (bien_id === undefined || fecha === undefined || valor === undefined || cantidad === undefined || concepto_id === undefined || dept_id === undefined) {
-            return res.status(400).json({ ok: false, message: "All fields are required" });
+        if (!bien_id || !fecha || !valor || !cantidad || !concepto_id) {
+            return res.status(400).json({ ok: false, message: "Please fill in all required fields." });
         }
-        const newDesincorp = await desincorpModel.createDesincorp(bien_id, fecha, valor, cantidad, concepto_id, dept_id);
-        res.status(201).json({ ok: true, desincorp: newDesincorp });
+        const newDesincorp = await desincorpModel.createDesincorp({
+            bien_id,
+            fecha,
+            valor,
+            cantidad,
+            concepto_id,
+            dept_id,
+        });
+        return res.status(201).json({ ok: true, desincorp: newDesincorp });
     } catch (error) {
-        res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
+        return res.status(500).json({
+            ok: false,
+            msg: "Server Error",
+            error: error instanceof Error ? error.message : "Unknown error",
+        });
     }
 };
 
 const updateDesincorp = async (req: any, res: any) => {
     try {
         const { id } = req.params;
-        const { bien_id, fecha, valor, cantidad, concepto_id, dept_id } = req.body;
-        if (bien_id === undefined || fecha === undefined || valor === undefined || cantidad === undefined || concepto_id === undefined || dept_id === undefined) {
-            return res.status(400).json({ ok: false, message: "All fields are required" });
-        }
-        const result = await desincorpModel.updateDesincorp(Number(id), bien_id, fecha, valor, cantidad, concepto_id, dept_id);
-        if ((result as any).affectedRows === 0) {
+        const updates = req.body;
+        const desincorp = await desincorpModel.getDesincorpById(Number(id));
+        if (!desincorp) {
             return res.status(404).json({ ok: false, message: "Desincorp not found" });
         }
-        res.status(200).json({ ok: true, message: "Desincorp updated successfully" });
+        await desincorpModel.updateDesincorp(Number(id), updates);
+        return res.status(200).json({ ok: true, message: "Desincorp updated successfully" });
     } catch (error) {
-        res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
+        return res.status(500).json({
+            ok: false,
+            msg: "Server Error",
+            error: error instanceof Error ? error.message : "Unknown error",
+        });
     }
 };
 
 const deleteDesincorp = async (req: any, res: any) => {
     try {
         const { id } = req.params;
-        const result = await desincorpModel.deleteDesincorp(Number(id));
-        if ((result as any).affectedRows === 0) {
+        const desincorp = await desincorpModel.getDesincorpById(Number(id));
+        if (!desincorp) {
             return res.status(404).json({ ok: false, message: "Desincorp not found" });
         }
-        res.status(200).json({ ok: true, message: "Desincorp deleted successfully" });
+        await desincorpModel.deleteDesincorp(Number(id));
+        return res.status(200).json({ ok: true, message: "Desincorp deleted successfully" });
     } catch (error) {
-        res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
+        return res.status(500).json({
+            ok: false,
+            msg: "Server Error",
+            error: error instanceof Error ? error.message : "Unknown error",
+        });
     }
 };
 
