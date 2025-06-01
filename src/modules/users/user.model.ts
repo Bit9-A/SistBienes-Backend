@@ -3,7 +3,7 @@ import { pool } from "../../database/index";
 const getAllUsers = async () => {
   const query = `
     SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
-           u.dept_id, d.nombre as dept_nombre, u.cedula
+           u.dept_id, d.nombre as dept_nombre, u.cedula, u.username, u.isActive
     FROM Usuarios u
     LEFT JOIN Dept d ON u.dept_id = d.id
   `;
@@ -14,7 +14,7 @@ const getAllUsers = async () => {
 const getUserById = async (id: number) => {
   const query = `
     SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
-           u.dept_id, d.nombre as dept_nombre, u.cedula
+           u.dept_id, d.nombre as dept_nombre, u.cedula, u.username, u.isActive
     FROM Usuarios u
     LEFT JOIN Dept d ON u.dept_id = d.id
     WHERE u.id = ?
@@ -26,7 +26,7 @@ const getUserById = async (id: number) => {
 const getUsersByDeptId = async (dept_id: number) => {
   const query = `
     SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
-           u.dept_id, d.nombre as dept_nombre, u.cedula
+           u.dept_id, d.nombre as dept_nombre, u.cedula, u.username, u.isActive
     FROM Usuarios u
     LEFT JOIN Dept d ON u.dept_id = d.id
     WHERE u.dept_id = ?
@@ -45,6 +45,8 @@ const updateUser = async (
     telefono,
     dept_id,
     cedula,
+    username,
+    isActive,
   }: {
     tipo_usuario?: number;
     email?: string;
@@ -53,6 +55,8 @@ const updateUser = async (
     telefono?: string;
     dept_id?: number;
     cedula?: string;
+    username?: string;
+    isActive?: number;
   }
 ) => {
   const query = `
@@ -64,17 +68,21 @@ const updateUser = async (
       apellido = COALESCE(?, apellido),
       telefono = COALESCE(?, telefono),
       dept_id = COALESCE(?, dept_id),
-      cedula = COALESCE(?, cedula)
+      cedula = COALESCE(?, cedula),
+      username = COALESCE(?, username),
+      isActive = COALESCE(?, isActive)
     WHERE id = ?
   `;
   const [result] = await pool.execute(query, [
-    tipo_usuario || null,
-    email || null,
-    nombre || null,
-    apellido || null,
-    telefono || null,
-    dept_id || null,
-    cedula || null,
+    tipo_usuario ?? null,
+    email ?? null,
+    nombre ?? null,
+    apellido ?? null,
+    telefono ?? null,
+    dept_id ?? null,
+    cedula ?? null,
+    username ?? null,
+    isActive !== undefined ? isActive : null,
     id,
   ]);
   return result;

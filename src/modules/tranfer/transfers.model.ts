@@ -3,9 +3,10 @@ import { pool } from "../../database/index";
 // Obtener todos los traslados con sus bienes asociados
 const getAllTransfers = async () => {
     const query = `
-        SELECT t.*, bt.id as bien_traslado_id, bt.id_mueble
+        SELECT t.*,CONCAT(u.nombre,' ',u.apellido) as responsable, bt.id as bien_traslado_id, bt.id_mueble
         FROM Traslado t
         LEFT JOIN bien_traslado bt ON t.id = bt.id_traslado
+        JOIN Usuarios u ON t.responsable_id = u.id
     `;
     const [rows] = await pool.execute(query);
     return rows as any[];
@@ -42,7 +43,7 @@ const createTransfer = async ({
 }) => {
     // 1. Crear el traslado
     const query = `
-        INSERT INTO Traslado (fecha, cantidad, origen_id, destino_id)
+        INSERT INTO Traslado (fecha, cantidad, origen_id, destino_id,responsable_id,observaciones)
         VALUES (?, ?, ?, ?)
     `;
     const [result]: any = await pool.execute(query, [

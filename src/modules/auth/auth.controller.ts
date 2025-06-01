@@ -4,68 +4,90 @@ import { Request, Response } from "express";
 import { AuthModel } from "./auth.model";
 
 const register = async (req: any, res: any) => {
-    try {
-      const { tipo_usuario, email, password, nombre, apellido, telefono, dept_id, cedula } = req.body;
-  
-      if (!nombre || !apellido || !email || !password || !cedula) {
-        return res.status(400).json({ ok: false, message: "Please fill in all required fields." });
-      }
-  
-      const existingUser = await AuthModel.findUserByEmail(email);
-      if (existingUser) {
-        return res.status(400).json({ ok: false, message: "Email already exists" });
-      }
-  
-      const salt = await bcryptjs.genSalt(10);
-      const hashedPassword = await bcryptjs.hash(password, salt);
-  
-      const newUser = await AuthModel.createUser({
-        tipo_usuario,
-        email,
-        password: hashedPassword,
-        nombre,
-        apellido,
-        telefono,
-        dept_id,
-        cedula,
-      });
-  
-      const token = jwt.sign({ email: newUser.email }, process.env.SECRET_KEY || "defaultSecret", {
-        expiresIn: "1h",
-      });
-  
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 3600000,
-      });
-  
-      return res.status(201).json({
-        ok: true,
-        user: { ...newUser, password: undefined }, // Excluir la contraseña del usuario en la respuesta
-      });
-    } catch (error) {
-      console.error("Registration error:", error);
-      return res.status(500).json({
-        ok: false,
-        msg: "Server Error",
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
-  };
-
-const login = async (req: any, res: any) => {
   try {
-    const { email, password } = req.body;
+    const { tipo_usuario, email, password, nombre, apellido, telefono, dept_id, cedula, username, isActive } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ ok: false, message: "Email and password are required" });
+    if (!nombre || !apellido || !email || !password || !cedula || !username) {
+      return res.status(400).json({ ok: false, message: "Please fill in all required fields." });
     }
 
-    const user = await AuthModel.findUserByEmail(email);
+    const existingUser = await AuthModel.findUserByEmail(email);
+    if (existingUser) {
+      return res.status(400).json({ ok: false, message: "Email already exists" });
+    }
 
+    // Validar que el username sea único
+    const existingUsername = await AuthModel.findUserByUsername
+      ? await AuthModel.findUserByUsername(username)
+      : null;
+    if (existingUsername) {
+      return res.status(400).json({ ok: false, message: "Username already exists" });
+    }
+
+    const existingCedula = await AuthModel.findUserByCedula(cedula);
+    if (existingCedula) {
+      return res.status(400).json({ ok: false, message: "Cedula already exists" });
+    }
+
+
+    const salt = await bcryptjs.genSalt(10);
+    const hashedPassword = await bcryptjs.hash(password, salt);
+
+    const newUser = await AuthModel.createUser({
+      tipo_usuario,
+      email,
+      password: hashedPassword,
+      nombre,
+      apellido,
+      telefono,
+      dept_id,
+      cedula,
+      username,
+      isActive: isActive !== undefined ? isActive : true,
+    });
+
+    const token = jwt.sign({ email: newUser.email }, process.env.SECRET_KEY || "defaultSecret", {
+      expiresIn: "1h",
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 3600000,
+    });
+
+    return res.status(201).json({
+      ok: true,
+      user: { ...newUser, password: undefined }, // Excluir la contraseña del usuario en la respuesta
+    });
+  } catch (error) {
+    console.error("Registration error:", error);
+    return res.status(500).json({
+      ok: false,
+      msg: "Server Error",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+};
+
+const login = async (req:any, res:any) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ ok: false, message: "Username and password are required" });
+    }
+
+    const user = await AuthModel.findUserByUsername(username);
+
+    // Primero verifica si existe el usuario
     if (!user) {
-      return res.status(400).json({ ok: false, message: "Email or password is invalid" });
+      return res.status(400).json({ ok: false, message: "Username or password is invalid" });
+    }
+
+    // Luego verifica si está activo (acepta 0 o false)
+    if (user.isActive === 0 || user.isActive === false) {
+      return res.status(403).json({ ok: false, message: "User is inactive" });
     }
 
     const validPassword = await bcryptjs.compare(password, user.password);
@@ -88,7 +110,22 @@ const login = async (req: any, res: any) => {
       maxAge: 3600000,
     });
 
-    res.json({ ok: true, token});
+    res.json({
+      ok: true,
+      token,
+      user: {
+        id: user.id,
+        tipo_usuario: user.tipo_usuario,
+        email: user.email,
+        username: user.username,
+        nombre: user.nombre,
+        apellido: user.apellido,
+        telefono: user.telefono,
+        dept_id: user.dept_id,
+        cedula: user.cedula,
+        isActive: user.isActive,
+      }
+    });
 
   } catch (error) {
     console.error("Login error:", error);
@@ -164,12 +201,14 @@ const profile = async (req: any, res: any) => {
       id: user.id,
       tipo_usuario: user.tipo_usuario,
       email: user.email,
+      username: user.username,
       nombre_completo: nombreCompleto,
       telefono: user.telefono,
       dept_id: user.dept_id,
       cedula: user.cedula,
       dept_nombre: user.dept_nombre,
-      nombre_tipo_usuario: user.nombre_tipo_usuario
+      nombre_tipo_usuario: user.nombre_tipo_usuario,
+      isActive: user.isActive,
     };
 
     res.json({ user: userProfile });
@@ -213,7 +252,6 @@ const resetPassword = async (req: any, res: any) => {
     });
   }
 };
-
 
 export const AuthController = {
   register,

@@ -1,10 +1,12 @@
 import { pool } from "../../database/index";
+// Obtener la configuración actual
 
 const getConfig = async () => {
     const [rows] = await pool.execute("SELECT * FROM config LIMIT 1");
     return (rows as any[])[0] || null;
 };
 
+// Crea una nueva configuración, permitiendo que los campos sean opcionales
 const createConfig = async ({
     fecha,
     colorprimario,
@@ -39,7 +41,7 @@ const createConfig = async ({
     return result.insertId;
 };
 
-
+// Actualiza la configuración existente, permitiendo que los campos sean opcionales
 
 const updateConfig = async (
     id: number,
