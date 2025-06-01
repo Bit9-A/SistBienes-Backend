@@ -161,7 +161,7 @@ const logout = async (req: any, res: any) => {
       secure: process.env.NODE_ENV === "production",
     });
 
-    res.json({ ok: true, message: "Logout successful" });
+    return res.json({ ok: true, message: "Logout successful" });
   } catch (error) {
     console.error("Logout error:", error);
     res.status(500).json({
