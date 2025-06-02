@@ -67,13 +67,13 @@ const findIncorpById = async (id: number) => {
   const query = `
     SELECT i.id, i.bien_id, i.fecha, i.valor, i.cantidad, i.concepto_id, i.dept_id,
            b.nombre_descripcion AS bien_nombre,
-           c.nombre AS concepto_nombre,
+           ci.nombre AS concepto_nombre,
            d.nombre AS dept_nombre
     FROM Incorp i
     JOIN Muebles b ON i.bien_id = b.id
-    JOIN dept d ON i.dept_id = d.id
-    JOIN ConceptoIncorp ci ON Incorp.concepto_id = ConceptoIncorp.id
-    WHERE id = ?
+    JOIN Dept d ON i.dept_id = d.id
+    JOIN ConceptoIncorp ci ON i.concepto_id = ci.id
+    WHERE i.id = ?
   `;
   const [rows] = await pool.execute(query, [id]);
   return (rows as any[])[0];

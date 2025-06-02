@@ -30,7 +30,7 @@ const getDesincorpById = async (id: number) => {
                b.nombre_descripcion AS bien_nombre,
                b.numero_identificacion AS numero_identificacion,
                c.nombre AS concepto_nombre,
-               dept.nombre AS dept_nombre
+               Dept.nombre AS dept_nombre
         FROM Desincorp d
         JOIN Muebles b ON d.bien_id = b.id
         JOIN ConceptoDesincorp c ON d.concepto_id = c.id
