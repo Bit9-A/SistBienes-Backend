@@ -84,7 +84,7 @@ const updateIncorp = async (req: any, res: any) => {
 
     await IncorpModel.updateIncorp(Number(id), updates);
 
-    return res.status(200).json({ ok: true, message: "Incorp updated successfully" });
+    return res.status(200).json({ ok: true,  incorp, message: "Incorp updated successfully" });
   } catch (error) {
     console.error("Update Incorp error:", error);
     return res.status(500).json({

@@ -3,8 +3,8 @@ import { logsController } from "./logs.controller";
 
 const router = Router();
 
-router.post("/logs", logsController.createLog);
-router.get("/logs", logsController.getAllLogs);
-router.get("/logs/:id", logsController.getLogById);
+router.post("/", logsController.createLog);
+router.get("/", logsController.getAllLogs);
+router.get("/:id", logsController.getLogById);
 
 export default router;

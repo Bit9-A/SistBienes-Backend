@@ -79,22 +79,45 @@ const findIncorpById = async (id: number) => {
   return (rows as any[])[0];
 };
 
-const updateIncorp = async (id: number, updates: Partial<{
-  bien_id: number;
-  fecha: Date;
-  valor: number;
-  cantidad: number;
-  concepto_id: number;
-  dept_id: number;
-}>) => {
-  const fields = Object.keys(updates).map((key) => `${key} = ?`).join(", ");
-  const values = Object.values(updates);
+const updateIncorp = async (
+  id: number,
+  {
+    bien_id,
+    fecha,
+    valor,
+    cantidad,
+    concepto_id,
+    dept_id,
+  }: {
+    bien_id?: number;
+    fecha?: Date | string;
+    valor?: number;
+    cantidad?: number;
+    concepto_id?: number;
+    dept_id?: number;
+  }
+) => {
   const query = `
     UPDATE Incorp
-    SET ${fields}
+    SET 
+      bien_id = COALESCE(?, bien_id),
+      fecha = COALESCE(?, fecha),
+      valor = COALESCE(?, valor),
+      cantidad = COALESCE(?, cantidad),
+      concepto_id = COALESCE(?, concepto_id),
+      dept_id = COALESCE(?, dept_id)
     WHERE id = ?
   `;
-  await pool.execute(query, [...values, id]);
+  const [result] = await pool.execute(query, [
+    bien_id ?? null,
+    fecha ?? null,
+    valor ?? null,
+    cantidad ?? null,
+    concepto_id ?? null,
+    dept_id ?? null,
+    id,
+  ]);
+  return result;
 };
 
 const deleteIncorp = async (id: number) => {

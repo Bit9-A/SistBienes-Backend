@@ -10,8 +10,8 @@ router.delete("/:id", auditController.deleteAudit);
 
 
 // Auditoría de sesión
-router.post("/in", auditController.registerIn);
-router.post("/out", auditController.registerOut);
+router.post("/in/r", auditController.registerIn);
+router.post("/out/r", auditController.registerOut);
 
 
 export default router;

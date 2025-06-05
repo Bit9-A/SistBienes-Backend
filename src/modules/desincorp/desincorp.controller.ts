@@ -63,7 +63,7 @@ const updateDesincorp = async (req: any, res: any) => {
             return res.status(404).json({ ok: false, message: "Desincorp not found" });
         }
         await desincorpModel.updateDesincorp(Number(id), updates);
-        return res.status(200).json({ ok: true, message: "Desincorp updated successfully" });
+        return res.status(200).json({ ok: true, desincorp ,message: "Desincorp updated successfully" });
     } catch (error) {
         return res.status(500).json({
             ok: false,

@@ -79,16 +79,27 @@ const createDesincorp = async ({
     return (rows as any[])[0];
 };
 
-const updateDesincorp = async (id: number, updates: Partial<{
-    bien_id: number;
-    fecha: Date;
-    valor: number;
-    cantidad: number;
-    concepto_id: number;
-    dept_id: number;
-}>) => {
-    const fields = Object.keys(updates).map((key) => `${key} = ?`).join(", ");
-    const values = Object.values(updates);
+const updateDesincorp = async (
+    id: number,
+    updates: Partial<{
+        bien_id: number;
+        fecha: Date | string;
+        valor: number;
+        cantidad: number;
+        concepto_id: number;
+        dept_id: number;
+    }>
+) => {
+    // Lista de campos válidos en la tabla Desincorp
+    const validFields = ["bien_id", "fecha", "valor", "cantidad", "concepto_id", "dept_id"];
+
+    // Filtrar solo los campos válidos presentes en updates
+    const fieldsToUpdate = Object.keys(updates).filter(key => validFields.includes(key));
+    if (fieldsToUpdate.length === 0) return; // Nada que actualizar
+
+    const fields = fieldsToUpdate.map(key => `${key} = ?`).join(", ");
+    const values = fieldsToUpdate.map(key => (updates as any)[key]);
+
     const query = `
         UPDATE Desincorp
         SET ${fields}
