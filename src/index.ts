@@ -27,16 +27,19 @@ import logsRoute from "./modules/logs/logs.route";
 import componentRoute from "./modules/components/components.route";
 import transferComponent from "./modules/transferComponent/transferComponent.route";
 
+import "./jobs/closeOldSessions.job";
+
 import { config } from "dotenv";
 import { db } from "./database/index";
 import { verifyToken } from "./middlewares/jwt.middleware";
 import cors from "cors";
 
-
 // Inicializar la conexión a la base de datos
 db()
   .then((): void => console.log("Database connected successfully"))
-  .catch((error: unknown): void => console.error("Database connection failed:", error));
+  .catch((error: unknown): void =>
+    console.error("Database connection failed:", error)
+  );
 
 // Obtener el directorio actual
 const __filename = fileURLToPath(import.meta.url);
@@ -48,20 +51,21 @@ const app = express();
 // Middleware para manejar JSON
 app.use(express.json());
 app.use(cors());
-app.use(cors({
-  //permitir todas las solicitudes de origen
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-}));
+app.use(
+  cors({
+    //permitir todas las solicitudes de origen
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 // Rutas
-
 
 app.use("/", homeRoute);
 app.use("/auth", authRoute);
 
-app.use(verifyToken)
+app.use(verifyToken);
 app.use("/user", userRoute);
 app.use("/subgroup", subgroupRoute);
 app.use("/incorp", incorpRoute);
@@ -80,7 +84,7 @@ app.use("/config", configRoute);
 app.use("/missing-goods", missingGoods);
 app.use("/desincorp", desincorp);
 app.use("/history", goodHistory);
-app.use("/logs",logsRoute)
+app.use("/logs", logsRoute);
 app.use("/components", componentRoute);
 app.use("/transfer-component", transferComponent);
 
