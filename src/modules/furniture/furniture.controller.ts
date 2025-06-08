@@ -23,7 +23,6 @@ const getFurnitureById = async (req: any, res: any) => {
   }
 };
 
-
 const createFurniture = async (req: any, res: any) => {
   try {
     const data = req.body;
@@ -36,6 +35,10 @@ const createFurniture = async (req: any, res: any) => {
       });
     }
 
+    // Si no viene isComputer o isActive, asignar valores por defecto
+    if (typeof data.isComputer === "undefined") data.isComputer = 0;
+    if (typeof data.isActive === "undefined") data.isActive = 1;
+
     // Crear el mueble
     const newFurniture = await FurnitureModel.createFurniture(data);
     res.status(201).json({ ok: true, furniture: newFurniture });
@@ -47,7 +50,6 @@ const createFurniture = async (req: any, res: any) => {
     });
   }
 };
-
 
 const updateFurniture = async (req: any, res: any) => {
   try {
@@ -76,7 +78,21 @@ const deleteFurniture = async (req: any, res: any) => {
   }
 };
 
+const getFurnitureByDepartment = async (req: any, res: any) => {
+  try {
+    const { deptId } = req.params;
+    const furniture = await FurnitureModel.getFurnitureByDepartment(Number(deptId));
+    if (!furniture || furniture.length === 0) {
+      return res.status(404).json({ ok: false, message: "No furniture found for this department" });
+    }
+    res.status(200).json({ ok: true, furniture });
+  } catch (error) {
+    res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
+  }
+};
+
 export const FurnitureController = {
+  getFurnitureByDepartment,
   getAllFurniture,
   getFurnitureById,
   createFurniture,
