@@ -24,6 +24,9 @@ import desincorp from "./modules/desincorp/desincorp.route";
 import goodHistory from "./modules/history/history.router";
 import logsRoute from "./modules/logs/logs.route";
 
+import componentRoute from "./modules/components/components.route";
+import transferComponent from "./modules/transferComponent/transferComponent.route";
+
 import { config } from "dotenv";
 import { db } from "./database/index";
 import { verifyToken } from "./middlewares/jwt.middleware";
@@ -46,7 +49,8 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(cors({
-  origin: ["http://shuttle.proxy.rlwy.net:12546"], // Permitir solicitudes desde el frontend local
+  //permitir todas las solicitudes de origen
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
@@ -77,6 +81,8 @@ app.use("/missing-goods", missingGoods);
 app.use("/desincorp", desincorp);
 app.use("/history", goodHistory);
 app.use("/logs",logsRoute)
+app.use("/components", componentRoute);
+app.use("/transfer-component", transferComponent);
 
 const PORT = process.env.PORT || 8000;
 

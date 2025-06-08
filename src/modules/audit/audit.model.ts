@@ -1,7 +1,11 @@
 import { pool } from "../../database/index";
 
 const getAllAudit = async () => {
-    const query = `SELECT * FROM Auditoria`;
+    const query = `SELECT a.id, a.usuario_id ,a.entrada, a.salida, a.ip,CONCAT(u.nombre, ' ', u.apellido) AS nombre, d.nombre as departamento
+    FROM Auditoria a
+    JOIN Usuarios u ON a.usuario_id = u.id
+    JOIN Dept d ON u.dept_id = d.id
+    `;
     const [rows] = await pool.execute(query);
     return rows as any[];
 }
