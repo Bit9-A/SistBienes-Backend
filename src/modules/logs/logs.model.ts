@@ -15,7 +15,11 @@ const createLog = async (usuario_id: number, accion: string, detalles?: string |
 
 const getAllLogs = async () => {
     const query = `
-        SELECT * FROM Logs ORDER BY fecha DESC`;
+        SELECT l.*, u.username AS usuario_nombre, d.nombre AS departamento
+        FROM Logs l 
+        JOIN Usuarios u ON l.usuario_id = u.id
+        JOIN Dept d ON u.dept_id = d.id
+        ORDER BY l.fecha DESC`;
     const [rows] = await pool.query(query);
     return rows as any[];
 };
