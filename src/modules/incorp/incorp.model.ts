@@ -47,7 +47,7 @@ const createIncorp = async ({
 
   const query = `
     INSERT INTO Incorp (bien_id, fecha, valor, cantidad, concepto_id, dept_id, isActive, observaciones)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?,?)
   `;
   const [result] = await pool.execute(query, [
     Number(bien_id),
@@ -62,7 +62,7 @@ const createIncorp = async ({
 
   // Recuperar el registro recién creado
   const incorpQuery = `
-    SELECT id, bien_id, fecha, valor, cantidad, concepto_id, dept_id, isActive, observaciones,
+    SELECT id, bien_id, fecha, valor, cantidad, concepto_id, dept_id, isActive, observaciones
     FROM Incorp
     WHERE id = ?
   `;
