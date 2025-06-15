@@ -4,7 +4,7 @@ import { pool } from "../../database/index";
 //Obtener todos los registros de incorporación
 const getAllIncorps = async () => {
   const query = `
-    SELECT i.id, i.bien_id, i.fecha, i.valor, i.cantidad, i.concepto_id, i.dept_id,
+    SELECT i.id, i.bien_id, i.fecha, i.valor, i.cantidad, i.concepto_id, i.dept_id,i.isActive,i.observaciones,
            b.nombre_descripcion AS bien_nombre,
            b.numero_identificacion AS numero_identificacion,
            c.nombre AS concepto_nombre,
@@ -31,6 +31,8 @@ const createIncorp = async ({
   cantidad,
   concepto_id,
   dept_id,
+  isActive,
+  observaciones,
 }: {
   bien_id: number;
   fecha: Date; // <-- Cambiado a string
@@ -38,12 +40,14 @@ const createIncorp = async ({
   cantidad: number;
   concepto_id: number;
   dept_id?: number;
+  isActive: number;
+  observaciones?: string;
 }) => {
   console.log("Datos recibidos para crear:", { bien_id, fecha, valor, cantidad, concepto_id, dept_id });
 
   const query = `
-    INSERT INTO Incorp (bien_id, fecha, valor, cantidad, concepto_id, dept_id)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO Incorp (bien_id, fecha, valor, cantidad, concepto_id, dept_id, isActive, observaciones)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `;
   const [result] = await pool.execute(query, [
     Number(bien_id),
@@ -52,11 +56,13 @@ const createIncorp = async ({
     Number(cantidad),
     Number(concepto_id),
     dept_id ? Number(dept_id) : null,
+    isActive,
+    observaciones ? observaciones : null,
   ]);
 
   // Recuperar el registro recién creado
   const incorpQuery = `
-    SELECT id, bien_id, fecha, valor, cantidad, concepto_id, dept_id
+    SELECT id, bien_id, fecha, valor, cantidad, concepto_id, dept_id, isActive, observaciones,
     FROM Incorp
     WHERE id = ?
   `;
@@ -65,7 +71,7 @@ const createIncorp = async ({
 };
 const findIncorpById = async (id: number) => {
   const query = `
-    SELECT i.id, i.bien_id, i.fecha, i.valor, i.cantidad, i.concepto_id, i.dept_id,
+    SELECT i.id, i.bien_id, i.fecha, i.valor, i.cantidad, i.concepto_id, i.dept_id,i.isActive,i.observaciones,
            b.nombre_descripcion AS bien_nombre,
            ci.nombre AS concepto_nombre,
            d.nombre AS dept_nombre
@@ -88,6 +94,8 @@ const updateIncorp = async (
     cantidad,
     concepto_id,
     dept_id,
+    isActive,
+    observaciones,
   }: {
     bien_id?: number;
     fecha?: Date | string;
@@ -95,6 +103,8 @@ const updateIncorp = async (
     cantidad?: number;
     concepto_id?: number;
     dept_id?: number;
+    isActive?: number;
+    observaciones?: string;
   }
 ) => {
   const query = `
@@ -106,6 +116,8 @@ const updateIncorp = async (
       cantidad = COALESCE(?, cantidad),
       concepto_id = COALESCE(?, concepto_id),
       dept_id = COALESCE(?, dept_id)
+      isActive = COALESCE(?, isActive),
+      observaciones = COALESCE(?, observaciones)
     WHERE id = ?
   `;
   const [result] = await pool.execute(query, [
@@ -116,6 +128,8 @@ const updateIncorp = async (
     concepto_id ?? null,
     dept_id ?? null,
     id,
+    isActive ?? null,
+    observaciones ?? null,
   ]);
   return result;
 };
