@@ -5,6 +5,18 @@ interface TotalBienesResult extends RowDataPacket {
   total_bienes: number;
 }
 
+interface TotalValorBienesResult extends RowDataPacket {
+  dept_id: number;
+  dept_nombre: string;
+  total_valor: number;
+}
+
+interface MueblesPorMesResult extends RowDataPacket {
+    anio: number;
+    mes: number;
+    total_muebles: number;
+}
+
 const getSubgruposConConteo = async () => {
     const query = `
         SELECT sg.id, sg.nombre, sg.codigo, COALESCE(SUM(m.cantidad), 0) AS total
@@ -50,9 +62,37 @@ const contarMueblesUltimaSemana = async (): Promise<number> => {
   return rows[0].total_bienes ?? 0;
 };
 
+const obtenerValorTotalBienesPorDepartamento = async () => {
+    const query = `
+        SELECT m.dept_id, d.nombre AS dept_nombre, COALESCE(SUM(m.valor_unitario * m.cantidad), 0) AS total_valor
+        FROM Muebles m
+        LEFT JOIN Dept d ON m.dept_id = d.id
+        GROUP BY m.dept_id, d.nombre
+    `;
+    const [rows] = await pool.execute<TotalValorBienesResult[]>(query);
+    return rows;
+};
+
+const contarMueblesPorMes = async (): Promise<MueblesPorMesResult[]> => {
+    const query = `
+        SELECT 
+            YEAR(fecha) AS anio, 
+            MONTH(fecha) AS mes, 
+            COALESCE(sum(cantidad), 0) AS total_muebles
+        FROM Muebles
+        WHERE fecha IS NOT NULL
+        GROUP BY anio, mes
+        ORDER BY anio ASC, mes ASC;
+    `;
+    const [rows] = await pool.execute<MueblesPorMesResult[]>(query);
+    return rows;
+};
+
 export const HomeModel = {
     getSubgruposConConteo,
     getGoodStatusConConteo,
     contarMuebles,
-    contarMueblesUltimaSemana
+    contarMueblesUltimaSemana,
+    obtenerValorTotalBienesPorDepartamento,
+    contarMueblesPorMes
 };

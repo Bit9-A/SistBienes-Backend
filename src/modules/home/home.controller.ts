@@ -35,9 +35,28 @@ const getMueblesUltimaSemana = async (req: Request, res: Response) => {
         res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
     }
 };
+const obtenerValorTotalBienesPorDepartamento = async (req: Request, res: Response) => {
+    try {
+        const valortotal = await HomeModel.obtenerValorTotalBienesPorDepartamento();
+        res.status(200).json({ ok: true, valortotal });
+    } catch (error) {
+        res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
+    }
+};
+
+const contarMueblesPorMes = async (req: Request, res: Response) => {
+    try {
+        const mublesPorMes = await HomeModel.contarMueblesPorMes();
+        res.status(200).json({ ok: true, mublesPorMes });
+    } catch (error) {
+        res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
+    }
+};
 export const mueblesController = {
     getCounts,
     getCountsEstadobien,
     getTotalMuebles,
-    getMueblesUltimaSemana
+    getMueblesUltimaSemana,
+    obtenerValorTotalBienesPorDepartamento,
+    contarMueblesPorMes
 };
