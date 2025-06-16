@@ -24,11 +24,42 @@ const getMissingGoodsById = async (req: any, res: any) => {
 
 const createMissingGoods = async (req: any, res: any) => {
     try {
-        const { unidad, existencias, diferenciaCantidad, diferenciaValor, funcionarioId, jefeId, observaciones, fecha, bienId } = req.body;
-        if (!unidad || existencias === undefined || diferenciaCantidad === undefined || diferenciaValor === undefined || !funcionarioId || !jefeId || !bienId) {
-            return res.status(400).json({ ok: false, message: "All fields are required" });
+        const {
+            unidad,
+            existencias,
+            diferencia_cantidad,
+            diferencia_valor,
+            funcionario_id,
+            jefe_id,
+            observaciones,
+            fecha,
+            bien_id
+        } = req.body;
+
+        if (
+            unidad === undefined ||
+            existencias === undefined ||
+            diferencia_cantidad === undefined ||
+            diferencia_valor === undefined ||
+            funcionario_id === undefined ||
+            jefe_id === undefined ||
+            !fecha ||
+            bien_id === undefined
+        ) {
+            return res.status(400).json({ ok: false, message: "Todos los campos son requeridos" });
         }
-        const newMissingGoods = await missingGoodsModel.createMissingGoods(unidad, existencias, diferenciaCantidad, diferenciaValor, funcionarioId, jefeId, observaciones, fecha, bienId);
+
+        const newMissingGoods = await missingGoodsModel.createMissingGoods({
+            unidad,
+            existencias,
+            diferencia_cantidad,
+            diferencia_valor,
+            funcionario_id,
+            jefe_id,
+            observaciones,
+            fecha,
+            bien_id
+        });
         res.status(201).json({ ok: true, missingGoods: newMissingGoods });
     } catch (error) {
         res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
@@ -38,11 +69,43 @@ const createMissingGoods = async (req: any, res: any) => {
 const updateMissingGoods = async (req: any, res: any) => {
     try {
         const { id } = req.params;
-        const { unidad, existencias, diferenciaCantidad, diferenciaValor, funcionarioId, jefeId, observaciones, fecha, bienId } = req.body;
-        if (!unidad || existencias === undefined || diferenciaCantidad === undefined || diferenciaValor === undefined || !funcionarioId || !jefeId || !bienId) {
-            return res.status(400).json({ ok: false, message: "All fields are required" });
+        const {
+            unidad,
+            existencias,
+            diferencia_cantidad,
+            diferencia_valor,
+            funcionario_id,
+            jefe_id,
+            observaciones,
+            fecha,
+            bien_id
+        } = req.body;
+
+        if (
+            unidad === undefined ||
+            existencias === undefined ||
+            diferencia_cantidad === undefined ||
+            diferencia_valor === undefined ||
+            funcionario_id === undefined ||
+            jefe_id === undefined ||
+            !fecha ||
+            bien_id === undefined
+        ) {
+            return res.status(400).json({ ok: false, message: "Todos los campos son requeridos" });
         }
-        const result = await missingGoodsModel.updateMissingGoods(Number(id), unidad, existencias, diferenciaCantidad, diferenciaValor, funcionarioId, jefeId, observaciones, fecha, bienId);
+
+        const result = await missingGoodsModel.updateMissingGoods(
+            Number(id),
+            unidad,
+            existencias,
+            diferencia_cantidad,
+            diferencia_valor,
+            funcionario_id,
+            jefe_id,
+            observaciones,
+            fecha,
+            bien_id
+        );
         if ((result as any).affectedRows === 0) {
             return res.status(404).json({ ok: false, message: "Missing goods not found" });
         }

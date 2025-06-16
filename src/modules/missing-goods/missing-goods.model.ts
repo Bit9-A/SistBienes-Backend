@@ -29,61 +29,71 @@ const getMissingGoodsById = async (id: number) => {
     JOIN Usuarios j ON bf.jefe_id = j.id
     LEFT JOIN Dept d ON bf.unidad = d.id
     LEFT JOIN Muebles m ON bf.bien_id = m.id
-        WHERE bf.id = ?`;
+    WHERE bf.id = ?`;
     const [rows] = await pool.execute(query, [id]);
     return (rows as any[])[0];
 };
 
-const createMissingGoods = async (
-    unidad: string,
+const createMissingGoods = async ({
+    unidad,
+    existencias,
+    diferencia_cantidad,
+    diferencia_valor,
+    funcionario_id,
+    jefe_id,
+    observaciones,
+    fecha,
+    bien_id
+}: {
+    unidad: number,
     existencias: number,
-    diferenciaCantidad: number,
-    diferenciaValor: number,
-    funcionarioId: number,
-    jefeId: number,
+    diferencia_cantidad: number,
+    diferencia_valor: number,
+    funcionario_id: number,
+    jefe_id: number,
     observaciones: string,
-    fecha: Date,
-    bienId: number
-) => {
+    fecha: string,
+    bien_id: number
+}) => {
     const query = `
         INSERT INTO BienesFaltantes (unidad, existencias, diferencia_cantidad, diferencia_valor, funcionario_id, jefe_id, observaciones, fecha, bien_id) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const [result] = await pool.execute(query, [
         unidad,
         existencias,
-        diferenciaCantidad,
-        diferenciaValor,
-        funcionarioId,
-        jefeId,
+        diferencia_cantidad,
+        diferencia_valor,
+        funcionario_id,
+        jefe_id,
         observaciones,
         fecha,
-        bienId,
+        bien_id,
     ]);
     return {
         id: (result as any).insertId,
         unidad,
         existencias,
-        diferenciaCantidad,
-        diferenciaValor,
-        funcionarioId,
-        jefeId,
+        diferencia_cantidad,
+        diferencia_valor,
+        funcionario_id,
+        jefe_id,
         observaciones,
         fecha,
-        bienId,
+        bien_id,
     };
 };
 
 const updateMissingGoods = async (
     id: number,
-    unidad: string,
+    unidad: number,
     existencias: number,
-    diferenciaCantidad: number,
-    diferenciaValor: number,
-    funcionarioId: number,
-    jefeId: number,
+    diferencia_cantidad: number,
+    diferencia_valor: number,
+    funcionario_id: number,
+    jefe_id: number,
     observaciones: string,
-    fecha: Date,
-    bienId: number
+    fecha: string,
+    bien_id: number
 ) => {
     const query = `
         UPDATE BienesFaltantes 
@@ -92,13 +102,13 @@ const updateMissingGoods = async (
     const [result] = await pool.execute(query, [
         unidad,
         existencias,
-        diferenciaCantidad,
-        diferenciaValor,
-        funcionarioId,
-        jefeId,
+        diferencia_cantidad,
+        diferencia_valor,
+        funcionario_id,
+        jefe_id,
         observaciones,
         fecha,
-        bienId,
+        bien_id,
         id,
     ]);
     return result;
