@@ -31,11 +31,11 @@ const getNotificationById = async (req: any, res: any) => {
 
 const createNotification = async (req: any, res: any) => {
     try {
-        const { dept_id, descripcion } = req.body;
-        if (!dept_id || !descripcion) {
+        const { dept_id, descripcion, fecha, isRead } = req.body;
+        if (!dept_id || !descripcion || !fecha || isRead === undefined) {
             return res.status(400).json({ ok: false, message: "Datos incompletos" });
         }
-        const id = await notificationsModel.createNotification({ dept_id, descripcion });
+        const id = await notificationsModel.createNotification({ dept_id, descripcion, fecha, isRead: Number(isRead) });
         res.status(201).json({ ok: true, message: "Notificación creada", id });
     } catch (error) {
         console.error("Error al crear la notificación:", error);
@@ -47,11 +47,8 @@ const createNotification = async (req: any, res: any) => {
 const updateNotification = async (req: any, res: any) => {
     try {
         const { id } = req.params;
-        const { dept_id, descripcion } = req.body;
-        const result = await notificationsModel.updateNotification(Number(id), { dept_id, descripcion });
-        if ((result as any).affectedRows === 0) {
-            return res.status(404).json({ ok: false, message: "Notificación no encontrada" });
-        }
+        const { dept_id, descripcion, isRead, fecha } = req.body;
+        const result = await notificationsModel.updateNotification(Number(id), { dept_id, descripcion,isRead, fecha });
         res.status(200).json({ ok: true, message: "Notificación actualizada", result });
     } catch (error) {
         console.error("Error al actualizar la notificación:", error);
@@ -75,10 +72,33 @@ const deleteNotification = async (req: any, res: any) => {
     }
 };
 
+const getNotificationsByDeptId = async (req: any, res: any) => {
+    try {
+        const { dept_id } = req.params;
+        const notifications = await notificationsModel.getNotificationsByDeptId(Number(dept_id));
+        res.status(200).json({ ok: true, notifications });
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ ok: false, error: errorMessage });
+    }
+};
+
+const getNotificationsByDeptId = async (req: any, res: any) => {
+    try {
+        const { dept_id } = req.params;
+        const notifications = await notificationsModel.getNotificationsByDeptId(Number(dept_id));
+        res.status(200).json({ ok: true, notifications });
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ ok: false, error: errorMessage });
+    }
+};
+
 export const notificationsController = {
     getAllNotifications,
     getNotificationById,
     createNotification,
     updateNotification,
     deleteNotification,
+    getNotificationsByDeptId,
 };

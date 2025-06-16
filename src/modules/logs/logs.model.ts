@@ -18,7 +18,7 @@ const getAllLogs = async () => {
         SELECT l.*, u.username AS usuario_nombre, d.nombre AS departamento
         FROM Logs l 
         JOIN Usuarios u ON l.usuario_id = u.id
-        JOIN Dept d ON u.dept_id = d.id
+        LEFT JOIN Dept d ON u.dept_id = d.id or u.dept_id = null
         ORDER BY l.fecha DESC`;
     const [rows] = await pool.query(query);
     return rows as any[];

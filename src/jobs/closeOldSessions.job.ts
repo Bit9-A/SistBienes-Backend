@@ -18,7 +18,7 @@ export const closeOldSessions = async () => {
   }
 };
 
-// Cron job: ejecuta cada hora
+// Ejecuta cada hora
 cron.schedule("0 * * * *", closeOldSessions);
 
 // Para pruebas manuales, puedes llamar closeOldSessions() desde otro archivo o desde aquí:

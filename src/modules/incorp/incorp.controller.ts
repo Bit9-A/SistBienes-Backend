@@ -24,8 +24,8 @@ const getAllIncorps = async (req: any, res: any) => {
 
 const createIncorp = async (req: any, res: any) => {
   try {
-    const { bien_id, fecha, valor, cantidad, concepto_id, dept_id } = req.body;
-    console.log("Datos recibidos en backend:", req.body);
+    const { bien_id, fecha, valor, cantidad, concepto_id, dept_id, isActive,observaciones } = req.body;
+        console.log("Datos recibidos en backend:", req.body);
 
     if (!bien_id || !fecha || !valor || !cantidad || !concepto_id) {
       return res.status(400).json({ ok: false, message: "Por favor, complete todos los campos requeridos." });
@@ -38,6 +38,8 @@ const createIncorp = async (req: any, res: any) => {
       cantidad,
       concepto_id,
       dept_id,
+      isActive: isActive !== undefined ? isActive : 1, // Default to active if not provided
+      observaciones: observaciones || "", // Default to empty string if not provided
     });
 
     return res.status(201).json({
