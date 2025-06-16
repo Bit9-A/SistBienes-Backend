@@ -83,16 +83,7 @@ const getNotificationsByDeptId = async (req: any, res: any) => {
     }
 };
 
-const getNotificationsByDeptId = async (req: any, res: any) => {
-    try {
-        const { dept_id } = req.params;
-        const notifications = await notificationsModel.getNotificationsByDeptId(Number(dept_id));
-        res.status(200).json({ ok: true, notifications });
-    } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        res.status(500).json({ ok: false, error: errorMessage });
-    }
-};
+
 
 export const notificationsController = {
     getAllNotifications,
