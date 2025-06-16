@@ -5,11 +5,11 @@ const getAllConceptDes = async (req: any, res:any) => {
         const conceptDes = await ConceptDesModel.getAllConceptDes();
         return res.status(200).json({ok: true, conceptDes});
     } catch (error) {
-        console.error("Error fetching concept desincorporation:", error);
+        console.error("Error al obtener el concepto de desincorporación:", error);
         return res.status(500).json({
             ok: false,
-            message: "Server error",
-            error: error instanceof Error ? error.message : "Unknown error",
+            message: "Error del servidor",
+            error: error instanceof Error ? error.message : "Error desconocido",
         });
     }
 }
@@ -19,15 +19,15 @@ const getConceptDesById = async (req: any, res:any) => {
         const {id} = req.params;
         const conceptDes = await ConceptDesModel.getConceptDesById(Number(id));
         if (!conceptDes) {
-            return res.status(404).json({ok: false, message: "Concept desincorporation not found"});
+            return res.status(404).json({ok: false, message: "Concepto de desincorporación no encontrado"});
         }
         return res.status(200).json({ok: true, conceptDes});
     } catch (error) {
-        console.error("Error fetching concept desincorporation by ID:", error);
+        console.error("Error al obtener la desincorporación del concepto por ID:", error);
         return res.status(500).json({
             ok: false,
-            message: "Server error",
-            error: error instanceof Error ? error.message : "Unknown error",
+            message: "Error del servidor",
+            error: error instanceof Error ? error.message : "Error desconocido",
         });
     }
 };
@@ -38,15 +38,15 @@ const createConceptDes = async (req: any, res:any) => {
         const newConceptDes = await ConceptDesModel.createConceptDes({nombre, codigo});
         return res.status(201).json({
             ok: true,
-            message: "Concept desincorporation created successfully",
+            message: "Concepto de desincorporación creado con éxito",
             newConceptDes,
         });
     } catch (error) {
-        console.error("Error creating concept desincorporation:", error);
+        console.error("Error al crear la desincorporación del concepto:", error);
         return res.status(500).json({
             ok: false,
-            message: "Server error",
-            error: error instanceof Error ? error.message : "Unknown error",
+            message: "Error del servidor",
+            error: error instanceof Error ? error.message : "Error desconocido",
         });
     }
 };
@@ -57,15 +57,15 @@ const updateConceptDes = async (req: any, res:any) => {
         const updatedConceptDes = await ConceptDesModel.updateConceptDes(Number(id), req.body);
         return res.status(200).json({
             ok: true,
-            message: "Concept desincorporation updated successfully",
+            message: "Concepto de desincorporación actualizado con éxito",
             updatedConceptDes,
         });
     } catch (error) {
-        console.error("Error updating concept desincorporation:", error);
+        console.error("Error al actualizar el concepto de desincorporación:", error);
         return res.status(500).json({
             ok: false,
-            message: "Server error",
-            error: error instanceof Error ? error.message : "Unknown error",
+            message: "Error del servidor",
+            error: error instanceof Error ? error.message : "Error desconocido",
         });
     }
 };
@@ -76,15 +76,15 @@ const deleteConceptDes = async (req: any, res:any) => {
         const deletedConceptDes = await ConceptDesModel.deleteConceptDes(Number(id));
         return res.status(200).json({
             ok: true,
-            message: "Concept desincorporation deleted successfully",
+            message: "Concepto de desincorporación eliminado correctamente",
             deletedConceptDes,
         });
     } catch (error) {
-        console.error("Error deleting concept desincorporation:", error);
+        console.error("Error al eliminar el concepto de desincorporación:", error);
         return res.status(500).json({
             ok: false,
-            message: "Server error",
-            error: error instanceof Error ? error.message : "Unknown error",
+            message: "Error del servidor",
+            error: error instanceof Error ? error.message : "Error desconocido",
         });
     }
 };

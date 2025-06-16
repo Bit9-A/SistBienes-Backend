@@ -1,32 +1,34 @@
 import { Request, Response } from "express";
 import { IncorpModel } from "./incorp.model";
 
-
-//Obtener una lista de incorporaciones
+// Obtener una lista de incorporaciones
 const getAllIncorps = async (req: any, res: any) => {
   try {
     const incorps = await IncorpModel.getAllIncorps();
+    if (!incorps || incorps.length === 0) {
+      return res.status(404).json({ ok: false, message: "No se encontraron incorporaciones" });
+    }
     return res.status(200).json({
       ok: true,
       incorps,
     });
   } catch (error) {
-    console.error("Get All Incorps error:", error);
+    console.error("Error al obtener todas las incorporaciones:", error);
     return res.status(500).json({
       ok: false,
-      msg: "Server Error",
-      error: error instanceof Error ? error.message : "Unknown error",
+      msg: "Error del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
     });
   }
 }
+
 const createIncorp = async (req: any, res: any) => {
   try {
     const { bien_id, fecha, valor, cantidad, concepto_id, dept_id } = req.body;
-        console.log("Datos recibidos en backend:", req.body);
-
+    console.log("Datos recibidos en backend:", req.body);
 
     if (!bien_id || !fecha || !valor || !cantidad || !concepto_id) {
-      return res.status(400).json({ ok: false, message: "Please fill in all required fields." });
+      return res.status(400).json({ ok: false, message: "Por favor, complete todos los campos requeridos." });
     }
 
     const newIncorp = await IncorpModel.createIncorp({
@@ -43,11 +45,11 @@ const createIncorp = async (req: any, res: any) => {
       incorp: newIncorp,
     });
   } catch (error) {
-    console.error("Create Incorp error:", error);
+    console.error("Error al crear la incorporación:", error);
     return res.status(500).json({
       ok: false,
-      msg: "Server Error",
-      error: error instanceof Error ? error.message : "Unknown error",
+      msg: "Error del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
     });
   }
 };
@@ -58,16 +60,16 @@ const getIncorpById = async (req: any, res: any) => {
 
     const incorp = await IncorpModel.findIncorpById(Number(id));
     if (!incorp) {
-      return res.status(404).json({ ok: false, message: "Incorp not found" });
+      return res.status(404).json({ ok: false, message: "Incorporación no encontrada" });
     }
 
     return res.status(200).json({ ok: true, incorp });
   } catch (error) {
-    console.error("Get Incorp error:", error);
+    console.error("Error al obtener la incorporación:", error);
     return res.status(500).json({
       ok: false,
-      msg: "Server Error",
-      error: error instanceof Error ? error.message : "Unknown error",
+      msg: "Error del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
     });
   }
 };
@@ -79,18 +81,18 @@ const updateIncorp = async (req: any, res: any) => {
 
     const incorp = await IncorpModel.findIncorpById(Number(id));
     if (!incorp) {
-      return res.status(404).json({ ok: false, message: "Incorp not found" });
+      return res.status(404).json({ ok: false, message: "Incorporación no encontrada" });
     }
 
     await IncorpModel.updateIncorp(Number(id), updates);
 
-    return res.status(200).json({ ok: true,  incorp, message: "Incorp updated successfully" });
+    return res.status(200).json({ ok: true, incorp, message: "Incorporación actualizada con éxito" });
   } catch (error) {
-    console.error("Update Incorp error:", error);
+    console.error("Error al actualizar la incorporación:", error);
     return res.status(500).json({
       ok: false,
-      msg: "Server Error",
-      error: error instanceof Error ? error.message : "Unknown error",
+      msg: "Error del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
     });
   }
 };
@@ -101,18 +103,18 @@ const deleteIncorp = async (req: any, res: any) => {
 
     const incorp = await IncorpModel.findIncorpById(Number(id));
     if (!incorp) {
-      return res.status(404).json({ ok: false, message: "Incorp not found" });
+      return res.status(404).json({ ok: false, message: "Incorporación no encontrada" });
     }
 
     await IncorpModel.deleteIncorp(Number(id));
 
-    return res.status(200).json({ ok: true, message: "Incorp deleted successfully" });
+    return res.status(200).json({ ok: true, message: "Incorporación eliminada con éxito" });
   } catch (error) {
-    console.error("Delete Incorp error:", error);
+    console.error("Error al eliminar la incorporación:", error);
     return res.status(500).json({
       ok: false,
-      msg: "Server Error",
-      error: error instanceof Error ? error.message : "Unknown error",
+      msg: "Error del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
     });
   }
 };

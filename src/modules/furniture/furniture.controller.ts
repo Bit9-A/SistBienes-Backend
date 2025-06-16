@@ -1,12 +1,19 @@
-import { Request, Response } from "express";
 import { FurnitureModel } from "./furniture.model";
 
 const getAllFurniture = async (req: any, res: any) => {
   try {
     const furniture = await FurnitureModel.getAllFurniture();
+    if (!furniture || furniture.length === 0) {
+      return res.status(404).json({ ok: false, message: "No se encontraron muebles" });
+    }
     res.status(200).json({ ok: true, furniture });
   } catch (error) {
-    res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
+    console.error("Error al obtener los muebles:", error);
+    res.status(500).json({
+      ok: false,
+      message: "Error del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
+    });
   }
 };
 
@@ -15,14 +22,18 @@ const getFurnitureById = async (req: any, res: any) => {
     const { id } = req.params;
     const furniture = await FurnitureModel.getFurnitureById(Number(id));
     if (!furniture) {
-      return res.status(404).json({ ok: false, message: "Furniture not found" });
+      return res.status(404).json({ ok: false, message: "Mueble no encontrado" });
     }
     res.status(200).json({ ok: true, furniture });
   } catch (error) {
-    res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
+    console.error("Error al obtener el mueble por ID:", error);
+    res.status(500).json({
+      ok: false,
+      message: "Error del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
+    });
   }
 };
-
 
 const createFurniture = async (req: any, res: any) => {
   try {
@@ -32,7 +43,7 @@ const createFurniture = async (req: any, res: any) => {
     if (!data.nombre_descripcion || !data.cantidad || !data.numero_identificacion) {
       return res.status(400).json({
         ok: false,
-        message: "Description, quantity, and identification number are required",
+        message: "La descripción, la cantidad y el número de identificación son obligatorios",
       });
     }
 
@@ -40,26 +51,31 @@ const createFurniture = async (req: any, res: any) => {
     const newFurniture = await FurnitureModel.createFurniture(data);
     res.status(201).json({ ok: true, furniture: newFurniture });
   } catch (error) {
+    console.error("Error al crear el mueble:", error);
     res.status(500).json({
       ok: false,
-      message: "Server error",
-      error: error instanceof Error ? error.message : "Unknown error",
+      message: "Error del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
     });
   }
 };
-
 
 const updateFurniture = async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const data = req.body;
     const result = await FurnitureModel.updateFurniture(Number(id), data);
-    if ((result as any).affectedRows === 0) {
-      return res.status(404).json({ ok: false, message: "Furniture not found" });
+    if (!result) {
+      return res.status(404).json({ ok: false, message: "Mueble no encontrado" });
     }
-    res.status(200).json({ ok: true, message: "Furniture updated successfully" });
+    res.status(200).json({ ok: true, message: "Mueble actualizado con éxito" });
   } catch (error) {
-    res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
+    console.error("Error al actualizar el mueble:", error);
+    res.status(500).json({
+      ok: false,
+      message: "Error del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
+    });
   }
 };
 
@@ -67,12 +83,17 @@ const deleteFurniture = async (req: any, res: any) => {
   try {
     const { id } = req.params;
     const result = await FurnitureModel.deleteFurniture(Number(id));
-    if ((result as any).affectedRows === 0) {
-      return res.status(404).json({ ok: false, message: "Furniture not found" });
+    if (!result) {
+      return res.status(404).json({ ok: false, message: "Mueble no encontrado" });
     }
-    res.status(200).json({ ok: true, message: "Furniture deleted successfully" });
+    res.status(200).json({ ok: true, message: "Mueble eliminado con éxito" });
   } catch (error) {
-    res.status(500).json({ ok: false, message: "Server error", error: error instanceof Error ? error.message : "Unknown error" });
+    console.error("Error al eliminar el mueble:", error);
+    res.status(500).json({
+      ok: false,
+      message: "Error del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
+    });
   }
 };
 

@@ -5,11 +5,11 @@ const getAllAudit = async (req: any, res: any) => {
         const audits = await auditModel.getAllAudit();
         return res.status(200).json({ ok: true, audits });
     } catch (error) {
-        console.error("Error fetching audits:", error);
+        console.error("Error al obtener las auditorías", error);
         return res.status(500).json({
             ok: false,
-            message: "Server error",
-            error: error instanceof Error ? error.message : "Unknown error",
+            message: "Error del servidor",
+            error: error instanceof Error ? error.message : "Error desconocido",
         });
     }
 };
@@ -23,11 +23,11 @@ const getAuditById = async (req: any, res: any) => {
         }
         return res.status(200).json({ ok: true, audit });
     } catch (error) {
-        console.error("Error fetching audit by ID:", error);
+        console.error("Error al obtener la auditoría por ID", error);
         return res.status(500).json({
             ok: false,
-            message: "Server error",
-            error: error instanceof Error ? error.message : "Unknown error",
+            message: "Error del servidor",
+            error: error instanceof Error ? error.message : "Error desconocido",
         });
     }
 };
@@ -37,15 +37,15 @@ const createAudit = async (req: any, res: any) => {
         const newAudit = await auditModel.createAudit(req.body);
         return res.status(201).json({
             ok: true,
-            message: "Audit created successfully",
+            message: "Auditoría creada exitosamente",
             newAudit,
         });
     } catch (error) {
-        console.error("Error creating audit:", error);
+        console.error("Error al crear auditoría:", error);
         return res.status(500).json({
             ok: false,
-            message: "Server error",
-            error: error instanceof Error ? error.message : "Unknown error",
+            message: "Error del servidor",
+            error: error instanceof Error ? error.message : "Error desconocido",
         });
     }
 };
@@ -56,15 +56,15 @@ const updateAudit = async (req: any, res: any) => {
         const updatedAudit = await auditModel.updateAudit(Number(id), req.body);
         return res.status(200).json({
             ok: true,
-            message: "Audit updated successfully",
+            message: "Auditoría actualizada con éxito",
             updatedAudit,
         });
     } catch (error) {
-        console.error("Error updating audit:", error);
+        console.error("Error al actualizar la auditoría:", error);
         return res.status(500).json({
             ok: false,
-            message: "Server error",
-            error: error instanceof Error ? error.message : "Unknown error",
+            message: "Error del servidor",
+            error: error instanceof Error ? error.message : "Error desconocido",
         });
     }
 };
@@ -75,14 +75,14 @@ const deleteAudit = async (req: any, res:any) => {
         await auditModel.deleteAudit(Number(id));
         return res.status(200).json({
             ok: true,
-            message: "Audit deleted successfully",
+            message: "Auditoría eliminada correctamente",
         });
     } catch (error) {
-        console.error("Error deleting audit:", error);
+        console.error("Error al eliminar la auditoría:", error);
         return res.status(500).json({
             ok: false,
-            message: "Server error",
-            error: error instanceof Error ? error.message : "Unknown error",
+            message: "Error del servidor",
+            error: error instanceof Error ? error.message : "Error desconocido",
         });
     }
 }

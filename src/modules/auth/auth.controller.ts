@@ -8,12 +8,12 @@ const register = async (req: any, res: any) => {
     const { tipo_usuario, email, password, nombre, apellido, telefono, dept_id, cedula, username, isActive } = req.body;
 
     if (!nombre || !apellido || !email || !password || !cedula || !username) {
-      return res.status(400).json({ ok: false, message: "Please fill in all required fields." });
+      return res.status(400).json({ ok: false, message: "Por favor, rellene todos los campos obligatorios." });
     }
 
     const existingUser = await AuthModel.findUserByEmail(email);
     if (existingUser) {
-      return res.status(400).json({ ok: false, message: "Email already exists" });
+      return res.status(400).json({ ok: false, message: "El correo electrónico ya existe" });
     }
 
     // Validar que el username sea único
@@ -21,12 +21,12 @@ const register = async (req: any, res: any) => {
       ? await AuthModel.findUserByUsername(username)
       : null;
     if (existingUsername) {
-      return res.status(400).json({ ok: false, message: "Username already exists" });
+      return res.status(400).json({ ok: false, message: "El nombre de usuario ya existe" });
     }
 
     const existingCedula = await AuthModel.findUserByCedula(cedula);
     if (existingCedula) {
-      return res.status(400).json({ ok: false, message: "Cedula already exists" });
+      return res.status(400).json({ ok: false, message: "La cédula ya existe." });
     }
 
 
@@ -61,11 +61,11 @@ const register = async (req: any, res: any) => {
       user: { ...newUser, password: undefined }, // Excluir la contraseña del usuario en la respuesta
     });
   } catch (error) {
-    console.error("Registration error:", error);
+    console.error("Error de registro:", error);
     return res.status(500).json({
       ok: false,
-      msg: "Server Error",
-      error: error instanceof Error ? error.message : "Unknown error",
+      msg: "Error del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
     });
   }
 };
@@ -75,24 +75,24 @@ const login = async (req:any, res:any) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
-      return res.status(400).json({ ok: false, message: "Username and password are required" });
+      return res.status(400).json({ ok: false, message: "Se requieren nombre de usuario y contraseña" });
     }
 
     const user = await AuthModel.findUserByUsername(username);
 
     // Primero verifica si existe el usuario
     if (!user) {
-      return res.status(400).json({ ok: false, message: "Username or password is invalid" });
+      return res.status(400).json({ ok: false, message: "El nombre de usuario o la contraseña no son válidos" });
     }
 
     // Luego verifica si está activo (acepta 0 o false)
     if (user.isActive === 0 || user.isActive === false) {
-      return res.status(403).json({ ok: false, message: "User is inactive" });
+      return res.status(403).json({ ok: false, message: "El usuario está inactivo" });
     }
 
     const validPassword = await bcryptjs.compare(password, user.password);
     if (!validPassword) {
-      return res.status(400).json({ ok: false, message: "Password is invalid" });
+      return res.status(400).json({ ok: false, message: "La contraseña no es válida" });
     }
 
     const token = jwt.sign(
@@ -128,11 +128,11 @@ const login = async (req:any, res:any) => {
     });
 
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Error de inicio de sesión:", error);
     res.status(500).json({
       ok: false,
-      msg: "Server Error",
-      error: error instanceof Error ? error.message : "Unknown error",
+      msg: "Error del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
     });
   }
 };
@@ -141,17 +141,17 @@ const logout = async (req: any, res: any) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      return res.status(401).json({ message: "No token provided" });
+      return res.status(401).json({ message: "No se proporciona ningún token" });
     }
 
     const [bearer, token] = authHeader.split(" ");
     if (bearer !== "Bearer" || !token) {
-      return res.status(401).json({ message: "Invalid token format" });
+      return res.status(401).json({ message: "Formato de token no válido" });
     }
 
     const user = await AuthModel.findUserByLoginToken(token);
     if (!user) {
-      return res.status(403).json({ message: "Invalid token" });
+      return res.status(403).json({ message: "Token no válido" });
     }
 
     await AuthModel.clearLoginToken(user.id);
@@ -161,13 +161,13 @@ const logout = async (req: any, res: any) => {
       secure: process.env.NODE_ENV === "production",
     });
 
-    return res.json({ ok: true, message: "Logout successful" });
+    return res.json({ ok: true, message: "Cerrar sesión exitosamentel" });
   } catch (error) {
-    console.error("Logout error:", error);
+    console.error("Error al cerrar sesión:", error);
     res.status(500).json({
       ok: false,
-      msg: "Server Error",
-      error: error instanceof Error ? error.message : "Unknown error",
+      msg: "Error del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
     });
   }
 };
@@ -176,22 +176,22 @@ const profile = async (req: any, res: any) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      return res.status(401).json({ ok: false, message: "No token provided" });
+      return res.status(401).json({ ok: false, message: "No se proporciona ningún token" });
     }
 
     const [bearer, token] = authHeader.split(" ");
     if (bearer !== "Bearer" || !token) {
-      return res.status(401).json({ ok: false, message: "Invalid token format" });
+      return res.status(401).json({ ok: false, message: "Formato de token no válido" });
     }
 
     const user = await AuthModel.findUserByLoginToken(token);
     if (!user) {
-      return res.status(403).json({ ok: false, message: "Invalid token" });
+      return res.status(403).json({ ok: false, message: "Token no válido" });
     }
 
     // Verificar si el token ha expirado
     if (user.login_token_expiration && new Date(user.login_token_expiration) < new Date()) {
-      return res.status(403).json({ ok: false, message: "Token has expired" });
+      return res.status(403).json({ ok: false, message: "El token ha expirado" });
     }
 
     // Combinar nombre y apellido en un solo campo
@@ -213,11 +213,11 @@ const profile = async (req: any, res: any) => {
 
     res.json({ user: userProfile });
   } catch (error) {
-    console.error("Profile error:", error);
+    console.error("Error de perfil:", error);
     res.status(500).json({
       ok: false,
-      msg: "Server Error",
-      error: error instanceof Error ? error.message : "Unknown error",
+      msg: "Error del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
     });
   }
 };
@@ -229,11 +229,11 @@ const resetPassword = async (req: any, res: any) => {
     const user = await AuthModel.findUserByResetToken(token);
 
     if (!user) {
-      return res.status(400).json({ ok: false, message: "Invalid or expired token" });
+      return res.status(400).json({ ok: false, message: "Token inválido o caducado" });
     }
 
     if (user.reset_token_expiration < Date.now()) {
-      return res.status(400).json({ ok: false, message: "Token has expired" });
+      return res.status(400).json({ ok: false, message: "El token ha expirado" });
     }
 
     const salt = await bcryptjs.genSalt(10);
@@ -242,13 +242,13 @@ const resetPassword = async (req: any, res: any) => {
     await AuthModel.updateUserPassword(user.id, hashedPassword);
     await AuthModel.clearPasswordResetToken(user.id);
 
-    res.status(200).json({ ok: true, message: "Password reset successfully" });
+    res.status(200).json({ ok: true, message: "Restablecimiento de contraseña exitoso" });
   } catch (error) {
-    console.error("Password reset error:", error);
+    console.error("Error de restablecimiento de contraseña:", error);
     res.status(500).json({
       ok: false,
-      msg: "Server Error",
-      error: error instanceof Error ? error.message : "Unknown error",
+      msg: "Error del servidor",
+      error: error instanceof Error ? error.message : "Error desconocido",
     });
   }
 };

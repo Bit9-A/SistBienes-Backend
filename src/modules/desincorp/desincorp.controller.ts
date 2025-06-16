@@ -7,8 +7,8 @@ const getAllDesincorp = async (req: any, res: any) => {
     } catch (error) {
         return res.status(500).json({
             ok: false,
-            msg: "Server Error",
-            error: error instanceof Error ? error.message : "Unknown error",
+            msg: "Error del servidor",
+            error: error instanceof Error ? error.message : "Error desconocido",
         });
     }
 };
@@ -18,14 +18,14 @@ const getDesincorpById = async (req: any, res: any) => {
         const { id } = req.params;
         const desincorp = await desincorpModel.getDesincorpById(Number(id));
         if (!desincorp) {
-            return res.status(404).json({ ok: false, message: "Desincorp not found" });
+            return res.status(404).json({ ok: false, message: "Desincorporacion no encontrado" });
         }
         return res.status(200).json({ ok: true, desincorp });
     } catch (error) {
         return res.status(500).json({
             ok: false,
-            msg: "Server Error",
-            error: error instanceof Error ? error.message : "Unknown error",
+            msg: "Error del servidor",
+            error: error instanceof Error ? error.message : "Error desconocido",
         });
     }
 };
@@ -34,7 +34,7 @@ const createDesincorp = async (req: any, res: any) => {
     try {
         const { bien_id, fecha, valor, cantidad, concepto_id, dept_id } = req.body;
         if (!bien_id || !fecha || !valor || !cantidad || !concepto_id) {
-            return res.status(400).json({ ok: false, message: "Please fill in all required fields." });
+            return res.status(400).json({ ok: false, message: "Por favor, complete todos los campos requeridos." });
         }
         const newDesincorp = await desincorpModel.createDesincorp({
             bien_id,
@@ -48,8 +48,8 @@ const createDesincorp = async (req: any, res: any) => {
     } catch (error) {
         return res.status(500).json({
             ok: false,
-            msg: "Server Error",
-            error: error instanceof Error ? error.message : "Unknown error",
+            msg: "Error del servidor",
+            error: error instanceof Error ? error.message : "Error desconocido",
         });
     }
 };
@@ -60,15 +60,15 @@ const updateDesincorp = async (req: any, res: any) => {
         const updates = req.body;
         const desincorp = await desincorpModel.getDesincorpById(Number(id));
         if (!desincorp) {
-            return res.status(404).json({ ok: false, message: "Desincorp not found" });
+            return res.status(404).json({ ok: false, message: "Desincorporacion no encontrado" });
         }
         await desincorpModel.updateDesincorp(Number(id), updates);
-        return res.status(200).json({ ok: true, desincorp ,message: "Desincorp updated successfully" });
+        return res.status(200).json({ ok: true, desincorp, message: "Desincorporacion actualizado con éxito" });
     } catch (error) {
         return res.status(500).json({
             ok: false,
-            msg: "Server Error",
-            error: error instanceof Error ? error.message : "Unknown error",
+            msg: "Error del servidor",
+            error: error instanceof Error ? error.message : "Error desconocido",
         });
     }
 };
@@ -78,15 +78,15 @@ const deleteDesincorp = async (req: any, res: any) => {
         const { id } = req.params;
         const desincorp = await desincorpModel.getDesincorpById(Number(id));
         if (!desincorp) {
-            return res.status(404).json({ ok: false, message: "Desincorp not found" });
+            return res.status(404).json({ ok: false, message: "Desincorporacion no encontrado" });
         }
         await desincorpModel.deleteDesincorp(Number(id));
-        return res.status(200).json({ ok: true, message: "Desincorp deleted successfully" });
+        return res.status(200).json({ ok: true, message: "Desincorporacion eliminado con éxito" });
     } catch (error) {
         return res.status(500).json({
             ok: false,
-            msg: "Server Error",
-            error: error instanceof Error ? error.message : "Unknown error",
+            msg: "Error del servidor",
+            error: error instanceof Error ? error.message : "Error desconocido",
         });
     }
 };
