@@ -2,16 +2,16 @@ import { pool } from "../../database/index";
 
 const getAllMissingGoods = async () => {
     const query = `
-    SELECT bf.*, 
+    SELECT af.*, 
            CONCAT(u.nombre, ' ', u.apellido) AS funcionario_nombre,
            CONCAT(j.nombre, ' ', j.apellido) AS jefe_nombre,
            d.nombre AS departamento,
-           m.numero_identificacion AS numero_identificacion
-    FROM BienesFaltantes bf
-    JOIN Usuarios u ON bf.funcionario_id = u.id
-    JOIN Usuarios j ON bf.jefe_id = j.id
-    LEFT JOIN Dept d ON bf.unidad = d.id
-    LEFT JOIN Muebles m ON bf.bien_id = m.id
+           a.numero_identificacion AS numero_identificacion
+    FROM ActivosFaltantes af
+    JOIN Usuarios u ON af.funcionario_id = u.id
+    JOIN Usuarios j ON af.jefe_id = j.id
+    LEFT JOIN Departamento d ON af.unidad = d.id
+    LEFT JOIN Activos a ON af.bien_id = a.id
   `;
     const [rows] = await pool.query(query);
     return rows as any[];
@@ -19,17 +19,17 @@ const getAllMissingGoods = async () => {
 
 const getMissingGoodsById = async (id: number) => {
     const query = `
-    SELECT bf.*, 
+    SELECT af.*, 
            CONCAT(u.nombre, ' ', u.apellido) AS funcionario_nombre,
            CONCAT(j.nombre, ' ', j.apellido) AS jefe_nombre,
            d.nombre AS departamento,
-           m.numero_identificacion AS numero_identificacion
-    FROM BienesFaltantes bf
-    JOIN Usuarios u ON bf.funcionario_id = u.id
-    JOIN Usuarios j ON bf.jefe_id = j.id
-    LEFT JOIN Dept d ON bf.unidad = d.id
-    LEFT JOIN Muebles m ON bf.bien_id = m.id
-    WHERE bf.id = ?`;
+           a.numero_identificacion AS numero_identificacion
+    FROM ActivosFaltantes af
+    JOIN Usuarios u ON af.funcionario_id = u.id
+    JOIN Usuarios j ON af.jefe_id = j.id
+    LEFT JOIN Departamento d ON af.unidad = d.id
+    LEFT JOIN Activos a ON af.bien_id = a.id
+    WHERE af.id = ?`;
     const [rows] = await pool.execute(query, [id]);
     return (rows as any[])[0];
 };
@@ -56,7 +56,7 @@ const createMissingGoods = async ({
     bien_id: number
 }) => {
     const query = `
-        INSERT INTO BienesFaltantes (unidad, existencias, diferencia_cantidad, diferencia_valor, funcionario_id, jefe_id, observaciones, fecha, bien_id) 
+        INSERT INTO ActivosFaltantes (unidad, existencias, diferencia_cantidad, diferencia_valor, funcionario_id, jefe_id, observaciones, fecha, bien_id) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const [result] = await pool.execute(query, [
         unidad,
@@ -96,7 +96,7 @@ const updateMissingGoods = async (
     bien_id: number
 ) => {
     const query = `
-        UPDATE BienesFaltantes 
+        UPDATE ActivosFaltantes 
         SET unidad = ?, existencias = ?, diferencia_cantidad = ?, diferencia_valor = ?, funcionario_id = ?, jefe_id = ?, observaciones = ?, fecha = ?, bien_id = ? 
         WHERE id = ?`;
     const [result] = await pool.execute(query, [
@@ -116,7 +116,7 @@ const updateMissingGoods = async (
 
 const deleteMissingGoods = async (id: number) => {
     const query = `
-        DELETE FROM BienesFaltantes WHERE id = ?`;
+        DELETE FROM ActivosFaltantes WHERE id = ?`;
     const [result] = await pool.execute(query, [id]);
     return result;
 };

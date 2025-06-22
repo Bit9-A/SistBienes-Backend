@@ -5,8 +5,8 @@ const getAllNotifications = async () => {
         SELECT 
             n.*,
             d.nombre AS departamento
-        FROM notificaciones n
-        JOIN Dept d ON n.dept_id = d.id
+        FROM Notificaciones n
+        JOIN Departamento d ON n.dept_id = d.id
     `);
     return rows as any[];
 };
@@ -16,21 +16,21 @@ const getNotificationsByDeptId = async (dept_id: number) => {
         SELECT 
             n.*,
             d.nombre AS departamento
-        FROM notificaciones n
-        JOIN Dept d ON n.dept_id = d.id
+        FROM Notificaciones n
+        JOIN Departamento d ON n.dept_id = d.id
         WHERE n.dept_id = ?
     `, [dept_id]);
     return rows as any[];
 };
 
 const getNotificationById = async (id: number) => {
-    const [rows] = await pool.execute("SELECT * FROM notificaciones WHERE id = ?", [id]);
+    const [rows] = await pool.execute("SELECT * FROM Notificaciones WHERE id = ?", [id]);
     return (rows as any[])[0] || null;
 };
 
 const createNotification = async ({ dept_id, descripcion, fecha, isRead }: { dept_id: number; descripcion: string; fecha: string | null; isRead: number; }) => {
     const [result]: any = await pool.execute(
-        "INSERT INTO notificaciones (dept_id, descripcion, fecha, isRead) VALUES (?, ?, ?, ?)",
+        "INSERT INTO Notificaciones (dept_id, descripcion, fecha, isRead) VALUES (?, ?, ?, ?)",
         [dept_id, descripcion, fecha || null, isRead]
     );
     return result.insertId;
@@ -38,7 +38,7 @@ const createNotification = async ({ dept_id, descripcion, fecha, isRead }: { dep
 
 const updateNotification = async (id: number, { dept_id, descripcion, isRead, fecha }: { dept_id?: number; descripcion?: string; isRead?: number; fecha?: string; }) => {
     const [result] = await pool.execute(
-        `UPDATE notificaciones SET 
+        `UPDATE Notificaciones SET 
             dept_id = COALESCE(?, dept_id), 
             descripcion = COALESCE(?, descripcion),
             isRead = COALESCE(?, isRead),
@@ -50,7 +50,7 @@ const updateNotification = async (id: number, { dept_id, descripcion, isRead, fe
 };
 
 const deleteNotification = async (id: number) => {
-    const [result] = await pool.execute("DELETE FROM notificaciones WHERE id = ?", [id]);
+    const [result] = await pool.execute("DELETE FROM Notificaciones WHERE id = ?", [id]);
     return result;
 };
 

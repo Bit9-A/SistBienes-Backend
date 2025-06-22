@@ -4,7 +4,7 @@ const getAllTransferComponents = async () => {
   const query = `
     SELECT tc.id, tc.componente_id, tc.bien_origen_id, tc.bien_destino_id, tc.fecha,
            c.nombre as componente_nombre, c.numero_serial
-    FROM TrasladoComponentes tc
+    FROM ComponentesTraslado tc
     JOIN Componentes c ON tc.componente_id = c.id
   `;
   const [rows] = await pool.execute(query);
@@ -15,7 +15,7 @@ const getTransferComponentById = async (id: number) => {
   const query = `
     SELECT tc.id, tc.componente_id, tc.bien_origen_id, tc.bien_destino_id, tc.fecha,
            c.nombre as componente_nombre, c.numero_serial
-    FROM TrasladoComponentes tc
+    FROM ComponentesTraslado tc
     JOIN Componentes c ON tc.componente_id = c.id
     WHERE tc.id = ?
   `;
@@ -35,7 +35,7 @@ const createTransferComponent = async ({
   fecha: string | Date;
 }) => {
   const query = `
-    INSERT INTO TrasladoComponentes (componente_id, bien_origen_id, bien_destino_id, fecha)
+    INSERT INTO ComponentesTraslado (componente_id, bien_origen_id, bien_destino_id, fecha)
     VALUES (?, ?, ?, ?)
   `;
   const [result] = await pool.execute(query, [
@@ -68,7 +68,7 @@ const updateTransferComponent = async (
   }
 ) => {
   const query = `
-    UPDATE TrasladoComponentes
+    UPDATE ComponentesTraslado
     SET 
       componente_id = COALESCE(?, componente_id),
       bien_origen_id = COALESCE(?, bien_origen_id),
@@ -88,7 +88,7 @@ const updateTransferComponent = async (
 
 const deleteTransferComponent = async (id: number) => {
   const query = `
-    DELETE FROM TrasladoComponentes
+    DELETE FROM ComponentesTraslado
     WHERE id = ?
   `;
   const [result] = await pool.execute(query, [id]);

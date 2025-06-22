@@ -3,8 +3,8 @@ import { pool } from "../../database/index";
 const getGoodHistoryById = async (goodId: number) => {
   const query = `
     SELECT
-    M.id AS bien_id,
-    M.nombre_descripcion AS bien_nombre, 
+    A.id AS bien_id,
+    A.nombre_descripcion AS bien_nombre, 
     CD.nombre AS estado_desincorporacion,
     D.nombre AS dept_actual,
     CONCAT(U.nombre, ' ', U.apellido) AS funcionario_nombre,
@@ -16,23 +16,23 @@ const getGoodHistoryById = async (goodId: number) => {
     DES.valor AS valor_desincorporacion,
     DES.cantidad AS cantidad_desincorporacion,
     DDES.nombre AS dept_desincorporacion
-    FROM Muebles M
-    LEFT JOIN Dept D ON M.dept_id = D.id
-    LEFT JOIN Incorp I ON M.id = I.bien_id
+    FROM Activos A
+    LEFT JOIN Departamento D ON A.dept_id = D.id
+    LEFT JOIN IncorporacionActivo I ON A.id = I.bien_id
     LEFT JOIN Usuarios U ON I.dept_id = U.dept_id
-    LEFT JOIN bien_traslado BT ON BT.id_mueble = M.id  
+    LEFT JOIN TransferenciaActivo BT ON BT.id_mueble = A.id  
     LEFT JOIN Traslado T ON BT.id_traslado = T.id 
-    LEFT JOIN Dept D1 ON T.origen_id = D1.id
-    LEFT JOIN Dept D2 ON T.destino_id = D2.id
-    LEFT JOIN Desincorp DES ON M.id = DES.bien_id
-    LEFT JOIN ConceptoDesincorp CD ON DES.concepto_id = CD.id
-    LEFT JOIN Dept DDES ON DES.dept_id = DDES.id
-    WHERE M.id = ?
+    LEFT JOIN Departamento D1 ON T.origen_id = D1.id
+    LEFT JOIN Departamento D2 ON T.destino_id = D2.id
+    LEFT JOIN DesincorporacionActivo DES ON A.id = DES.bien_id
+    LEFT JOIN ConceptoDesincorporacion CD ON DES.concepto_id = CD.id
+    LEFT JOIN Departamento DDES ON DES.dept_id = DDES.id
+    WHERE A.id = ?
     ORDER BY 
     I.fecha ASC,
     T.fecha ASC,
     DES.fecha ASC;
-    `;
+  `;
   const [rows] = await pool.execute(query, [goodId]);
   return rows as any[];
 };

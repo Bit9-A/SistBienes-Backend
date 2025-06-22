@@ -1,41 +1,39 @@
 import { pool } from "../../database/index";
 
-
-//Obtener todos los componentes
+// Obtener todos los componentes
 const getAllComponents = async () => {
   const query = `
     SELECT c.id, c.bien_id, c.nombre, c.numero_serial
-    FROM Componentes c
+    FROM ComponentesActivo c
   `;
   const [rows] = await pool.execute(query);
   return rows as any[];
 };
 
-
 // Obtener un componente por su ID
 const getComponentById = async (id: number) => {
   const query = `
     SELECT c.id, c.bien_id, c.nombre, c.numero_serial
-    FROM Componentes c
+    FROM ComponentesActivo c
     WHERE c.id = ?
   `;
   const [rows] = await pool.execute(query, [id]);
   return (rows as any[])[0];
 };
 
-//Obtener todos los componentes de un bien específico
+// Obtener todos los componentes de un bien específico
 const getComponentsByBienId = async (bien_id: number) => {
-    const query = `
-        SELECT c.id, c.bien_id, c.nombre, c.numero_serial
-        FROM Componentes c
-        WHERE c.bien_id = ?
-    `;
-    const [rows] = await pool.execute(query, [bien_id]);
-    return rows as any[];
-    }
+  const query = `
+    SELECT c.id, c.bien_id, c.nombre, c.numero_serial
+    FROM ComponentesActivo c
+    WHERE c.bien_id = ?
+  `;
+  const [rows] = await pool.execute(query, [bien_id]);
+  return rows as any[];
+};
 
 // Crear un nuevo componente
-    const createComponent = async ({
+const createComponent = async ({
   bien_id,
   nombre,
   numero_serial,
@@ -45,7 +43,7 @@ const getComponentsByBienId = async (bien_id: number) => {
   numero_serial?: string;
 }) => {
   const query = `
-    INSERT INTO Componentes (bien_id, nombre, numero_serial)
+    INSERT INTO ComponentesActivo (bien_id, nombre, numero_serial)
     VALUES (?, ?, ?)
   `;
   const [result] = await pool.execute(query, [
@@ -75,7 +73,7 @@ const updateComponent = async (
   }
 ) => {
   const query = `
-    UPDATE Componentes
+    UPDATE ComponentesActivo
     SET 
       bien_id = COALESCE(?, bien_id),
       nombre = COALESCE(?, nombre),
@@ -91,10 +89,10 @@ const updateComponent = async (
   return result;
 };
 
-//Borrar un componente por su ID
+// Borrar un componente por su ID
 const deleteComponent = async (id: number) => {
   const query = `
-    DELETE FROM Componentes
+    DELETE FROM ComponentesActivo
     WHERE id = ?
   `;
   const [result] = await pool.execute(query, [id]);

@@ -1,10 +1,10 @@
 import { pool } from "../../database/index";
 
-// CRUD para la tabla `marca`
+// CRUD para la tabla `Marca`
 const getAllMarcas = async () => {
   const query = `
     SELECT id, nombre
-    FROM marca
+    FROM Marca
   `;
   const [rows] = await pool.execute(query);
   return rows as any[];
@@ -13,7 +13,7 @@ const getAllMarcas = async () => {
 const getMarcaById = async (id: number) => {
   const query = `
     SELECT id, nombre
-    FROM marca
+    FROM Marca
     WHERE id = ?
   `;
   const [rows] = await pool.execute(query, [id]);
@@ -22,7 +22,7 @@ const getMarcaById = async (id: number) => {
 
 const createMarca = async (nombre: string) => {
   const query = `
-    INSERT INTO marca (nombre)
+    INSERT INTO Marca (nombre)
     VALUES (?)
   `;
   const [result] = await pool.execute(query, [nombre]);
@@ -34,7 +34,7 @@ const createMarca = async (nombre: string) => {
 
 const updateMarca = async (id: number, nombre: string) => {
   const query = `
-    UPDATE marca
+    UPDATE Marca
     SET nombre = ?
     WHERE id = ?
   `;
@@ -44,18 +44,18 @@ const updateMarca = async (id: number, nombre: string) => {
 
 const deleteMarca = async (id: number) => {
   const query = `
-    DELETE FROM marca
+    DELETE FROM Marca
     WHERE id = ?
   `;
   const [result] = await pool.execute(query, [id]);
   return result;
 };
 
-// CRUD para la tabla `modelo`
+// CRUD para la tabla `Modelo`
 const getAllModelos = async () => {
   const query = `
     SELECT id, nombre, idmarca
-    FROM modelo
+    FROM Modelo
   `;
   const [rows] = await pool.execute(query);
   return rows as any[];
@@ -64,7 +64,7 @@ const getAllModelos = async () => {
 const getModeloById = async (id: number) => {
   const query = `
     SELECT id, nombre, idmarca
-    FROM modelo
+    FROM Modelo
     WHERE id = ?
   `;
   const [rows] = await pool.execute(query, [id]);
@@ -73,7 +73,7 @@ const getModeloById = async (id: number) => {
 
 const createModelo = async (nombre: string, idmarca: number) => {
   const query = `
-    INSERT INTO modelo (nombre, idmarca)
+    INSERT INTO Modelo (nombre, idmarca)
     VALUES (?, ?)
   `;
   const [result] = await pool.execute(query, [nombre, idmarca]);
@@ -86,7 +86,7 @@ const createModelo = async (nombre: string, idmarca: number) => {
 
 const updateModelo = async (id: number, nombre: string, idmarca: number) => {
   const query = `
-    UPDATE modelo
+    UPDATE Modelo
     SET nombre = ?, idmarca = ?
     WHERE id = ?
   `;
@@ -96,35 +96,33 @@ const updateModelo = async (id: number, nombre: string, idmarca: number) => {
 
 const deleteModelo = async (id: number) => {
   const query = `
-    DELETE FROM modelo
+    DELETE FROM Modelo
     WHERE id = ?
   `;
   const [result] = await pool.execute(query, [id]);
   return result;
 };
 
-
-//obtener todos los modelos de una marca
-const getModelsByMarca = async (idmarca: number) =>
-  {
-    const query = `
+// Obtener todos los modelos de una marca
+const getModelsByMarca = async (idmarca: number) => {
+  const query = `
     SELECT id, nombre
-    FROM modelo
+    FROM Modelo
     WHERE idmarca = ?
   `;
-    const [rows] = await pool.execute(query, [idmarca]);
-    return rows as any[];
-  };
+  const [rows] = await pool.execute(query, [idmarca]);
+  return rows as any[];
+};
 
 export const MarcaModeloModel = {
-  // Métodos para `marca`
+  // Métodos para `Marca`
   getAllMarcas,
   getMarcaById,
   createMarca,
   updateMarca,
   deleteMarca,
 
-  // Métodos para `modelo`
+  // Métodos para `Modelo`
   getAllModelos,
   getModeloById,
   createModelo,
