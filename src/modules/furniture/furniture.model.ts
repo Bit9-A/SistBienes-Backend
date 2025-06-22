@@ -5,12 +5,12 @@ const getAllFurniture = async () => {
     SELECT a.*, sg.nombre AS subgrupo_nombre, d.nombre AS dept_nombre,
     p.nombre AS parroquia_nombre, e.nombre AS estado_nombre, ma.nombre AS marca_nombre, mo.nombre AS modelo_nombre
     FROM Activos a
-    JOIN SubgrupoActivos sg ON a.subgrupo_id = sg.id
-    JOIN Departamento d ON a.dept_id = d.id
-    JOIN Parroquia p ON a.parroquia_id = p.id
-    JOIN EstadoActivo e ON a.estado_id = e.id
-    JOIN Marca ma ON a.marca_id = ma.id
-    JOIN Modelo mo ON a.modelo_id = mo.id
+    LEFT JOIN SubgrupoActivos sg ON a.subgrupo_id = sg.id
+    LEFT JOIN Departamento d ON a.dept_id = d.id
+    LEFT JOIN Parroquia p ON a.parroquia_id = p.id
+    LEFT JOIN EstadoActivo e ON a.estado_id = e.id
+    LEFT JOIN Marca ma ON a.marca_id = ma.id
+    LEFT JOIN Modelo mo ON a.modelo_id = mo.id
   `;
   const [rows] = await pool.execute(query);
   return rows as any[];
@@ -22,12 +22,12 @@ const getFurnitureByDepartment = async (deptId: number) => {
     SELECT a.*, sg.nombre AS subgrupo_nombre, d.nombre AS dept_nombre,
     p.nombre AS parroquia_nombre, e.nombre AS estado_nombre, ma.nombre AS marca_nombre, mo.nombre AS modelo_nombre
     FROM Activos a
-    JOIN SubgrupoActivos sg ON a.subgrupo_id = sg.id
-    JOIN Departamento d ON a.dept_id = d.id
-    JOIN Parroquia p ON a.parroquia_id = p.id
-    JOIN EstadoActivo e ON a.estado_id = e.id
-    JOIN Marca ma ON a.marca_id = ma.id
-    JOIN Modelo mo ON a.modelo_id = mo.id
+    LEFT JOIN SubgrupoActivos sg ON a.subgrupo_id = sg.id
+    LEFT JOIN Departamento d ON a.dept_id = d.id
+    LEFT JOIN Parroquia p ON a.parroquia_id = p.id
+    LEFT JOIN EstadoActivo e ON a.estado_id = e.id
+    LEFT JOIN Marca ma ON a.marca_id = ma.id
+    LEFT JOIN Modelo mo ON a.modelo_id = mo.id
     WHERE a.dept_id = ?
   `;
   const [rows] = await pool.execute(query, [deptId]);
@@ -39,12 +39,12 @@ const getFurnitureById = async (id: number) => {
     SELECT a.*, sg.nombre AS subgrupo_nombre, d.nombre AS dept_nombre,
     p.nombre AS parroquia_nombre, e.nombre AS estado_nombre, ma.nombre AS marca_nombre, mo.nombre AS modelo_nombre
     FROM Activos a
-    JOIN SubgrupoActivos sg ON a.subgrupo_id = sg.id
-    JOIN Departamento d ON a.dept_id = d.id
-    JOIN Parroquia p ON a.parroquia_id = p.id
-    JOIN EstadoActivo e ON a.estado_id = e.id
-    JOIN Marca ma ON a.marca_id = ma.id
-    JOIN Modelo mo ON a.modelo_id = mo.id
+    LEFT JOIN SubgrupoActivos sg ON a.subgrupo_id = sg.id
+    LEFT JOIN Departamento d ON a.dept_id = d.id
+    LEFT JOIN Parroquia p ON a.parroquia_id = p.id
+    LEFT JOIN EstadoActivo e ON a.estado_id = e.id
+    LEFT JOIN Marca ma ON a.marca_id = ma.id
+    LEFT JOIN Modelo mo ON a.modelo_id = mo.id
     WHERE a.id = ?
   `;
   const [rows] = await pool.execute(query, [id]);

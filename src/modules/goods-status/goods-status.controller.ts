@@ -57,7 +57,7 @@ const updateStatusGoods = async (req: any, res: any) => {
         if (!nombre) {
             return res.status(400).json({ ok: false, message: "El nombre es obligatorio" });
         }
-        const result = await statusGoodsModel.uptadeStatusGoods(Number(id), nombre);
+        const result = await statusGoodsModel.updateStatusGoods(Number(id), nombre);
         if ((result as any).affectedRows === 0) {
             return res.status(404).json({ ok: false, message: "Estado no encontrado" });
         }
