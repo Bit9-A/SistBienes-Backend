@@ -4,14 +4,14 @@ import { pool } from "../../database/index";
 const getAllDesincorp = async () => {
     const query = `
         SELECT d.id, d.bien_id, d.fecha, d.valor, d.cantidad, d.concepto_id, d.dept_id,
-               b.nombre_descripcion AS bien_nombre,
-               b.numero_identificacion AS numero_identificacion,
-               c.nombre AS concepto_nombre,
+               a.nombre_descripcion AS bien_nombre,
+               a.numero_identificacion AS numero_identificacion,
+               cd.nombre AS concepto_nombre,
                dept.nombre AS dept_nombre
-        FROM Desincorp d
-        JOIN Muebles b ON d.bien_id = b.id
-        JOIN ConceptoDesincorp c ON d.concepto_id = c.id
-        LEFT JOIN Dept dept ON d.dept_id = dept.id
+        FROM DesincorporacionActivo d
+        JOIN Activos a ON d.bien_id = a.id
+        JOIN ConceptoDesincorporacion cd ON d.concepto_id = cd.id
+        LEFT JOIN Departamento dept ON d.dept_id = dept.id
     `;
     const [rows] = await pool.execute(query);
     return (rows as any[]).map(row => ({
@@ -27,14 +27,14 @@ const getAllDesincorp = async () => {
 const getDesincorpById = async (id: number) => {
     const query = `
         SELECT d.id, d.bien_id, d.fecha, d.valor, d.cantidad, d.concepto_id, d.dept_id,
-               b.nombre_descripcion AS bien_nombre,
-               b.numero_identificacion AS numero_identificacion,
-               c.nombre AS concepto_nombre,
-               Dept.nombre AS dept_nombre
-        FROM Desincorp d
-        JOIN Muebles b ON d.bien_id = b.id
-        JOIN ConceptoDesincorp c ON d.concepto_id = c.id
-        LEFT JOIN Dept dept ON d.dept_id = dept.id
+               a.nombre_descripcion AS bien_nombre,
+               a.numero_identificacion AS numero_identificacion,
+               cd.nombre AS concepto_nombre,
+               dept.nombre AS dept_nombre
+        FROM DesincorporacionActivo d
+        JOIN Activos a ON d.bien_id = a.id
+        JOIN ConceptoDesincorporacion cd ON d.concepto_id = cd.id
+        LEFT JOIN Departamento dept ON d.dept_id = dept.id
         WHERE d.id = ?
     `;
     const [rows] = await pool.execute(query, [id]);
@@ -58,7 +58,7 @@ const createDesincorp = async ({
     dept_id?: number;
 }) => {
     const query = `
-        INSERT INTO Desincorp (bien_id, fecha, valor, cantidad, concepto_id, dept_id)
+        INSERT INTO DesincorporacionActivo (bien_id, fecha, valor, cantidad, concepto_id, dept_id)
         VALUES (?, ?, ?, ?, ?, ?)
     `;
     const [result]: any = await pool.execute(query, [
@@ -72,7 +72,7 @@ const createDesincorp = async ({
     // Recuperar el registro recién creado
     const desincorpQuery = `
         SELECT id, bien_id, fecha, valor, cantidad, concepto_id, dept_id
-        FROM Desincorp
+        FROM DesincorporacionActivo
         WHERE id = ?
     `;
     const [rows] = await pool.execute(desincorpQuery, [result.insertId]);
@@ -90,7 +90,7 @@ const updateDesincorp = async (
         dept_id: number;
     }>
 ) => {
-    // Lista de campos válidos en la tabla Desincorp
+    // Lista de campos válidos en la tabla DesincorporacionActivo
     const validFields = ["bien_id", "fecha", "valor", "cantidad", "concepto_id", "dept_id"];
 
     // Filtrar solo los campos válidos presentes en updates
@@ -101,7 +101,7 @@ const updateDesincorp = async (
     const values = fieldsToUpdate.map(key => (updates as any)[key]);
 
     const query = `
-        UPDATE Desincorp
+        UPDATE DesincorporacionActivo
         SET ${fields}
         WHERE id = ?
     `;
@@ -110,7 +110,7 @@ const updateDesincorp = async (
 
 const deleteDesincorp = async (id: number) => {
     const query = `
-        DELETE FROM Desincorp
+        DELETE FROM DesincorporacionActivo
         WHERE id = ?
     `;
     await pool.execute(query, [id]);

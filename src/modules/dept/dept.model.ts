@@ -3,7 +3,7 @@ import { pool } from "../../database/index";
 const getAllDepartments = async () => {
   const query = `
     SELECT id, nombre, codigo
-    FROM Dept
+    FROM Departamento
   `;
   const [rows] = await pool.execute(query);
   return rows as any[];
@@ -12,7 +12,7 @@ const getAllDepartments = async () => {
 const getDepartmentById = async (id: number) => {
   const query = `
     SELECT id, nombre, codigo
-    FROM Dept
+    FROM Departamento
     WHERE id = ?
   `;
   const [rows] = await pool.execute(query, [id]);
@@ -21,7 +21,7 @@ const getDepartmentById = async (id: number) => {
 
 const createDepartment = async (nombre: string, codigo: string) => {
   const query = `
-    INSERT INTO Dept (nombre, codigo)
+    INSERT INTO Departamento (nombre, codigo)
     VALUES (?, ?)
   `;
   const [result] = await pool.execute(query, [nombre, codigo]);
@@ -34,7 +34,7 @@ const createDepartment = async (nombre: string, codigo: string) => {
 
 const updateDepartment = async (id: number, nombre: string, codigo: string) => {
   const query = `
-    UPDATE Dept
+    UPDATE Departamento
     SET nombre = ?, codigo = ?
     WHERE id = ?
   `;
@@ -44,7 +44,7 @@ const updateDepartment = async (id: number, nombre: string, codigo: string) => {
 
 const deleteDepartment = async (id: number) => {
   const query = `
-    DELETE FROM Dept
+    DELETE FROM Departamento
     WHERE id = ?
   `;
   const [result] = await pool.execute(query, [id]);

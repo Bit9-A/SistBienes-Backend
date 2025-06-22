@@ -2,51 +2,50 @@ import { pool } from "../../database/index";
 
 const getAllFurniture = async () => {
   const query = `
-    SELECT m.*, sg.nombre AS subgrupo_nombre, d.nombre AS dept_nombre,
+    SELECT a.*, sg.nombre AS subgrupo_nombre, d.nombre AS dept_nombre,
     p.nombre AS parroquia_nombre, e.nombre AS estado_nombre, ma.nombre AS marca_nombre, mo.nombre AS modelo_nombre
-    FROM Muebles m
-    JOIN SubGrupoMuebles sg ON m.subgrupo_id = sg.id
-    JOIN Dept d ON m.dept_id = d.id
-    JOIN Parroquia p ON m.parroquia_id = p.id
-    JOIN EstadoBien e ON m.estado_id = e.id
-    JOIN marca ma ON m.marca_id = ma.id
-    JOIN modelo mo ON m.modelo_id = mo.id
+    FROM Activos a
+    JOIN SubgrupoActivos sg ON a.subgrupo_id = sg.id
+    JOIN Departamento d ON a.dept_id = d.id
+    JOIN Parroquia p ON a.parroquia_id = p.id
+    JOIN EstadoActivo e ON a.estado_id = e.id
+    JOIN Marca ma ON a.marca_id = ma.id
+    JOIN Modelo mo ON a.modelo_id = mo.id
   `;
   const [rows] = await pool.execute(query);
   return rows as any[];
 };
 
-//obtener los muebles por departamento
+// Obtener los muebles por departamento
 const getFurnitureByDepartment = async (deptId: number) => {
   const query = `
-    SELECT m.*, sg.nombre AS subgrupo_nombre, d.nombre AS dept_nombre,
+    SELECT a.*, sg.nombre AS subgrupo_nombre, d.nombre AS dept_nombre,
     p.nombre AS parroquia_nombre, e.nombre AS estado_nombre, ma.nombre AS marca_nombre, mo.nombre AS modelo_nombre
-    FROM Muebles m
-    JOIN SubGrupoMuebles sg ON m.subgrupo_id = sg.id
-    JOIN Dept d ON m.dept_id = d.id
-    JOIN Parroquia p ON m.parroquia_id = p.id
-    JOIN EstadoBien e ON m.estado_id = e.id
-    JOIN marca ma ON m.marca_id = ma.id
-    JOIN modelo mo ON m.modelo_id = mo.id
-    WHERE m.dept_id = ?
+    FROM Activos a
+    JOIN SubgrupoActivos sg ON a.subgrupo_id = sg.id
+    JOIN Departamento d ON a.dept_id = d.id
+    JOIN Parroquia p ON a.parroquia_id = p.id
+    JOIN EstadoActivo e ON a.estado_id = e.id
+    JOIN Marca ma ON a.marca_id = ma.id
+    JOIN Modelo mo ON a.modelo_id = mo.id
+    WHERE a.dept_id = ?
   `;
   const [rows] = await pool.execute(query, [deptId]);
   return rows as any[];
 };
 
-
 const getFurnitureById = async (id: number) => {
   const query = `
-    SELECT m.*, sg.nombre AS subgrupo_nombre, d.nombre AS dept_nombre,
+    SELECT a.*, sg.nombre AS subgrupo_nombre, d.nombre AS dept_nombre,
     p.nombre AS parroquia_nombre, e.nombre AS estado_nombre, ma.nombre AS marca_nombre, mo.nombre AS modelo_nombre
-    FROM Muebles m
-    JOIN SubGrupoMuebles sg ON m.subgrupo_id = sg.id
-    JOIN Dept d ON m.dept_id = d.id
-    JOIN Parroquia p ON m.parroquia_id = p.id
-    JOIN EstadoBien e ON m.estado_id = e.id
-    JOIN marca ma ON m.marca_id = ma.id
-    JOIN modelo mo ON m.modelo_id = mo.id
-    WHERE m.id = ?
+    FROM Activos a
+    JOIN SubgrupoActivos sg ON a.subgrupo_id = sg.id
+    JOIN Departamento d ON a.dept_id = d.id
+    JOIN Parroquia p ON a.parroquia_id = p.id
+    JOIN EstadoActivo e ON a.estado_id = e.id
+    JOIN Marca ma ON a.marca_id = ma.id
+    JOIN Modelo mo ON a.modelo_id = mo.id
+    WHERE a.id = ?
   `;
   const [rows] = await pool.execute(query, [id]);
   return (rows as any[])[0];
@@ -70,7 +69,7 @@ const createFurniture = async (data: {
   isActive?: number;
 }) => {
   const query = `
-    INSERT INTO Muebles (
+    INSERT INTO Activos (
       subgrupo_id, cantidad, nombre_descripcion, marca_id, modelo_id, numero_serial,
       valor_unitario, valor_total, fecha, dept_id, estado_id, parroquia_id, numero_identificacion, isComputer, isActive
     )
@@ -120,7 +119,7 @@ const updateFurniture = async (
   }>
 ) => {
   const query = `
-    UPDATE Muebles
+    UPDATE Activos
     SET 
       subgrupo_id = COALESCE(?, subgrupo_id),
       cantidad = COALESCE(?, cantidad),
@@ -162,7 +161,7 @@ const updateFurniture = async (
 
 const deleteFurniture = async (id: number) => {
   const query = `
-    DELETE FROM Muebles
+    DELETE FROM Activos
     WHERE id = ?
   `;
   const [result] = await pool.execute(query, [id]);

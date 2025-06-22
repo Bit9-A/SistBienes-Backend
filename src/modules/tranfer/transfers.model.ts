@@ -5,11 +5,11 @@ const getAllTransfers = async () => {
     const query = `
         SELECT t.*, CONCAT(u.nombre,' ',u.apellido) as responsable, 
                d.nombre as origen_nombre, d2.nombre as destino_nombre,
-               COUNT(bt.id) AS cantidad
+               COUNT(ta.id) AS cantidad
         FROM Traslado t
-        LEFT JOIN bien_traslado bt ON t.id = bt.id_traslado
-        JOIN Dept d ON t.origen_id = d.id
-        JOIN Dept d2 ON t.destino_id = d2.id
+        LEFT JOIN TransferenciaActivo ta ON t.id = ta.id_traslado
+        JOIN Departamento d ON t.origen_id = d.id
+        JOIN Departamento d2 ON t.destino_id = d2.id
         JOIN Usuarios u ON t.responsable_id = u.id
         GROUP BY t.id
     `;
@@ -19,18 +19,21 @@ const getAllTransfers = async () => {
 
 // Obtener un traslado por ID con sus bienes asociados
 const getTransferById = async (id: number) => {
-    const trasladoQuery = `SELECT t.*, CONCAT(u.nombre,' ',u.apellido) as responsable ,d.nombre as origen_nombre, d2.nombre as destino_nombre
-    FROM Traslado t
-    JOIN Usuarios u ON t.responsable_id = u.id
-    JOIN Dept d ON t.origen_id = d.id
-    JOIN Dept d2 ON t.destino_id = d2.id
-    WHERE t.id = ?`;
+    const trasladoQuery = `
+        SELECT t.*, CONCAT(u.nombre,' ',u.apellido) as responsable,
+               d.nombre as origen_nombre, d2.nombre as destino_nombre
+        FROM Traslado t
+        JOIN Usuarios u ON t.responsable_id = u.id
+        JOIN Departamento d ON t.origen_id = d.id
+        JOIN Departamento d2 ON t.destino_id = d2.id
+        WHERE t.id = ?
+    `;
     const bienesQuery = `
-        SELECT bt.*, m.nombre_descripcion, m.numero_identificacion,eb.nombre as estado
-        FROM bien_traslado bt
-        JOIN Muebles m ON bt.id_mueble = m.id
-        JOIN EstadoBien eb ON m.estado_id = eb.id
-        WHERE bt.id_traslado = ?
+        SELECT ta.*, a.nombre_descripcion, a.numero_identificacion, ea.nombre as estado
+        FROM TransferenciaActivo ta
+        JOIN Activos a ON ta.id_mueble = a.id
+        JOIN EstadoActivo ea ON a.estado_id = ea.id
+        WHERE ta.id_traslado = ?
     `;
     const [trasladoRows] = await pool.execute(trasladoQuery, [id]) as [any[], any];
     if (trasladoRows.length === 0) return null;
@@ -81,7 +84,7 @@ const createTransfer = async ({
     // 2. Asociar los bienes al traslado
     for (const mueble_id of bienes) {
         await pool.execute(
-            `INSERT INTO bien_traslado (id_traslado, id_mueble) VALUES (?, ?)`,
+            `INSERT INTO TransferenciaActivo (id_traslado, id_mueble) VALUES (?, ?)`,
             [trasladoId, mueble_id]
         );
     }
@@ -125,7 +128,7 @@ const updateTransfer = async (
 
 // Eliminar traslado y sus bienes asociados
 const deleteTransfer = async (id: number) => {
-    await pool.execute(`DELETE FROM bien_traslado WHERE id_traslado = ?`, [id]);
+    await pool.execute(`DELETE FROM TransferenciaActivo WHERE id_traslado = ?`, [id]);
     const [result] = await pool.execute(`DELETE FROM Traslado WHERE id = ?`, [id]);
     return result;
 };
