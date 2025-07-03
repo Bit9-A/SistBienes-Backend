@@ -3,8 +3,8 @@ import { pool } from "../../database/index";
 const getAllAudit = async () => {
     const query = `SELECT a.id, a.usuario_id, a.entrada, a.salida, a.ip, CONCAT(u.nombre, ' ', u.apellido) AS nombre, d.nombre as departamento
     FROM RegistroAuditoria a
-    JOIN Usuarios u ON a.usuario_id = u.id
-    LEFT JOIN Departamento d ON u.dept_id IS NULL OR u.dept_id = d.id
+	LEFT JOIN Usuarios u ON a.usuario_id = u.id
+	LEFT JOIN Departamento d ON u.dept_id = d.id;
     `;
     const [rows] = await pool.execute(query);
     return rows as any[];

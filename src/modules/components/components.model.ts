@@ -4,7 +4,7 @@ import { pool } from "../../database/index";
 const getAllComponents = async () => {
   const query = `
     SELECT c.id, c.bien_id, c.nombre, c.numero_serial
-    FROM ComponentesActivo c
+    FROM Componentes c
   `;
   const [rows] = await pool.execute(query);
   return rows as any[];
@@ -14,7 +14,7 @@ const getAllComponents = async () => {
 const getComponentById = async (id: number) => {
   const query = `
     SELECT c.id, c.bien_id, c.nombre, c.numero_serial
-    FROM ComponentesActivo c
+    FROM Componentes c
     WHERE c.id = ?
   `;
   const [rows] = await pool.execute(query, [id]);
@@ -25,7 +25,7 @@ const getComponentById = async (id: number) => {
 const getComponentsByBienId = async (bien_id: number) => {
   const query = `
     SELECT c.id, c.bien_id, c.nombre, c.numero_serial
-    FROM ComponentesActivo c
+    FROM Componentes c
     WHERE c.bien_id = ?
   `;
   const [rows] = await pool.execute(query, [bien_id]);
@@ -43,7 +43,7 @@ const createComponent = async ({
   numero_serial?: string;
 }) => {
   const query = `
-    INSERT INTO ComponentesActivo (bien_id, nombre, numero_serial)
+    INSERT INTO Componentes (bien_id, nombre, numero_serial)
     VALUES (?, ?, ?)
   `;
   const [result] = await pool.execute(query, [
@@ -73,7 +73,7 @@ const updateComponent = async (
   }
 ) => {
   const query = `
-    UPDATE ComponentesActivo
+    UPDATE Componentes
     SET 
       bien_id = COALESCE(?, bien_id),
       nombre = COALESCE(?, nombre),
@@ -92,7 +92,7 @@ const updateComponent = async (
 // Borrar un componente por su ID
 const deleteComponent = async (id: number) => {
   const query = `
-    DELETE FROM ComponentesActivo
+    DELETE FROM Componentes
     WHERE id = ?
   `;
   const [result] = await pool.execute(query, [id]);

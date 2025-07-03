@@ -5,9 +5,9 @@ import { pool } from "../database/index";
 export const closeOldSessions = async () => {
   try {
     const query = `
-      UPDATE Auditoria
+      UPDATE RegistroAuditoria
       SET salida = NOW()
-      WHERE salida IS NULL AND entrada < (NOW() - INTERVAL 8 HOUR)
+      WHERE salida IS NULL AND entrada < (NOW() - INTERVAL 1 HOUR)
     `;
     const [result] = await pool.execute(query);
     if ((result as any).affectedRows > 0) {

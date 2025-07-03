@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "commonjs", // Cambiado a "commonjs" para compatibilidad con Node.js
+    "module": "es2020", // Cambiado a "commonjs" para compatibilidad con Node.js
     "target": "es2016", // Especifica la versión de ECMAScript a la que se compilará
     "strict": true, // Habilitar todas las opciones de comprobación de tipo
     "moduleDetection": "force", // Forzar la detección de módulos
@@ -8,6 +8,7 @@
     "esModuleInterop": true, // Habilitar interoperabilidad de módulos
     "isolatedModules": true, // Habilitar la comprobación de módulos independientes
     "resolveJsonModule": true, // Habilitar la resolución de módulos JSON
+    "moduleResolution": "node", // Usar resolución de módulos Node.js para permitir resolveJsonModule
     "outDir": "./dist", // Carpeta donde se generará el código compilado
     "rootDir": "./src", // Carpeta donde está tu código fuente
     "skipLibCheck": true // Omitir la comprobación de tipos en archivos de declaración

@@ -17,8 +17,8 @@ const getAllLogs = async () => {
     const query = `
         SELECT rl.*, u.username AS usuario_nombre, d.nombre AS departamento
         FROM RegistroLogs rl 
-        JOIN Usuarios u ON rl.usuario_id = u.id
-        LEFT JOIN Departamento d ON u.dept_id = d.id OR u.dept_id IS NULL
+        LEFT JOIN Usuarios u ON rl.usuario_id = u.id
+        LEFT JOIN Departamento d ON u.dept_id = d.id
         ORDER BY rl.fecha DESC`;
     const [rows] = await pool.query(query);
     return rows as any[];

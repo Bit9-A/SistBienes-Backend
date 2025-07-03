@@ -5,7 +5,7 @@ const getAllUsers = async () => {
     SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
            u.dept_id, d.nombre as dept_nombre, u.cedula, u.username, u.isActive
     FROM Usuarios u
-    LEFT JOIN Dept d ON u.dept_id = d.id
+    LEFT JOIN Departamento d ON u.dept_id = d.id
   `;
   const [rows] = await pool.execute(query);
   return rows as any[];
@@ -16,7 +16,7 @@ const getUserById = async (id: number) => {
     SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
            u.dept_id, d.nombre as dept_nombre, u.cedula, u.username, u.isActive
     FROM Usuarios u
-    LEFT JOIN Dept d ON u.dept_id = d.id
+    LEFT JOIN Departamento d ON u.dept_id = d.id
     WHERE u.id = ?
   `;
   const [rows] = await pool.execute(query, [id]);
@@ -28,7 +28,7 @@ const getUsersByDeptId = async (dept_id: number) => {
     SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
            u.dept_id, d.nombre as dept_nombre, u.cedula, u.username, u.isActive
     FROM Usuarios u
-    LEFT JOIN Dept d ON u.dept_id = d.id
+    LEFT JOIN Departamento d ON u.dept_id = d.id
     WHERE u.dept_id = ?
   `;
   const [rows] = await pool.execute(query, [dept_id]);
