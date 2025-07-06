@@ -23,6 +23,7 @@ import missingGoods from "./modules/missing-goods/missing-goods.route";
 import desincorp from "./modules/desincorp/desincorp.route";
 import goodHistory from "./modules/history/history.router";
 import logsRoute from "./modules/logs/logs.route";
+import reportRoute from "./modules/report/report.route";
 
 import componentRoute from "./modules/components/components.route";
 import transferComponent from "./modules/transferComponent/transferComponent.route";
@@ -87,6 +88,7 @@ app.use("/history", goodHistory);
 app.use("/logs", logsRoute);
 app.use("/components", componentRoute);
 app.use("/transfer-component", transferComponent);
+app.use("/report", reportRoute);
 
 const PORT = process.env.PORT || 8000;
 
