@@ -28,6 +28,8 @@ import reportRoute from "./modules/report/report.route";
 import componentRoute from "./modules/components/components.route";
 import transferComponent from "./modules/transferComponent/transferComponent.route";
 
+
+import ExcelRoute from "./jobs/ExcelRoute";
 import "./jobs/closeOldSessions.job";
 
 import { config } from "dotenv";
@@ -89,6 +91,7 @@ app.use("/logs", logsRoute);
 app.use("/components", componentRoute);
 app.use("/transfer-component", transferComponent);
 app.use("/report", reportRoute);
+app.use("/excel", ExcelRoute);
 
 const PORT = process.env.PORT || 8000;
 

@@ -3,7 +3,7 @@ import { pool } from "../../database/index";
 const getAllFurniture = async () => {
   const query = `
     SELECT a.*, sg.nombre AS subgrupo_nombre, d.nombre AS dept_nombre,
-    p.nombre AS parroquia_nombre, e.nombre AS estado_nombre, ma.nombre AS marca_nombre, mo.nombre AS modelo_nombre
+    p.nombre AS parroquia_nombre, e.nombre AS estado_nombre, ma.nombre AS marca_nombre, mo.nombre AS modelo_nombre, sg.codigo AS subgrupo_codigo
     FROM Activos a
     LEFT JOIN SubgrupoActivos sg ON a.subgrupo_id = sg.id
     LEFT JOIN Departamento d ON a.dept_id = d.id
@@ -20,7 +20,7 @@ const getAllFurniture = async () => {
 const getFurnitureByDepartment = async (deptId: number) => {
   const query = `
     SELECT a.*, sg.nombre AS subgrupo_nombre, d.nombre AS dept_nombre,
-    p.nombre AS parroquia_nombre, e.nombre AS estado_nombre, ma.nombre AS marca_nombre, mo.nombre AS modelo_nombre
+    p.nombre AS parroquia_nombre, e.nombre AS estado_nombre, ma.nombre AS marca_nombre, mo.nombre AS modelo_nombre, sg.codigo AS subgrupo_codigo
     FROM Activos a
     LEFT JOIN SubgrupoActivos sg ON a.subgrupo_id = sg.id
     LEFT JOIN Departamento d ON a.dept_id = d.id
@@ -37,7 +37,7 @@ const getFurnitureByDepartment = async (deptId: number) => {
 const getFurnitureById = async (id: number) => {
   const query = `
     SELECT a.*, sg.nombre AS subgrupo_nombre, d.nombre AS dept_nombre,
-    p.nombre AS parroquia_nombre, e.nombre AS estado_nombre, ma.nombre AS marca_nombre, mo.nombre AS modelo_nombre
+    p.nombre AS parroquia_nombre, e.nombre AS estado_nombre, ma.nombre AS marca_nombre, mo.nombre AS modelo_nombre, sg.codigo AS subgrupo_codigo
     FROM Activos a
     LEFT JOIN SubgrupoActivos sg ON a.subgrupo_id = sg.id
     LEFT JOIN Departamento d ON a.dept_id = d.id
