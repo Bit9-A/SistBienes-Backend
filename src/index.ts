@@ -15,7 +15,6 @@ import parishRoute from "./modules/parish/parish.route";
 import auditRoute from "./modules/audit/audit.route";
 import furnitureRoute from "./modules/furniture/furniture.route";
 import transferRoute from "./modules/tranfer/tranfers.route";
-
 import brandRoute from "./modules/marca_modelo/marca_modelo.route";
 import notificationsRoute from "./modules/notifications/notifications.route";
 import configRoute from "./modules/config/config.route";
@@ -24,7 +23,6 @@ import desincorp from "./modules/desincorp/desincorp.route";
 import goodHistory from "./modules/history/history.router";
 import logsRoute from "./modules/logs/logs.route";
 import reportRoute from "./modules/report/report.route";
-
 import componentRoute from "./modules/components/components.route";
 import transferComponent from "./modules/transferComponent/transferComponent.route";
 
