@@ -7,7 +7,7 @@ export const closeOldSessions = async () => {
     const query = `
       UPDATE RegistroAuditoria
       SET salida = NOW()
-      WHERE salida IS NULL AND entrada < (NOW() - INTERVAL 1 HOUR)
+      WHERE salida IS NULL AND entrada < (NOW() - INTERVAL 2 HOUR)
     `;
     const [result] = await pool.execute(query);
     if ((result as any).affectedRows > 0) {
