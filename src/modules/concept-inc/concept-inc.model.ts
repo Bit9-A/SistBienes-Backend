@@ -3,19 +3,19 @@ import { pool } from "../../database/index";
 const createConceptInc = async ({
     nombre,
     codigo,
-} : {
+}: {
     nombre: string;
     codigo: string;
 }) => {
     const query = `
-        INSERT INTO ConceptoIncorp (nombre, codigo)
+        INSERT INTO ConceptoIncorporacion (nombre, codigo)
         VALUES (?, ?)
     `;
     const [result] = await pool.execute(query, [nombre, codigo]);
 
     const concepIncorpQuery = `
         SELECT id, nombre, codigo
-        FROM ConceptoIncorp WHERE id = ?`;
+        FROM ConceptoIncorporacion WHERE id = ?`;
     const [rows] = await pool.execute(concepIncorpQuery, [(result as any).insertId]);
     return (rows as any[])[0];
 };
@@ -23,7 +23,7 @@ const createConceptInc = async ({
 const getAllConceptInc = async () => {
     const query = `
         SELECT id, nombre, codigo
-        FROM ConceptoIncorp
+        FROM ConceptoIncorporacion
     `;
     const [rows] = await pool.execute(query);
     return rows as any[];
@@ -32,7 +32,7 @@ const getAllConceptInc = async () => {
 const getConceptIncById = async (id: number) => {
     const query = `
         SELECT id, nombre, codigo
-        FROM ConceptoIncorp WHERE id = ?`;
+        FROM ConceptoIncorporacion WHERE id = ?`;
     const [rows] = await pool.execute(query, [id]);
     return (rows as any[])[0];
 };
@@ -48,7 +48,7 @@ const updateConceptInc = async (
     }
 ) => {
     const query = `
-        UPDATE ConceptoIncorp
+        UPDATE ConceptoIncorporacion
         SET 
             nombre = COALESCE(?, nombre),
             codigo = COALESCE(?, codigo)
@@ -64,7 +64,7 @@ const updateConceptInc = async (
 
 const deleteConceptInc = async (id: number) => {
     const query = `
-        DELETE FROM ConceptoIncorp WHERE id=?`;
+        DELETE FROM ConceptoIncorporacion WHERE id=?`;
     const [result] = await pool.execute(query, [id]);
     return result;
 };
@@ -75,5 +75,4 @@ export const ConcepIncorpModel = {
     getConceptIncById,
     updateConceptInc,
     deleteConceptInc,
-}
-
+};

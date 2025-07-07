@@ -1,18 +1,17 @@
 import { pool } from "../../database/index";
 
-
-//Obtener todos los registros de incorporación
+// Obtener todos los registros de incorporación
 const getAllIncorps = async () => {
   const query = `
-    SELECT i.id, i.bien_id, i.fecha, i.valor, i.cantidad, i.concepto_id, i.dept_id,i.isActive,i.observaciones,
-           b.nombre_descripcion AS bien_nombre,
-           b.numero_identificacion AS numero_identificacion,
-           c.nombre AS concepto_nombre,
+    SELECT i.id, i.bien_id, i.fecha, i.valor, i.cantidad, i.concepto_id, i.dept_id, i.isActive, i.observaciones,
+           a.nombre_descripcion AS bien_nombre,
+           a.numero_identificacion AS numero_identificacion,
+           ci.nombre AS concepto_nombre,
            d.nombre AS dept_nombre
-    FROM Incorp i
-    JOIN Muebles b ON i.bien_id = b.id
-    JOIN ConceptoIncorp c ON i.concepto_id = c.id
-    LEFT JOIN Dept d ON i.dept_id = d.id
+    FROM IncorporacionActivo i
+    JOIN Activos a ON i.bien_id = a.id
+    JOIN ConceptoIncorporacion ci ON i.concepto_id = ci.id
+    LEFT JOIN Departamento d ON i.dept_id = d.id
   `;  
   const [rows] = await pool.execute(query);
   return (rows as any[]).map(row => ({
@@ -46,8 +45,8 @@ const createIncorp = async ({
   console.log("Datos recibidos para crear:", { bien_id, fecha, valor, cantidad, concepto_id, dept_id });
 
   const query = `
-    INSERT INTO Incorp (bien_id, fecha, valor, cantidad, concepto_id, dept_id, isActive, observaciones)
-    VALUES (?, ?, ?, ?, ?, ?, ?,?)
+    INSERT INTO IncorporacionActivo (bien_id, fecha, valor, cantidad, concepto_id, dept_id, isActive, observaciones)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `;
   const [result] = await pool.execute(query, [
     Number(bien_id),
@@ -63,22 +62,23 @@ const createIncorp = async ({
   // Recuperar el registro recién creado
   const incorpQuery = `
     SELECT id, bien_id, fecha, valor, cantidad, concepto_id, dept_id, isActive, observaciones
-    FROM Incorp
+    FROM IncorporacionActivo
     WHERE id = ?
   `;
   const [rows] = await pool.execute(incorpQuery, [(result as any).insertId]);
   return (rows as any[])[0];
 };
+
 const findIncorpById = async (id: number) => {
   const query = `
-    SELECT i.id, i.bien_id, i.fecha, i.valor, i.cantidad, i.concepto_id, i.dept_id,i.isActive,i.observaciones,
-           b.nombre_descripcion AS bien_nombre,
+    SELECT i.id, i.bien_id, i.fecha, i.valor, i.cantidad, i.concepto_id, i.dept_id, i.isActive, i.observaciones,
+           a.nombre_descripcion AS bien_nombre,
            ci.nombre AS concepto_nombre,
            d.nombre AS dept_nombre
-    FROM Incorp i
-    JOIN Muebles b ON i.bien_id = b.id
-    JOIN Dept d ON i.dept_id = d.id
-    JOIN ConceptoIncorp ci ON i.concepto_id = ci.id
+    FROM IncorporacionActivo i
+    JOIN Activos a ON i.bien_id = a.id
+    JOIN Departamento d ON i.dept_id = d.id
+    JOIN ConceptoIncorporacion ci ON i.concepto_id = ci.id
     WHERE i.id = ?
   `;
   const [rows] = await pool.execute(query, [id]);
@@ -108,14 +108,14 @@ const updateIncorp = async (
   }
 ) => {
   const query = `
-    UPDATE Incorp
+    UPDATE IncorporacionActivo
     SET 
       bien_id = COALESCE(?, bien_id),
       fecha = COALESCE(?, fecha),
       valor = COALESCE(?, valor),
       cantidad = COALESCE(?, cantidad),
       concepto_id = COALESCE(?, concepto_id),
-      dept_id = COALESCE(?, dept_id)
+      dept_id = COALESCE(?, dept_id),
       isActive = COALESCE(?, isActive),
       observaciones = COALESCE(?, observaciones)
     WHERE id = ?
@@ -127,16 +127,16 @@ const updateIncorp = async (
     cantidad ?? null,
     concepto_id ?? null,
     dept_id ?? null,
-    id,
     isActive ?? null,
     observaciones ?? null,
+    id,
   ]);
   return result;
 };
 
 const deleteIncorp = async (id: number) => {
   const query = `
-    DELETE FROM Incorp
+    DELETE FROM IncorporacionActivo
     WHERE id = ?
   `;
   await pool.execute(query, [id]);

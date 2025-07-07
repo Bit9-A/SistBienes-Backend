@@ -22,9 +22,12 @@ import missingGoods from "./modules/missing-goods/missing-goods.route";
 import desincorp from "./modules/desincorp/desincorp.route";
 import goodHistory from "./modules/history/history.router";
 import logsRoute from "./modules/logs/logs.route";
+import reportRoute from "./modules/report/report.route";
 import componentRoute from "./modules/components/components.route";
 import transferComponent from "./modules/transferComponent/transferComponent.route";
 
+
+import ExcelRoute from "./jobs/ExcelRoute";
 import "./jobs/closeOldSessions.job";
 
 import { config } from "dotenv";
@@ -85,6 +88,8 @@ app.use("/history", goodHistory);
 app.use("/logs", logsRoute);
 app.use("/components", componentRoute);
 app.use("/transfer-component", transferComponent);
+app.use("/report", reportRoute);
+app.use("/excel", ExcelRoute);
 
 const PORT = process.env.PORT || 8000;
 

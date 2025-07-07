@@ -19,20 +19,21 @@ interface MueblesPorMesResult extends RowDataPacket {
 
 const getSubgruposConConteo = async () => {
     const query = `
-        SELECT sg.id, sg.nombre, sg.codigo, COALESCE(SUM(m.cantidad), 0) AS total
-        FROM SubGrupoMuebles sg
-        LEFT JOIN Muebles m ON sg.id = m.subgrupo_id
+        SELECT sg.id, sg.nombre, sg.codigo, COALESCE(SUM(a.cantidad), 0) AS total
+        FROM SubgrupoActivos sg
+        LEFT JOIN Activos a ON sg.id = a.subgrupo_id
         GROUP BY sg.id, sg.nombre, sg.codigo
     `;
     const [rows] = await pool.execute(query);
     return rows;
 };
+
 const getGoodStatusConConteo = async () => {
     const query = `
-        SELECT eb.id, eb.nombre, COALESCE(SUM(m.cantidad), 0) AS total
-        FROM EstadoBien eb
-        LEFT JOIN Muebles m ON eb.id = m.estado_id
-        GROUP BY eb.id, eb.nombre
+        SELECT ea.id, ea.nombre, COALESCE(SUM(a.cantidad), 0) AS total
+        FROM EstadoActivo ea
+        LEFT JOIN Activos a ON ea.id = a.estado_id
+        GROUP BY ea.id, ea.nombre
     `;
     const [rows] = await pool.execute(query);
     return rows;
@@ -40,8 +41,8 @@ const getGoodStatusConConteo = async () => {
 
 const contarMuebles = async () => {
     const query = `
-        SELECT COUNT(*) AS total_muebles, COALESCE(SUM(m.cantidad), 0) AS suma_cantidad
-        FROM Muebles m;
+        SELECT COUNT(*) AS total_muebles, COALESCE(SUM(a.cantidad), 0) AS suma_cantidad
+        FROM Activos a;
     `;
     const [rows] = await pool.execute(query);
     return rows;
@@ -49,11 +50,11 @@ const contarMuebles = async () => {
 
 const contarMueblesUltimaSemana = async (): Promise<number> => {
   const ahora = new Date();
-  const hace7Dias = new Date(ahora.getTime() - 8 * 24 * 60 * 60 * 1000); 
+  const hace7Dias = new Date(ahora.getTime() - 7 * 24 * 60 * 60 * 1000); 
 
   const query = `
     SELECT SUM(cantidad) AS total_bienes
-    FROM Muebles
+    FROM Activos
     WHERE fecha >= ? AND fecha <= ?;
   `;
 
@@ -64,10 +65,10 @@ const contarMueblesUltimaSemana = async (): Promise<number> => {
 
 const obtenerValorTotalBienesPorDepartamento = async () => {
     const query = `
-        SELECT m.dept_id, d.nombre AS dept_nombre, COALESCE(SUM(m.valor_unitario * m.cantidad), 0) AS total_valor
-        FROM Muebles m
-        LEFT JOIN Dept d ON m.dept_id = d.id
-        GROUP BY m.dept_id, d.nombre
+        SELECT a.dept_id, d.nombre AS dept_nombre, COALESCE(SUM(a.valor_unitario * a.cantidad), 0) AS total_valor
+        FROM Activos a
+        LEFT JOIN Departamento d ON a.dept_id = d.id
+        GROUP BY a.dept_id, d.nombre
     `;
     const [rows] = await pool.execute<TotalValorBienesResult[]>(query);
     return rows;
@@ -78,8 +79,8 @@ const contarMueblesPorMes = async (): Promise<MueblesPorMesResult[]> => {
         SELECT 
             YEAR(fecha) AS anio, 
             MONTH(fecha) AS mes, 
-            COALESCE(sum(cantidad), 0) AS total_muebles
-        FROM Muebles
+            COALESCE(SUM(cantidad), 0) AS total_muebles
+        FROM Activos
         WHERE fecha IS NOT NULL
         GROUP BY anio, mes
         ORDER BY anio ASC, mes ASC;

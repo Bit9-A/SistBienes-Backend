@@ -1,28 +1,28 @@
 import { pool } from "../../database/index";
 
-// CRUD para SubGrupoMuebles
-const getAllSubGrupoMuebles = async () => {
+// CRUD para SubgrupoActivos
+const getAllSubGrupoActivos = async () => {
   const query = `
     SELECT id, nombre, codigo
-    FROM SubGrupoMuebles
+    FROM SubgrupoActivos
   `;
   const [rows] = await pool.execute(query);
   return rows as any[];
 };
 
-const getSubGrupoMueblesById = async (id: number) => {
+const getSubGrupoActivosById = async (id: number) => {
   const query = `
     SELECT id, nombre, codigo
-    FROM SubGrupoMuebles
+    FROM SubgrupoActivos
     WHERE id = ?
   `;
   const [rows] = await pool.execute(query, [id]);
   return (rows as any[])[0];
 };
 
-const createSubGrupoMuebles = async (nombre: string, codigo: string) => {
+const createSubGrupoActivos = async (nombre: string, codigo: string) => {
   const query = `
-    INSERT INTO SubGrupoMuebles (nombre, codigo)
+    INSERT INTO SubgrupoActivos (nombre, codigo)
     VALUES (?, ?)
   `;
   const [result] = await pool.execute(query, [nombre, codigo]);
@@ -33,9 +33,9 @@ const createSubGrupoMuebles = async (nombre: string, codigo: string) => {
   };
 };
 
-const updateSubGrupoMuebles = async (id: number, nombre: string, codigo: string) => {
+const updateSubGrupoActivos = async (id: number, nombre: string, codigo: string) => {
   const query = `
-    UPDATE SubGrupoMuebles
+    UPDATE SubgrupoActivos
     SET nombre = ?, codigo = ?
     WHERE id = ?
   `;
@@ -43,78 +43,21 @@ const updateSubGrupoMuebles = async (id: number, nombre: string, codigo: string)
   return result;
 };
 
-const deleteSubGrupoMuebles = async (id: number) => {
+const deleteSubGrupoActivos = async (id: number) => {
   const query = `
-    DELETE FROM SubGrupoMuebles
+    DELETE FROM SubgrupoActivos
     WHERE id = ?
   `;
   const [result] = await pool.execute(query, [id]);
   return result;
 };
 
-// CRUD para SubGrupoInmuebles
-const getAllSubGrupoInmuebles = async () => {
-  const query = `
-    SELECT id, nombre
-    FROM SubGrupoInmuebles
-  `;
-  const [rows] = await pool.execute(query);
-  return rows as any[];
-};
-
-const getSubGrupoInmueblesById = async (id: number) => {
-  const query = `
-    SELECT id, nombre
-    FROM SubGrupoInmuebles
-    WHERE id = ?
-  `;
-  const [rows] = await pool.execute(query, [id]);
-  return (rows as any[])[0];
-};
-
-const createSubGrupoInmuebles = async (nombre: string) => {
-  const query = `
-    INSERT INTO SubGrupoInmuebles (nombre)
-    VALUES (?)
-  `;
-  const [result] = await pool.execute(query, [nombre]);
-  return {
-    id: (result as any).insertId,
-    nombre,
-  };
-};
-
-const updateSubGrupoInmuebles = async (id: number, nombre: string) => {
-  const query = `
-    UPDATE SubGrupoInmuebles
-    SET nombre = ?
-    WHERE id = ?
-  `;
-  const [result] = await pool.execute(query, [nombre, id]);
-  return result;
-};
-
-const deleteSubGrupoInmuebles = async (id: number) => {
-  const query = `
-    DELETE FROM SubGrupoInmuebles
-    WHERE id = ?
-  `;
-  const [result] = await pool.execute(query, [id]);
-  return result;
-};
-
+// Exportar el modelo
 export const SubGroupModel = {
-  // Métodos para SubGrupoMuebles
-  getAllSubGrupoMuebles,
-  getSubGrupoMueblesById,
-  createSubGrupoMuebles,
-  updateSubGrupoMuebles,
-  deleteSubGrupoMuebles,
-
-  // Métodos para SubGrupoInmuebles
-  getAllSubGrupoInmuebles,
-  getSubGrupoInmueblesById,
-  createSubGrupoInmuebles,
-  updateSubGrupoInmuebles,
-  deleteSubGrupoInmuebles,
+  // Métodos para SubgrupoActivos
+  getAllSubGrupoActivos,
+  getSubGrupoActivosById,
+  createSubGrupoActivos,
+  updateSubGrupoActivos,
+  deleteSubGrupoActivos,
 };
