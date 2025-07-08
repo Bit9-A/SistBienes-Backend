@@ -1,5 +1,8 @@
 import { reportModel } from "./report.model";
 
+// Este controlador maneja las operaciones relacionadas con los reportes mensuales
+
+// Este controlador maneja la obtención del reporte mensual por departamento
 const getMonthlyReport = async (req: any, res: any) => {
   try {
     const { month, year, deptId } = req.body;
@@ -14,7 +17,7 @@ const getMonthlyReport = async (req: any, res: any) => {
         message: "El mes, año y departamento son obligatorios en el body",
       });
     }
-
+    // Validación de que los parámetros son números
     const monthNumber = Number(month);
     const yearNumber = Number(year);
     const deptIdNumber = Number(deptId);
@@ -29,7 +32,7 @@ const getMonthlyReport = async (req: any, res: any) => {
         message: "El mes, año y departamento deben ser números válidos",
       });
     }
-
+    // Validación de rango de mes y año
     const totalIncorporations = await reportModel.getIncorporationsByMonthAndDepartment(monthNumber, yearNumber, deptIdNumber);
     const totalDisincorporationsConcept60 = await reportModel.getDisincorporationsConcept60ByMonthAndDepartment(monthNumber, yearNumber, deptIdNumber);
     const totalDisincorporationsExceptConcept60 = await reportModel.getDisincorporationsExceptConcept60ByMonthAndDepartment(monthNumber, yearNumber, deptIdNumber);

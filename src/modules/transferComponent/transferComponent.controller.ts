@@ -1,5 +1,8 @@
 import { TransferComponentModel } from "./transferComponent.model";
 
+// Este controlador maneja las operaciones relacionadas con los componentes de traslado
+
+// Este controlador maneja la obtención de todos los componentes de traslado
 const getAllTransferComponents = async (req: any, res: any) => {
   try {
     const transfers = await TransferComponentModel.getAllTransferComponents();
@@ -13,6 +16,7 @@ const getAllTransferComponents = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la obtención de un componente de traslado por su ID
 const getTransferComponentById = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -27,6 +31,7 @@ const getTransferComponentById = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la creación de un nuevo componente de traslado
 const createTransferComponent = async (req: any, res: any) => {
   try {
     const { componente_id, bien_origen_id, bien_destino_id, fecha } = req.body;
@@ -46,6 +51,7 @@ const createTransferComponent = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la actualización de un componente de traslado existente
 const updateTransferComponent = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -61,6 +67,7 @@ const updateTransferComponent = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la eliminación de un componente de traslado
 const deleteTransferComponent = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -75,6 +82,7 @@ const deleteTransferComponent = async (req: any, res: any) => {
   }
 };
 
+// Exportamos los controladores para que puedan ser utilizados en las rutas
 export const TransferComponentController = {
   getAllTransferComponents,
   getTransferComponentById,

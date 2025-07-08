@@ -1,5 +1,8 @@
 import { pool } from "../../database/index";
 
+// Este modelo maneja las operaciones relacionadas con los conceptos de desincorporación en la base de datos
+
+// Funciones para manejar los conceptos de desincorporación
 const createConceptDes = async ({
     nombre,
     codigo,
@@ -20,6 +23,7 @@ const createConceptDes = async ({
     return (rows as any[])[0];
 };
 
+// Obtiene todos los conceptos de desincorporación
 const getAllConceptDes = async () => {
     const query = `
         SELECT id, nombre, codigo
@@ -29,6 +33,7 @@ const getAllConceptDes = async () => {
     return rows as any[];
 };
 
+// Obtiene un concepto de desincorporación por su ID
 const getConceptDesById = async (id: number) => {
     const query = `
         SELECT id, nombre, codigo 
@@ -37,15 +42,16 @@ const getConceptDesById = async (id: number) => {
     return (rows as any[])[0];
 };
 
+//  Actualiza un concepto de desincorporación existente
 const updateConceptDes = async (
-    id: number, 
+    id: number,
     {
         nombre,
         codigo,
     }: {
         nombre?: string;
         codigo?: string;
-    } 
+    }
 ) => {
     const query = `
         UPDATE ConceptoDesincorporacion 
@@ -62,6 +68,7 @@ const updateConceptDes = async (
     return result;
 };
 
+// Elimina un concepto de desincorporación por su ID
 const deleteConceptDes = async (id: number) => {
     const query = `
         DELETE FROM ConceptoDesincorporacion WHERE id = ?
@@ -70,6 +77,7 @@ const deleteConceptDes = async (id: number) => {
     return result;
 };
 
+// Exportamos las funciones del modelo para que puedan ser utilizadas en los controladores
 export const ConceptDesModel = {
     createConceptDes,
     getAllConceptDes,

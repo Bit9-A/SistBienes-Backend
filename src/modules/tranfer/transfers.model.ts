@@ -40,10 +40,10 @@ const getTransferById = async (id: number) => {
     const [bienesRows] = await pool.execute(bienesQuery, [id]) as [any[], any];
 
     // Sobrescribe cantidad con la cantidad real de bienes asociados
-    return { 
-        ...trasladoRows[0], 
+    return {
+        ...trasladoRows[0],
         cantidad: bienesRows.length,
-        bienes: bienesRows 
+        bienes: bienesRows
     };
 };
 

@@ -1,5 +1,8 @@
 import { ParishModel } from "./parish.model";
 
+// Este controlador maneja las operaciones relacionadas con las parroquias
+
+// Este controlador maneja la obtención de todas las parroquias
 const getAllParishes = async (req: any, res: any) => {
   try {
     const parishes = await ParishModel.getAllParishes();
@@ -13,6 +16,7 @@ const getAllParishes = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la obtención de una parroquia por su ID
 const getParishById = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -27,6 +31,7 @@ const getParishById = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la creación de una nueva parroquia
 const createParish = async (req: any, res: any) => {
   try {
     const { nombre } = req.body;
@@ -41,6 +46,7 @@ const createParish = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la actualización de una parroquia existente
 const updateParish = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -59,6 +65,7 @@ const updateParish = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la eliminación de una parroquia por su ID
 const deleteParish = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -73,6 +80,7 @@ const deleteParish = async (req: any, res: any) => {
   }
 };
 
+// Exportamos el controlador para que pueda ser utilizado en las rutas
 export const ParishController = {
   getAllParishes,
   getParishById,

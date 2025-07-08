@@ -1,5 +1,6 @@
 import { pool } from "../../database/index";
 
+// Este modelo maneja las operaciones de auditoría en la base de datos
 const getAllAudit = async () => {
     const query = `SELECT a.id, a.usuario_id, a.entrada, a.salida, a.ip, CONCAT(u.nombre, ' ', u.apellido) AS nombre, d.nombre as departamento
     FROM RegistroAuditoria a
@@ -10,14 +11,16 @@ const getAllAudit = async () => {
     return rows as any[];
 }
 
+// Este modelo obtiene una auditoría por su ID
 const getAuditById = async (id: number) => {
     const query = `SELECT * FROM RegistroAuditoria WHERE id = ?`;
     const [rows] = await pool.execute(query, [id]);
     return (rows as any[])[0];
 }
 
+// Este modelo crea una nueva auditoría
 const createAudit = async ({
-    usuario_id, 
+    usuario_id,
     entrada,
     salida,
     ip,
@@ -25,7 +28,7 @@ const createAudit = async ({
     usuario_id: number;
     entrada: Date;
     salida: Date;
-    ip: string; 
+    ip: string;
 }) => {
     const query = `
         INSERT INTO RegistroAuditoria (usuario_id, entrada, salida, ip)
@@ -40,6 +43,7 @@ const createAudit = async ({
     return (rows as any[])[0];
 }
 
+// Este modelo actualiza una auditoría existente
 const updateAudit = async (
     id: number,
     {
@@ -51,7 +55,7 @@ const updateAudit = async (
         usuario_id?: number;
         entrada?: Date;
         salida?: Date;
-        ip?: string; 
+        ip?: string;
     }
 ) => {
     const query = `
@@ -72,12 +76,14 @@ const updateAudit = async (
     return result;
 };
 
+// Este modelo elimina una auditoría por su ID
 const deleteAudit = async (id: number) => {
     const query = `DELETE FROM RegistroAuditoria WHERE id = ?`;
     const [result] = await pool.execute(query, [id]);
     return result;
 }
 
+// Este modelo registra la entrada de un usuario
 const registerIn = async (usuario_id: number, ip: string) => {
     const query = `
         INSERT INTO RegistroAuditoria (usuario_id, entrada, ip)
@@ -87,6 +93,7 @@ const registerIn = async (usuario_id: number, ip: string) => {
     return (result as any).insertId;
 };
 
+// Este modelo registra la salida de un usuario
 const registerOut = async (usuario_id: number) => {
     const query = `
         UPDATE RegistroAuditoria
@@ -99,6 +106,7 @@ const registerOut = async (usuario_id: number) => {
     return result;
 };
 
+// Exportamos los modelos para que puedan ser utilizados en los controladores
 export const auditModel = {
     getAllAudit,
     getAuditById,

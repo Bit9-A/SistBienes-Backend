@@ -3,14 +3,17 @@ import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
 import { AuthModel } from "./auth.model";
 
+// Este controlador maneja el registro de nuevos usuarios
 const register = async (req: any, res: any) => {
   try {
     const { tipo_usuario, email, password, nombre, apellido, telefono, dept_id, cedula, username, isActive } = req.body;
 
+    // Validar que todos los campos obligatorios estén presentes
     if (!nombre || !apellido || !email || !password || !cedula || !username) {
       return res.status(400).json({ ok: false, message: "Por favor, rellene todos los campos obligatorios." });
     }
 
+    // Validar que el tipo de usuario sea válido
     const existingUser = await AuthModel.findUserByEmail(email);
     if (existingUser) {
       return res.status(400).json({ ok: false, message: "El correo electrónico ya existe" });
@@ -23,16 +26,16 @@ const register = async (req: any, res: any) => {
     if (existingUsername) {
       return res.status(400).json({ ok: false, message: "El nombre de usuario ya existe" });
     }
-
+    // Validar que la cédula sea única
     const existingCedula = await AuthModel.findUserByCedula(cedula);
     if (existingCedula) {
       return res.status(400).json({ ok: false, message: "La cédula ya existe." });
     }
 
-
+    // Validar que el teléfono sea único
     const salt = await bcryptjs.genSalt(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
-
+    // Crear el nuevo usuario
     const newUser = await AuthModel.createUser({
       tipo_usuario,
       email,
@@ -45,7 +48,7 @@ const register = async (req: any, res: any) => {
       username,
       isActive: isActive !== undefined ? isActive : true,
     });
-
+    // Generar un token JWT para el nuevo usuario
     const token = jwt.sign({ email: newUser.email }, process.env.SECRET_KEY || "defaultSecret", {
       expiresIn: "1h",
     });
@@ -70,14 +73,15 @@ const register = async (req: any, res: any) => {
   }
 };
 
-const login = async (req:any, res:any) => {
+// Este controlador maneja el inicio de sesión de los usuarios
+const login = async (req: any, res: any) => {
   try {
     const { username, password } = req.body;
-
+    // Validar que se proporcionen el nombre de usuario y la contraseña
     if (!username || !password) {
       return res.status(400).json({ ok: false, message: "Se requieren nombre de usuario y contraseña" });
     }
-
+    // Buscar el usuario por nombre de usuario
     const user = await AuthModel.findUserByUsername(username);
 
     // Primero verifica si existe el usuario
@@ -94,13 +98,13 @@ const login = async (req:any, res:any) => {
     if (!validPassword) {
       return res.status(400).json({ ok: false, message: "La contraseña no es válida" });
     }
-
+    // Generar un token JWT para el usuario
     const token = jwt.sign(
       { userId: user.id, email: user.email },
       process.env.SECRET_KEY || "defaultSecret",
       { expiresIn: "1h" }
     );
-
+    // Guardar el token de inicio de sesión en la base de datos
     const expiration = new Date(Date.now() + 3600000); // 1 hour from now
     await AuthModel.saveLoginToken(user.id, token, expiration);
 
@@ -109,7 +113,7 @@ const login = async (req:any, res:any) => {
       secure: process.env.NODE_ENV === "production",
       maxAge: 3600000,
     });
-
+    // Excluir la contraseña del usuario en la respuesta
     res.json({
       ok: true,
       token,
@@ -137,25 +141,26 @@ const login = async (req:any, res:any) => {
   }
 };
 
+// Este controlador maneja el cierre de sesión de los usuarios
 const logout = async (req: any, res: any) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
       return res.status(401).json({ message: "No se proporciona ningún token" });
     }
-
+    // Verificar el formato del token
     const [bearer, token] = authHeader.split(" ");
     if (bearer !== "Bearer" || !token) {
       return res.status(401).json({ message: "Formato de token no válido" });
     }
-
+    // Buscar al usuario por el token de inicio de sesión
     const user = await AuthModel.findUserByLoginToken(token);
     if (!user) {
       return res.status(403).json({ message: "Token no válido" });
     }
 
     await AuthModel.clearLoginToken(user.id);
-
+    // Eliminar la cookie del token de inicio de sesión
     res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -172,18 +177,19 @@ const logout = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la obtención del perfil del usuario
 const profile = async (req: any, res: any) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
       return res.status(401).json({ ok: false, message: "No se proporciona ningún token" });
     }
-
+    // Verificar el formato del token
     const [bearer, token] = authHeader.split(" ");
     if (bearer !== "Bearer" || !token) {
       return res.status(401).json({ ok: false, message: "Formato de token no válido" });
     }
-
+    // Buscar al usuario por el token de inicio de sesión
     const user = await AuthModel.findUserByLoginToken(token);
     if (!user) {
       return res.status(403).json({ ok: false, message: "Token no válido" });
@@ -196,7 +202,7 @@ const profile = async (req: any, res: any) => {
 
     // Combinar nombre y apellido en un solo campo
     const nombreCompleto = `${user.nombre} ${user.apellido}`;
-
+    // Crear un objeto de perfil de usuario con los datos necesarios
     const userProfile = {
       id: user.id,
       tipo_usuario: user.tipo_usuario,
@@ -222,26 +228,28 @@ const profile = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja el restablecimiento de contraseña
 const resetPassword = async (req: any, res: any) => {
   try {
     const { newPassword, token } = req.body;
 
     const user = await AuthModel.findUserByResetToken(token);
-
+    // Validar que se proporcione un nuevo password y un token
     if (!user) {
       return res.status(400).json({ ok: false, message: "Token inválido o caducado" });
     }
-
+    //  Validar que se proporcione un nuevo password
     if (user.reset_token_expiration < Date.now()) {
       return res.status(400).json({ ok: false, message: "El token ha expirado" });
     }
-
+    // Validar que el nuevo password tenga al menos 6 caracteres
     const salt = await bcryptjs.genSalt(10);
     const hashedPassword = await bcryptjs.hash(newPassword, salt);
-
+    // Actualizar la contraseña del usuario
     await AuthModel.updateUserPassword(user.id, hashedPassword);
+    // Limpiar el token de restablecimiento de contraseña
     await AuthModel.clearPasswordResetToken(user.id);
-
+    // Eliminar la cookie del token de restablecimiento de contraseña
     res.status(200).json({ ok: true, message: "Restablecimiento de contraseña exitoso" });
   } catch (error) {
     console.error("Error de restablecimiento de contraseña:", error);
@@ -253,6 +261,7 @@ const resetPassword = async (req: any, res: any) => {
   }
 };
 
+// Exportar los controladores para que puedan ser utilizados en las rutas
 export const AuthController = {
   register,
   login,

@@ -22,10 +22,11 @@ const getAllIncorps = async (req: any, res: any) => {
   }
 }
 
+// Este controlador maneja la creación de una nueva incorporación
 const createIncorp = async (req: any, res: any) => {
   try {
-    const { bien_id, fecha, valor, cantidad, concepto_id, dept_id, isActive,observaciones } = req.body;
-        console.log("Datos recibidos en backend:", req.body);
+    const { bien_id, fecha, valor, cantidad, concepto_id, dept_id, isActive, observaciones } = req.body;
+    console.log("Datos recibidos en backend:", req.body);
 
     if (!bien_id || !fecha || !valor || !cantidad || !concepto_id) {
       return res.status(400).json({ ok: false, message: "Por favor, complete todos los campos requeridos." });
@@ -56,6 +57,7 @@ const createIncorp = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la obtención de una incorporación por su ID
 const getIncorpById = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -76,6 +78,7 @@ const getIncorpById = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la actualización de una incorporación existente
 const updateIncorp = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -99,6 +102,7 @@ const updateIncorp = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la eliminación de una incorporación por su ID
 const deleteIncorp = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -121,6 +125,7 @@ const deleteIncorp = async (req: any, res: any) => {
   }
 };
 
+// Exportamos los controladores para que puedan ser utilizados en las rutas
 export const IncorpController = {
   createIncorp,
   getIncorpById,

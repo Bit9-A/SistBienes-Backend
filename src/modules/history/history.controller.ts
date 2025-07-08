@@ -1,5 +1,6 @@
 import { goodHistoryModel } from "./history.models.js";
 
+// Este controlador maneja las operaciones relacionadas con el historial de bienes
 export const getGoodHistory = async (req: any, res: any) => {
     try {
         const { goodId } = req.params;

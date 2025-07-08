@@ -1,6 +1,8 @@
 import { MarcaModeloModel } from "./marca_modelo.model";
 
-// Controladores para `marca`
+// Este controlador maneja las operaciones relacionadas con la marca 
+
+// Este controlador maneja la obtención de todas las marcas
 const getAllMarcas = async (req: any, res: any) => {
   try {
     const marcas = await MarcaModeloModel.getAllMarcas();
@@ -10,6 +12,7 @@ const getAllMarcas = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la obtención de una marca por su ID
 const getMarcaById = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -23,9 +26,11 @@ const getMarcaById = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la creación de una nueva marca
 const createMarca = async (req: any, res: any) => {
   try {
-    const { nombre } = req.body;
+    const { nombre } = req.body; // Validación del campo 'nombre'
+    // Verificar si el campo 'nombre' está vacío o no existe
     if (!nombre) {
       return res.status(400).json({ ok: false, message: "El campo 'nombre' es obligatorio." });
     }
@@ -40,10 +45,13 @@ const createMarca = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la actualización de una marca existente
 const updateMarca = async (req: any, res: any) => {
   try {
+    // Validación del campo 'nombre' y obtención del ID de la marca a actualizar
     const { id } = req.params;
-    const { nombre } = req.body;
+    const { nombre } = req.body; // Validación del campo 'nombre'
+    // Verificar si el campo 'nombre' está vacío o no existe
     if (!nombre) {
       return res.status(400).json({ ok: false, message: "El campo 'nombre' es obligatorio." });
     }
@@ -57,6 +65,7 @@ const updateMarca = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la eliminación de una marca existente
 const deleteMarca = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -71,6 +80,7 @@ const deleteMarca = async (req: any, res: any) => {
 };
 
 // Controladores para `modelo`
+// Este controlador maneja la obtención de todos los modelos
 const getAllModelos = async (req: any, res: any) => {
   try {
     const modelos = await MarcaModeloModel.getAllModelos();
@@ -80,6 +90,7 @@ const getAllModelos = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la obtención de un modelo por su ID
 const getModeloById = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -93,6 +104,7 @@ const getModeloById = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la creación de un nuevo modelo
 const createModelo = async (req: any, res: any) => {
   try {
     const { nombre, idmarca } = req.body;
@@ -106,6 +118,7 @@ const createModelo = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la actualización de un modelo existente
 const updateModelo = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -123,6 +136,7 @@ const updateModelo = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la eliminación de un modelo existente
 const deleteModelo = async (req: any, res: any) => {
   try {
     const { id } = req.params;

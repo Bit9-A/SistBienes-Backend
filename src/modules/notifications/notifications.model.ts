@@ -1,5 +1,6 @@
 import { pool } from "../../database/index";
 
+// Este modelo maneja las operaciones relacionadas con las notificaciones
 const getAllNotifications = async () => {
     const [rows] = await pool.execute(`
         SELECT 
@@ -11,6 +12,7 @@ const getAllNotifications = async () => {
     return rows as any[];
 };
 
+// Este modelo maneja la obtención de notificaciones por ID de departamento
 const getNotificationsByDeptId = async (dept_id: number) => {
     const [rows] = await pool.execute(`
         SELECT 
@@ -23,11 +25,13 @@ const getNotificationsByDeptId = async (dept_id: number) => {
     return rows as any[];
 };
 
+// Este modelo maneja la obtención de una notificación por su ID
 const getNotificationById = async (id: number) => {
     const [rows] = await pool.execute("SELECT * FROM Notificaciones WHERE id = ?", [id]);
     return (rows as any[])[0] || null;
 };
 
+// Este modelo maneja la creación de una nueva notificación
 const createNotification = async ({ dept_id, descripcion, fecha, isRead }: { dept_id: number; descripcion: string; fecha: string | null; isRead: number; }) => {
     const [result]: any = await pool.execute(
         "INSERT INTO Notificaciones (dept_id, descripcion, fecha, isRead) VALUES (?, ?, ?, ?)",
@@ -36,6 +40,7 @@ const createNotification = async ({ dept_id, descripcion, fecha, isRead }: { dep
     return result.insertId;
 };
 
+// Este modelo maneja la actualización de una notificación existente
 const updateNotification = async (id: number, { dept_id, descripcion, isRead, fecha }: { dept_id?: number; descripcion?: string; isRead?: number; fecha?: string; }) => {
     const [result] = await pool.execute(
         `UPDATE Notificaciones SET 
@@ -49,11 +54,13 @@ const updateNotification = async (id: number, { dept_id, descripcion, isRead, fe
     return result;
 };
 
+// Este modelo maneja la eliminación de una notificación por su ID
 const deleteNotification = async (id: number) => {
     const [result] = await pool.execute("DELETE FROM Notificaciones WHERE id = ?", [id]);
     return result;
 };
 
+// Exportamos el modelo para que pueda ser utilizado en los controladores
 export const notificationsModel = {
     getAllNotifications,
     getNotificationById,

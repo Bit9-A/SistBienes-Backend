@@ -1,6 +1,8 @@
 import { SubGroupModel } from "./subgroup.model";
 
 // Controladores para SubGrupoActivos
+
+// Este controlador maneja la obtención de todos los subgrupos de muebles activos
 const getAllSubGrupoActivos = async (req: any, res: any) => {
   try {
     const subgrupos = await SubGroupModel.getAllSubGrupoActivos();
@@ -14,6 +16,7 @@ const getAllSubGrupoActivos = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la obtención de un subgrupo de muebles por su ID
 const getSubGrupoActivosById = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -28,6 +31,7 @@ const getSubGrupoActivosById = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la creación de un nuevo subgrupo de muebles activos
 const createSubGrupoActivos = async (req: any, res: any) => {
   try {
     const { nombre, codigo } = req.body;
@@ -42,6 +46,7 @@ const createSubGrupoActivos = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la actualización de un subgrupo de muebles activos
 const updateSubGrupoActivos = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -60,6 +65,7 @@ const updateSubGrupoActivos = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la eliminación de un subgrupo de muebles activos
 const deleteSubGrupoActivos = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -74,6 +80,7 @@ const deleteSubGrupoActivos = async (req: any, res: any) => {
   }
 };
 
+// Exportamos los controladores para que puedan ser utilizados en las rutas
 export const SubGroupController = {
   // Controladores para SubGrupoActivos
   getAllSubGrupoActivos,

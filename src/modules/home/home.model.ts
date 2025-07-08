@@ -1,22 +1,27 @@
 import { pool } from '../../database/index';
 import { RowDataPacket } from 'mysql2/promise';
 
+// Este modelo maneja las operaciones relacionadas con el panel de inicio
+// Este modelo maneja la obtención de subgrupos con conteo de activos
 interface TotalBienesResult extends RowDataPacket {
-  total_bienes: number;
+    total_bienes: number;
 }
 
+// Este modelo maneja la obtención del total de bienes en la última semana
 interface TotalValorBienesResult extends RowDataPacket {
-  dept_id: number;
-  dept_nombre: string;
-  total_valor: number;
+    dept_id: number;
+    dept_nombre: string;
+    total_valor: number;
 }
 
+// Este modelo maneja la obtención del valor total de bienes por departamento
 interface MueblesPorMesResult extends RowDataPacket {
     anio: number;
     mes: number;
     total_muebles: number;
 }
 
+// Este modelo maneja la obtención de subgrupos con conteo de activos
 const getSubgruposConConteo = async () => {
     const query = `
         SELECT sg.id, sg.nombre, sg.codigo, COALESCE(SUM(a.cantidad), 0) AS total
@@ -28,6 +33,7 @@ const getSubgruposConConteo = async () => {
     return rows;
 };
 
+// Este modelo maneja la obtención de estados de activos con conteo
 const getGoodStatusConConteo = async () => {
     const query = `
         SELECT ea.id, ea.nombre, COALESCE(SUM(a.cantidad), 0) AS total
@@ -39,6 +45,7 @@ const getGoodStatusConConteo = async () => {
     return rows;
 };
 
+// Este modelo maneja el conteo total de muebles
 const contarMuebles = async () => {
     const query = `
         SELECT COUNT(*) AS total_muebles, COALESCE(SUM(a.cantidad), 0) AS suma_cantidad
@@ -47,22 +54,23 @@ const contarMuebles = async () => {
     const [rows] = await pool.execute(query);
     return rows;
 };
-
+//  Este modelo maneja el conteo de muebles en la última semana
 const contarMueblesUltimaSemana = async (): Promise<number> => {
-  const ahora = new Date();
-  const hace7Dias = new Date(ahora.getTime() - 7 * 24 * 60 * 60 * 1000); 
-
-  const query = `
+    const ahora = new Date();
+    const hace7Dias = new Date(ahora.getTime() - 7 * 24 * 60 * 60 * 1000);
+    // Formatear las fechas a YYYY-MM-DD HH:mm:ss
+    const query = `
     SELECT SUM(cantidad) AS total_bienes
     FROM Activos
     WHERE fecha >= ? AND fecha <= ?;
   `;
 
-  const [rows] = await pool.execute<TotalBienesResult[]>(query, [hace7Dias, ahora]);
+    const [rows] = await pool.execute<TotalBienesResult[]>(query, [hace7Dias, ahora]);
 
-  return rows[0].total_bienes ?? 0;
+    return rows[0].total_bienes ?? 0;
 };
 
+// Este modelo maneja la obtención del valor total de bienes por departamento
 const obtenerValorTotalBienesPorDepartamento = async () => {
     const query = `
         SELECT a.dept_id, d.nombre AS dept_nombre, COALESCE(SUM(a.valor_unitario * a.cantidad), 0) AS total_valor
@@ -73,7 +81,7 @@ const obtenerValorTotalBienesPorDepartamento = async () => {
     const [rows] = await pool.execute<TotalValorBienesResult[]>(query);
     return rows;
 };
-
+// Este modelo maneja el conteo de muebles por mes
 const contarMueblesPorMes = async (): Promise<MueblesPorMesResult[]> => {
     const query = `
         SELECT 
@@ -88,7 +96,7 @@ const contarMueblesPorMes = async (): Promise<MueblesPorMesResult[]> => {
     const [rows] = await pool.execute<MueblesPorMesResult[]>(query);
     return rows;
 };
-
+// Exportamos el modelo para que pueda ser utilizado en los controladores
 export const HomeModel = {
     getSubgruposConConteo,
     getGoodStatusConConteo,

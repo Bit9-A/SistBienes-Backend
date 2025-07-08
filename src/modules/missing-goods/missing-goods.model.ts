@@ -1,5 +1,8 @@
 import { pool } from "../../database/index";
 
+// Este modelo maneja las operaciones relacionadas con los bienes perdidos
+
+// Este modelo maneja la obtención de todos los bienes perdidos
 const getAllMissingGoods = async () => {
     const query = `
     SELECT af.*, 
@@ -17,6 +20,7 @@ const getAllMissingGoods = async () => {
     return rows as any[];
 };
 
+// Este modelo maneja la obtención de un bien perdido por su ID
 const getMissingGoodsById = async (id: number) => {
     const query = `
     SELECT af.*, 
@@ -34,6 +38,7 @@ const getMissingGoodsById = async (id: number) => {
     return (rows as any[])[0];
 };
 
+// Este modelo maneja la creación de un nuevo bien perdido
 const createMissingGoods = async ({
     unidad,
     existencias,
@@ -83,6 +88,7 @@ const createMissingGoods = async ({
     };
 };
 
+// Este modelo maneja la actualización de un bien perdido existente
 const updateMissingGoods = async (
     id: number,
     unidad: number,
@@ -114,6 +120,7 @@ const updateMissingGoods = async (
     return result;
 };
 
+// Este modelo maneja la eliminación de un bien perdido por su ID
 const deleteMissingGoods = async (id: number) => {
     const query = `
         DELETE FROM ActivosFaltantes WHERE id = ?`;
@@ -121,6 +128,7 @@ const deleteMissingGoods = async (id: number) => {
     return result;
 };
 
+// Exportamos el modelo para que pueda ser utilizado en los controladores
 export const missingGoodsModel = {
     getAllMissingGoods,
     getMissingGoodsById,

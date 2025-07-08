@@ -1,5 +1,6 @@
 import { pool } from "../../database/index";
 
+// Este modelo maneja las operaciones relacionadas con los conceptos de incorporación en la base de datos
 const createConceptInc = async ({
     nombre,
     codigo,
@@ -20,6 +21,7 @@ const createConceptInc = async ({
     return (rows as any[])[0];
 };
 
+// Obtiene todos los conceptos de incorporación
 const getAllConceptInc = async () => {
     const query = `
         SELECT id, nombre, codigo
@@ -29,6 +31,7 @@ const getAllConceptInc = async () => {
     return rows as any[];
 };
 
+// Obtiene un concepto de incorporación por su ID
 const getConceptIncById = async (id: number) => {
     const query = `
         SELECT id, nombre, codigo
@@ -37,6 +40,7 @@ const getConceptIncById = async (id: number) => {
     return (rows as any[])[0];
 };
 
+// Actualiza un concepto de incorporación existente
 const updateConceptInc = async (
     id: number,
     {
@@ -62,6 +66,7 @@ const updateConceptInc = async (
     return result;
 };
 
+// Elimina un concepto de incorporación por su ID
 const deleteConceptInc = async (id: number) => {
     const query = `
         DELETE FROM ConceptoIncorporacion WHERE id=?`;
@@ -69,6 +74,7 @@ const deleteConceptInc = async (id: number) => {
     return result;
 };
 
+// Exportamos las funciones del modelo para que puedan ser utilizadas en los controladores
 export const ConcepIncorpModel = {
     createConceptInc,
     getAllConceptInc,

@@ -10,6 +10,7 @@ const getAllMarcas = async () => {
   return rows as any[];
 };
 
+// Obtener una marca por ID
 const getMarcaById = async (id: number) => {
   const query = `
     SELECT id, nombre
@@ -20,6 +21,7 @@ const getMarcaById = async (id: number) => {
   return (rows as any[])[0];
 };
 
+// Crear una nueva marca
 const createMarca = async (nombre: string) => {
   const query = `
     INSERT INTO Marca (nombre)
@@ -32,6 +34,7 @@ const createMarca = async (nombre: string) => {
   };
 };
 
+// Actualizar una marca existente
 const updateMarca = async (id: number, nombre: string) => {
   const query = `
     UPDATE Marca
@@ -42,6 +45,7 @@ const updateMarca = async (id: number, nombre: string) => {
   return result;
 };
 
+// Eliminar una marca por ID
 const deleteMarca = async (id: number) => {
   const query = `
     DELETE FROM Marca
@@ -61,6 +65,7 @@ const getAllModelos = async () => {
   return rows as any[];
 };
 
+// Obtener un modelo por ID
 const getModeloById = async (id: number) => {
   const query = `
     SELECT id, nombre, idmarca
@@ -71,6 +76,7 @@ const getModeloById = async (id: number) => {
   return (rows as any[])[0];
 };
 
+// Crear un nuevo modelo
 const createModelo = async (nombre: string, idmarca: number) => {
   const query = `
     INSERT INTO Modelo (nombre, idmarca)
@@ -84,6 +90,7 @@ const createModelo = async (nombre: string, idmarca: number) => {
   };
 };
 
+// Actualizar un modelo existente
 const updateModelo = async (id: number, nombre: string, idmarca: number) => {
   const query = `
     UPDATE Modelo
@@ -94,6 +101,7 @@ const updateModelo = async (id: number, nombre: string, idmarca: number) => {
   return result;
 };
 
+// Eliminar un modelo por ID
 const deleteModelo = async (id: number) => {
   const query = `
     DELETE FROM Modelo

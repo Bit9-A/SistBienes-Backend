@@ -12,7 +12,7 @@ const getAllIncorps = async () => {
     JOIN Activos a ON i.bien_id = a.id
     JOIN ConceptoIncorporacion ci ON i.concepto_id = ci.id
     LEFT JOIN Departamento d ON i.dept_id = d.id
-  `;  
+  `;
   const [rows] = await pool.execute(query);
   return (rows as any[]).map(row => ({
     ...row,
@@ -23,6 +23,7 @@ const getAllIncorps = async () => {
   }));
 };
 
+// Crear un nuevo registro de incorporación
 const createIncorp = async ({
   bien_id,
   fecha,
@@ -34,7 +35,7 @@ const createIncorp = async ({
   observaciones,
 }: {
   bien_id: number;
-  fecha: Date; // <-- Cambiado a string
+  fecha: Date;
   valor: number;
   cantidad: number;
   concepto_id: number;
@@ -69,6 +70,7 @@ const createIncorp = async ({
   return (rows as any[])[0];
 };
 
+// Obtener un registro de incorporación por ID
 const findIncorpById = async (id: number) => {
   const query = `
     SELECT i.id, i.bien_id, i.fecha, i.valor, i.cantidad, i.concepto_id, i.dept_id, i.isActive, i.observaciones,
@@ -85,6 +87,7 @@ const findIncorpById = async (id: number) => {
   return (rows as any[])[0];
 };
 
+// Actualizar un registro de incorporación existente
 const updateIncorp = async (
   id: number,
   {
@@ -134,6 +137,7 @@ const updateIncorp = async (
   return result;
 };
 
+// Eliminar un registro de incorporación por ID
 const deleteIncorp = async (id: number) => {
   const query = `
     DELETE FROM IncorporacionActivo
@@ -142,6 +146,7 @@ const deleteIncorp = async (id: number) => {
   await pool.execute(query, [id]);
 };
 
+// Exportamos el modelo para que pueda ser utilizado en los controladores
 export const IncorpModel = {
   createIncorp,
   findIncorpById,

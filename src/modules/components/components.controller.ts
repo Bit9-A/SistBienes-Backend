@@ -1,5 +1,6 @@
 import { ComponentsModel } from "./components.model";
 
+// Este controlador maneja las operaciones CRUD para los componentes
 const getAllComponents = async (req: any, res: any) => {
   try {
     const components = await ComponentsModel.getAllComponents();
@@ -12,6 +13,7 @@ const getAllComponents = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la obtención de un componente por su ID
 const getComponentById = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -25,6 +27,7 @@ const getComponentById = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la creación de un nuevo componente
 const createComponent = async (req: any, res: any) => {
   try {
     const { bien_id, nombre, numero_serial } = req.body;
@@ -38,6 +41,7 @@ const createComponent = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la actualización de un componente existente
 const updateComponent = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -52,6 +56,7 @@ const updateComponent = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la eliminación de un componente por su ID
 const deleteComponent = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -65,7 +70,7 @@ const deleteComponent = async (req: any, res: any) => {
   }
 };
 
-
+// Este controlador maneja la obtención de componentes por el ID del bien asociado
 const getComponentsByBienId = async (req: any, res: any) => {
   try {
     const { bien_id } = req.params;
@@ -79,7 +84,7 @@ const getComponentsByBienId = async (req: any, res: any) => {
   }
 };
 
-
+// Exportamos los controladores para que puedan ser utilizados en las rutas
 export const ComponentsController = {
   getAllComponents,
   getComponentById,

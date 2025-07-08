@@ -1,5 +1,6 @@
 import { auditModel } from "./audit.model";
 
+// Este controlador maneja las operaciones CRUD para las auditorías
 const getAllAudit = async (req: any, res: any) => {
     try {
         const audits = await auditModel.getAllAudit();
@@ -14,6 +15,7 @@ const getAllAudit = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la obtención de una auditoría por su ID
 const getAuditById = async (req: any, res: any) => {
     try {
         const { id } = req.params;
@@ -32,6 +34,7 @@ const getAuditById = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la creación de una nueva auditoría
 const createAudit = async (req: any, res: any) => {
     try {
         const newAudit = await auditModel.createAudit(req.body);
@@ -50,6 +53,7 @@ const createAudit = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la actualización de una auditoría existente
 const updateAudit = async (req: any, res: any) => {
     try {
         const { id } = req.params;
@@ -69,7 +73,8 @@ const updateAudit = async (req: any, res: any) => {
     }
 };
 
-const deleteAudit = async (req: any, res:any) => {
+// Este controlador maneja la eliminación de una auditoría por su ID
+const deleteAudit = async (req: any, res: any) => {
     try {
         const { id } = req.params;
         await auditModel.deleteAudit(Number(id));
@@ -87,6 +92,7 @@ const deleteAudit = async (req: any, res:any) => {
     }
 }
 
+// Este controlador maneja el registro de entrada de un usuario
 const registerIn = async (req: any, res: any) => {
     try {
         const { usuario_id } = req.body;
@@ -101,6 +107,7 @@ const registerIn = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja el registro de salida de un usuario
 const registerOut = async (req: any, res: any) => {
     try {
         const { usuario_id } = req.body;
@@ -114,6 +121,7 @@ const registerOut = async (req: any, res: any) => {
     }
 };
 
+// Exportamos los controladores para que puedan ser utilizados en las rutas
 export const auditController = {
     getAllAudit,
     getAuditById,

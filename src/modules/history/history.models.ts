@@ -1,5 +1,6 @@
 import { pool } from "../../database/index";
 
+// Este modelo maneja la obtención del historial de un bien por su ID
 const getGoodHistoryById = async (goodId: number) => {
   const query = `
     SELECT
@@ -35,6 +36,7 @@ const getGoodHistoryById = async (goodId: number) => {
   return rows as any[];
 };
 
+// Exportamos el modelo para que pueda ser utilizado en los controladores
 export const goodHistoryModel = {
   getGoodHistoryById,
 };

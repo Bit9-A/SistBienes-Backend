@@ -1,5 +1,8 @@
 import { UserModel } from "./user.model";
 
+// Este controlador maneja las operaciones relacionadas con los usuarios
+
+// Maneja la obtención de todos los usuarios del sistema
 const getAllUsers = async (req: any, res: any) => {
   try {
     const users = await UserModel.getAllUsers();
@@ -17,6 +20,7 @@ const getAllUsers = async (req: any, res: any) => {
   }
 };
 
+// Maneja la obtención de un usuario por su ID
 const getUserById = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -35,6 +39,7 @@ const getUserById = async (req: any, res: any) => {
   }
 };
 
+// Maneja la obtención de usuarios por ID de departamento
 const getUsersByDeptId = async (req: any, res: any) => {
   try {
     const { dept_id } = req.params;
@@ -53,10 +58,11 @@ const getUsersByDeptId = async (req: any, res: any) => {
   }
 };
 
+// Maneja la actualización de un usuario existente
 const updateUser = async (req: any, res: any) => {
   try {
     const { id } = req.params;
-    // Attempt to find the existing user first
+    // Validar que el ID sea un número
     const existingUser = await UserModel.getUserById(Number(id));
     if (!existingUser) {
       return res.status(404).json({ ok: false, message: "Usuario no encontrado" });
@@ -78,10 +84,11 @@ const updateUser = async (req: any, res: any) => {
   }
 };
 
+// Maneja la eliminación de un usuario existente
 const deleteUser = async (req: any, res: any) => {
   try {
     const { id } = req.params;
-    // Check if the user exists first
+    // chequear que el ID sea un número
     const existingUser = await UserModel.getUserById(Number(id));
     if (!existingUser) {
       return res.status(404).json({ ok: false, message: "Usuario no encontrado" });
@@ -99,6 +106,7 @@ const deleteUser = async (req: any, res: any) => {
   }
 };
 
+// Exportamos los controladores para que puedan ser utilizados en las rutas
 export const UserController = {
   getAllUsers,
   getUserById,
