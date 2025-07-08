@@ -8,6 +8,7 @@ const getConfig = async () => {
     return (rows as any[])[0] || null;
 };
 
+// Crear una nueva configuración
 const createConfig = async ({
     fecha,
     colorprimario,
@@ -52,7 +53,7 @@ const createConfig = async ({
     return result.insertId;
 };
 
-
+// Actualizar la configuración general
 const updateGeneralConfig = async ({
     fecha,
     colorprimario,
@@ -93,6 +94,7 @@ const updateGeneralConfig = async ({
     return result;
 };
 
+// Exportamos las funciones del modelo para que puedan ser utilizadas en los controladores
 export const configModel = {
     getConfig,
     createConfig,

@@ -1,5 +1,8 @@
 import { transfersModel } from "./transfers.model";
 
+// Este controlador maneja las operaciones relacionadas con los traslados de bienes
+
+// Este controlador maneja la obtención de todos los traslados
 const getAllTransfers = async (req: any, res: any) => {
     try {
         const transfers = await transfersModel.getAllTransfers();
@@ -14,6 +17,7 @@ const getAllTransfers = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la obtención de un traslado por su ID
 const getTransferById = async (req: any, res: any) => {
     try {
         const { id } = req.params;
@@ -29,6 +33,7 @@ const getTransferById = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la creación de un nuevo traslado
 const createTransfer = async (req: any, res: any) => {
     try {
         const { fecha, cantidad, origen_id, destino_id, responsable_id, observaciones, bienes } = req.body;
@@ -44,6 +49,7 @@ const createTransfer = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la actualización de un traslado existente
 const updateTransfer = async (req: any, res: any) => {
     try {
         const { id } = req.params;
@@ -59,6 +65,7 @@ const updateTransfer = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la eliminación de un traslado
 const deleteTransfer = async (req: any, res: any) => {
     try {
         const { id } = req.params;
@@ -74,6 +81,7 @@ const deleteTransfer = async (req: any, res: any) => {
     }
 };
 
+// Exportamos los controladores para que puedan ser utilizados en las rutas
 export const transfersController = {
     getAllTransfers,
     getTransferById,

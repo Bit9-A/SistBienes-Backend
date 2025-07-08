@@ -1,5 +1,8 @@
 import { FurnitureModel } from "./furniture.model";
 
+// Este controlador maneja las operaciones CRUD para los muebles
+
+// Este controlador maneja la obtención de todos los muebles
 const getAllFurniture = async (req: any, res: any) => {
   try {
     const furniture = await FurnitureModel.getAllFurniture();
@@ -17,6 +20,7 @@ const getAllFurniture = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la obtención de un mueble por su ID
 const getFurnitureById = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -35,6 +39,7 @@ const getFurnitureById = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la creación de un nuevo mueble
 const createFurniture = async (req: any, res: any) => {
   try {
     const data = req.body;
@@ -64,6 +69,7 @@ const createFurniture = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la actualización de un mueble existente
 const updateFurniture = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -83,6 +89,7 @@ const updateFurniture = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la eliminación de un mueble por su ID
 const deleteFurniture = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -101,6 +108,7 @@ const deleteFurniture = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la obtención de muebles por departamento
 const getFurnitureByDepartment = async (req: any, res: any) => {
   try {
     const { deptId } = req.params;
@@ -114,6 +122,7 @@ const getFurnitureByDepartment = async (req: any, res: any) => {
   }
 };
 
+// Exportamos los controladores para que puedan ser utilizados en las rutas
 export const FurnitureController = {
   getFurnitureByDepartment,
   getAllFurniture,

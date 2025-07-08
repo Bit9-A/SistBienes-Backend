@@ -1,5 +1,7 @@
 import { statusGoodsModel } from "./goods-status.model";
+// Este controlador maneja las operaciones CRUD para los estados de los bienes
 
+// Este controlador maneja la obtención de todos los estados de los bienes
 const getAllStatusGoods = async (req: any, res: any) => {
     try {
         const statusGoodsList = await statusGoodsModel.getAllStatusGoods();
@@ -14,6 +16,7 @@ const getAllStatusGoods = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la obtención de un estado de los bienes por su ID
 const getStatusGoodsById = async (req: any, res: any) => {
     try {
         const { id } = req.params;
@@ -32,6 +35,7 @@ const getStatusGoodsById = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la creación de un nuevo estado de los bienes
 const createStatusGoods = async (req: any, res: any) => {
     try {
         const { nombre } = req.body;
@@ -50,6 +54,7 @@ const createStatusGoods = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la actualización de un estado de los bienes existente
 const updateStatusGoods = async (req: any, res: any) => {
     try {
         const { id } = req.params;
@@ -72,6 +77,7 @@ const updateStatusGoods = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la eliminación de un estado de los bienes por su ID
 const deleteStatusGoods = async (req: any, res: any) => {
     try {
         const { id } = req.params;
@@ -90,6 +96,7 @@ const deleteStatusGoods = async (req: any, res: any) => {
     }
 };
 
+// Exportamos los controladores para que puedan ser utilizados en las rutas
 export const statusGoodsController = {
     getAllStatusGoods,
     getStatusGoodsById,

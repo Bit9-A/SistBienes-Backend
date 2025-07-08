@@ -1,5 +1,8 @@
 import { pool } from "../../database/index";
 
+// Este modelo maneja las operaciones relacionadas con los roles de usuario
+
+// Este modelo maneja la obtención de todos los roles de usuario
 const getAllUserRoles = async () => {
   const query = `
     SELECT id, nombre
@@ -9,6 +12,7 @@ const getAllUserRoles = async () => {
   return rows as any[];
 };
 
+// Este modelo maneja la obtención de un rol de usuario por su ID
 const findUserRoleById = async (id: number) => {
   const query = `
     SELECT id, nombre
@@ -19,6 +23,7 @@ const findUserRoleById = async (id: number) => {
   return (rows as any[])[0];
 };
 
+// Este modelo maneja la creación de un nuevo rol de usuario
 const createUserRole = async (name: string) => {
   const query = `
     INSERT INTO TipoUsuario (nombre)
@@ -31,6 +36,7 @@ const createUserRole = async (name: string) => {
   };
 };
 
+// Este modelo maneja la actualización de un rol de usuario existente
 const updateUserRole = async (id: number, name: string) => {
   const query = `
     UPDATE TipoUsuario
@@ -41,6 +47,7 @@ const updateUserRole = async (id: number, name: string) => {
   return result;
 };
 
+// Este modelo maneja la eliminación de un rol de usuario por su ID
 const deleteUserRole = async (id: number) => {
   const query = `
     DELETE FROM TipoUsuario
@@ -50,6 +57,7 @@ const deleteUserRole = async (id: number) => {
   return result;
 };
 
+// Exportamos el modelo para que pueda ser utilizado en los controladores
 export const UserRoleModel = {
   getAllUserRoles,
   findUserRoleById,

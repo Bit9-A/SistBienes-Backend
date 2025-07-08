@@ -1,5 +1,6 @@
 import { desincorpModel } from "./desincorp.model";
 
+// Este controlador maneja las operaciones CRUD para las desincorporaciones
 const getAllDesincorp = async (req: any, res: any) => {
     try {
         const desincorps = await desincorpModel.getAllDesincorp();
@@ -13,6 +14,7 @@ const getAllDesincorp = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la obtención de una desincorporación por su ID
 const getDesincorpById = async (req: any, res: any) => {
     try {
         const { id } = req.params;
@@ -30,6 +32,7 @@ const getDesincorpById = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la creación de una nueva desincorporación
 const createDesincorp = async (req: any, res: any) => {
     try {
         const { bien_id, fecha, valor, cantidad, concepto_id, dept_id } = req.body;
@@ -54,6 +57,7 @@ const createDesincorp = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la actualización de una desincorporación existente
 const updateDesincorp = async (req: any, res: any) => {
     try {
         const { id } = req.params;
@@ -73,6 +77,7 @@ const updateDesincorp = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la eliminación de una desincorporación por su ID
 const deleteDesincorp = async (req: any, res: any) => {
     try {
         const { id } = req.params;
@@ -91,6 +96,7 @@ const deleteDesincorp = async (req: any, res: any) => {
     }
 };
 
+// Exportamos los controladores para que puedan ser utilizados en las rutas
 export const desincorpController = {
     getAllDesincorp,
     getDesincorpById,

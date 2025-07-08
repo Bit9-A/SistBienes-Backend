@@ -1,5 +1,8 @@
 import { pool } from "../../database/index";
 
+// Este modelo maneja las operaciones CRUD para los muebles
+
+// Este modelo maneja la obtención de todos los muebles
 const getAllFurniture = async () => {
   const query = `
     SELECT a.*, sg.nombre AS subgrupo_nombre, d.nombre AS dept_nombre,
@@ -34,6 +37,7 @@ const getFurnitureByDepartment = async (deptId: number) => {
   return rows as any[];
 };
 
+// Este modelo maneja la obtención de un mueble por su ID
 const getFurnitureById = async (id: number) => {
   const query = `
     SELECT a.*, sg.nombre AS subgrupo_nombre, d.nombre AS dept_nombre,
@@ -50,7 +54,7 @@ const getFurnitureById = async (id: number) => {
   const [rows] = await pool.execute(query, [id]);
   return (rows as any[])[0];
 };
-
+// Crear un nuevo mueble
 const createFurniture = async (data: {
   subgrupo_id: number;
   cantidad: number;
@@ -75,6 +79,7 @@ const createFurniture = async (data: {
     )
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
+  // Usamos COALESCE para manejar valores nulos
   const [result] = await pool.execute(query, [
     data.subgrupo_id,
     data.cantidad,
@@ -98,6 +103,7 @@ const createFurniture = async (data: {
   };
 };
 
+// Este modelo maneja la actualización de un mueble existente
 const updateFurniture = async (
   id: number,
   data: Partial<{
@@ -159,6 +165,7 @@ const updateFurniture = async (
   return result;
 };
 
+// Este modelo maneja la eliminación de un mueble por su ID
 const deleteFurniture = async (id: number) => {
   const query = `
     DELETE FROM Activos
@@ -168,6 +175,7 @@ const deleteFurniture = async (id: number) => {
   return result;
 };
 
+// Exportamos el modelo para que pueda ser utilizado en los controladores
 export const FurnitureModel = {
   getAllFurniture,
   getFurnitureById,

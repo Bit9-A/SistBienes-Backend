@@ -1,5 +1,8 @@
 import { logsModel } from "./logs.model";
 
+// Este controlador maneja las operaciones relacionadas con los logs del sistema
+
+// Este controlador maneja la creación de un nuevo log
 const createLog = async (req: any, res: any) => {
     try {
         const { usuario_id, accion, detalles } = req.body;
@@ -14,6 +17,7 @@ const createLog = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la obtención de todos los logs
 const getAllLogs = async (req: any, res: any) => {
     try {
         const logs = await logsModel.getAllLogs();
@@ -24,6 +28,7 @@ const getAllLogs = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la obtención de un log por su ID
 const getLogById = async (req: any, res: any) => {
     try {
         const { id } = req.params;
@@ -38,6 +43,7 @@ const getLogById = async (req: any, res: any) => {
     }
 };
 
+// Exportamos los controladores para que puedan ser utilizados en las rutas
 export const logsController = {
     createLog,
     getAllLogs,

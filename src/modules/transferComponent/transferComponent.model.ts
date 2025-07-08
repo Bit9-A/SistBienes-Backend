@@ -1,5 +1,8 @@
 import { pool } from "../../database/index";
 
+// Este modelo maneja las operaciones relacionadas con los componentes de traslado
+
+// Este modelo maneja la obtención de todos los componentes de traslado
 const getAllTransferComponents = async () => {
   const query = `
     SELECT tc.id, tc.componente_id, tc.bien_origen_id, tc.bien_destino_id, tc.fecha,
@@ -11,6 +14,7 @@ const getAllTransferComponents = async () => {
   return rows as any[];
 };
 
+// Este modelo maneja la obtención de un componente de traslado por su ID
 const getTransferComponentById = async (id: number) => {
   const query = `
     SELECT tc.id, tc.componente_id, tc.bien_origen_id, tc.bien_destino_id, tc.fecha,
@@ -23,6 +27,7 @@ const getTransferComponentById = async (id: number) => {
   return (rows as any[])[0];
 };
 
+// Este modelo maneja la creación de un nuevo componente de traslado
 const createTransferComponent = async ({
   componente_id,
   bien_origen_id,
@@ -53,6 +58,7 @@ const createTransferComponent = async ({
   };
 };
 
+// Este modelo maneja la actualización de un componente de traslado existente
 const updateTransferComponent = async (
   id: number,
   {
@@ -86,6 +92,7 @@ const updateTransferComponent = async (
   return result;
 };
 
+// Este modelo maneja la eliminación de un componente de traslado por su ID
 const deleteTransferComponent = async (id: number) => {
   const query = `
     DELETE FROM ComponentesTraslado
@@ -95,6 +102,7 @@ const deleteTransferComponent = async (id: number) => {
   return result;
 };
 
+// Exportamos los métodos del modelo para que puedan ser utilizados en otros módulos
 export const TransferComponentModel = {
   getAllTransferComponents,
   getTransferComponentById,

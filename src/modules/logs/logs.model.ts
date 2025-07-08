@@ -1,5 +1,8 @@
 import { pool } from '../../database/index';
 
+// Este modelo maneja las operaciones relacionadas con los logs del sistema
+
+// Este modelo maneja la creación de un nuevo log
 const createLog = async (usuario_id: number, accion: string, detalles?: string | null) => {
     const query = `
         INSERT INTO RegistroLogs (usuario_id, fecha, accion, detalles) 
@@ -13,6 +16,7 @@ const createLog = async (usuario_id: number, accion: string, detalles?: string |
     };
 };
 
+// Este modelo maneja la obtención de todos los logs
 const getAllLogs = async () => {
     const query = `
         SELECT rl.*, u.username AS usuario_nombre, d.nombre AS departamento
@@ -24,6 +28,7 @@ const getAllLogs = async () => {
     return rows as any[];
 };
 
+// Este modelo maneja la obtención de un log por su ID
 const getLogById = async (id: number) => {
     const query = `
         SELECT * FROM RegistroLogs WHERE id = ?`;
@@ -31,6 +36,7 @@ const getLogById = async (id: number) => {
     return (rows as any[])[0];
 };
 
+// Exportamos el modelo para que pueda ser utilizado en los controladores
 export const logsModel = {
     createLog,
     getAllLogs,

@@ -6,7 +6,7 @@ import { configModel } from "./config.model"
 import { Request, Response } from "express";
 // Image Config 
 
-
+// Este controlador maneja la configuración general de la aplicación, incluyendo la carga de imágenes y la obtención de la configuración actual.
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const diskStorage = multer.diskStorage({
@@ -18,6 +18,7 @@ const diskStorage = multer.diskStorage({
     }
 });
 
+// Este controlador maneja la obtención de la configuración actual de la aplicación
 const getConfig = async (req: any, res: any) => {
     try {
         const config = await configModel.getConfig();
@@ -32,7 +33,7 @@ const getConfig = async (req: any, res: any) => {
     }
 };
 
-
+// Este controlador maneja la creación de una nueva configuración general de la aplicación
 const createConfig = (req: Request, res: Response) => {
     const upload = multer({
         storage: diskStorage,
@@ -87,7 +88,7 @@ const createConfig = (req: Request, res: Response) => {
 
 //Images
 
-
+// Este controlador maneja la creación de una nueva configuración general de la aplicación
 const updateConfig = (req: Request, res: Response) => {
     const upload = multer({
         storage: diskStorage,
@@ -140,6 +141,7 @@ const updateConfig = (req: Request, res: Response) => {
     });
 };
 
+// Exportamos los controladores para que puedan ser utilizados en las rutas
 export const configController = {
     getConfig,
     createConfig,

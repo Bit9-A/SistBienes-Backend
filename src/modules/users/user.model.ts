@@ -1,5 +1,7 @@
 import { pool } from "../../database/index";
+// Este modelo maneja las operaciones relacionadas con los usuarios
 
+// Este modelo maneja la obtención de todos los usuarios
 const getAllUsers = async () => {
   const query = `
     SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
@@ -11,6 +13,7 @@ const getAllUsers = async () => {
   return rows as any[];
 };
 
+// Este modelo maneja la obtención de un usuario por su ID
 const getUserById = async (id: number) => {
   const query = `
     SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
@@ -23,6 +26,7 @@ const getUserById = async (id: number) => {
   return (rows as any[])[0];
 };
 
+// Este modelo maneja la obtención de usuarios por ID de departamento
 const getUsersByDeptId = async (dept_id: number) => {
   const query = `
     SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
@@ -35,6 +39,7 @@ const getUsersByDeptId = async (dept_id: number) => {
   return rows as any[];
 };
 
+// Este modelo maneja la actualización de un usuario existente
 const updateUser = async (
   id: number,
   {
@@ -88,6 +93,7 @@ const updateUser = async (
   return result;
 };
 
+// Este modelo maneja la eliminación de un usuario por su ID
 const deleteUser = async (id: number) => {
   const query = `
     DELETE FROM Usuarios
@@ -97,6 +103,7 @@ const deleteUser = async (id: number) => {
   return result;
 };
 
+// Exportamos el modelo para que pueda ser utilizado en los controladores
 export const UserModel = {
   getAllUsers,
   getUserById,

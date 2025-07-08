@@ -1,5 +1,6 @@
 import { DeptModel } from "../dept/dept.model";
 
+// Este controlador maneja las operaciones CRUD para los departamentos
 const getAllDepartments = async (req: any, res: any) => {
   try {
     const departments = await DeptModel.getAllDepartments();
@@ -14,6 +15,7 @@ const getAllDepartments = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la obtención de un departamento por su ID
 const getDepartmentById = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -32,6 +34,7 @@ const getDepartmentById = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la creación de un nuevo departamento
 const createDepartment = async (req: any, res: any) => {
   try {
     const { nombre, codigo } = req.body;
@@ -50,6 +53,7 @@ const createDepartment = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la actualización de un departamento existente
 const updateDepartment = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -72,6 +76,7 @@ const updateDepartment = async (req: any, res: any) => {
   }
 };
 
+// Este controlador maneja la eliminación de un departamento por su ID
 const deleteDepartment = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -90,6 +95,7 @@ const deleteDepartment = async (req: any, res: any) => {
   }
 };
 
+// Exportamos los controladores para que puedan ser utilizados en las rutas
 export const DeptController = {
   getAllDepartments,
   getDepartmentById,

@@ -1,5 +1,7 @@
 import { missingGoodsModel } from "./missing-goods.model";
+// Este controlador maneja las operaciones relacionadas con los bienes perdidos
 
+// Este controlador maneja la obtención de todos los bienes perdidos
 const getAllMissingGoods = async (req: any, res: any) => {
     try {
         const missingGoodsList = await missingGoodsModel.getAllMissingGoods();
@@ -9,6 +11,7 @@ const getAllMissingGoods = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la obtención de un bien perdido por su ID
 const getMissingGoodsById = async (req: any, res: any) => {
     try {
         const { id } = req.params;
@@ -22,6 +25,7 @@ const getMissingGoodsById = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la creación de un nuevo bien perdido
 const createMissingGoods = async (req: any, res: any) => {
     try {
         const {
@@ -66,6 +70,7 @@ const createMissingGoods = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la actualización de un bien perdido existente
 const updateMissingGoods = async (req: any, res: any) => {
     try {
         const { id } = req.params;
@@ -115,6 +120,7 @@ const updateMissingGoods = async (req: any, res: any) => {
     }
 };
 
+// Este controlador maneja la eliminación de un bien perdido existente
 const deleteMissingGoods = async (req: any, res: any) => {
     try {
         const { id } = req.params;
@@ -128,6 +134,7 @@ const deleteMissingGoods = async (req: any, res: any) => {
     }
 };
 
+// Exportamos los controladores para que puedan ser utilizados en las rutas
 export const missingGoodsController = {
     getAllMissingGoods,
     getMissingGoodsById,

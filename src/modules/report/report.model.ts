@@ -1,5 +1,5 @@
 import { pool } from "../../database/index";
-
+// Este modelo maneja las operaciones relacionadas con los reportes mensuales
 interface IncorporationCount {
   total_incorporations: number;
 }
@@ -16,6 +16,9 @@ interface FinalAssetsCount {
   existencia_final: number;
 }
 
+// Este modelo maneja las operaciones relacionadas con los reportes mensuales
+
+// Este modelo maneja la obtención de incorporaciones por mes y departamento
 const getIncorporationsByMonthAndDepartment = async (month: number, year: number, deptId: number): Promise<IncorporationCount> => {
   const query = `
     SELECT COUNT(*) AS total_incorporations
@@ -26,6 +29,7 @@ const getIncorporationsByMonthAndDepartment = async (month: number, year: number
   return rows[0];
 };
 
+// Este modelo maneja la obtención de desincorporaciones por concepto 60 por mes y departamento
 const getDisincorporationsConcept60ByMonthAndDepartment = async (month: number, year: number, deptId: number): Promise<DisincorporationCount> => {
   const query = `
     SELECT COUNT(*) AS total_disincorporations
@@ -37,6 +41,7 @@ const getDisincorporationsConcept60ByMonthAndDepartment = async (month: number, 
   return rows[0];
 };
 
+// Este modelo maneja la obtención de desincorporaciones por concepto diferente a 60 por mes y departamento
 const getDisincorporationsExceptConcept60ByMonthAndDepartment = async (month: number, year: number, deptId: number): Promise<DisincorporationCount> => {
   const query = `
     SELECT COUNT(*) AS total_disincorporations
@@ -48,6 +53,7 @@ const getDisincorporationsExceptConcept60ByMonthAndDepartment = async (month: nu
   return rows[0];
 };
 
+// Este modelo maneja la obtención de activos activos del mes anterior por departamento
 const getActiveAssetsPreviousMonthByDepartment = async (month: number, year: number, deptId: number): Promise<PreviousExistence> => {
   const previousMonth = month === 1 ? 12 : month - 1;
   const previousYear = month === 1 ? year - 1 : year;
@@ -61,6 +67,7 @@ const getActiveAssetsPreviousMonthByDepartment = async (month: number, year: num
   return rows[0];
 };
 
+// Este modelo maneja el cálculo de la existencia final de activos por mes y departamento
 const getFinalAssetsCountByMonth = async (month: number, year: number, deptId: number): Promise<FinalAssetsCount> => {
   // Obtener todos los valores necesarios
   const [existenciaAnterior, incorporaciones, desincorporaciones60, desincorporacionesNo60] = await Promise.all([
@@ -71,13 +78,14 @@ const getFinalAssetsCountByMonth = async (month: number, year: number, deptId: n
   ]);
 
   // Calcular existencia final
-  const existenciaFinal = existenciaAnterior.existencia_anterior + 
-                       incorporaciones.total_incorporations - 
-                       (desincorporaciones60.total_disincorporations + desincorporacionesNo60.total_disincorporations);
+  const existenciaFinal = existenciaAnterior.existencia_anterior +
+    incorporaciones.total_incorporations -
+    (desincorporaciones60.total_disincorporations + desincorporacionesNo60.total_disincorporations);
 
   return { existencia_final: existenciaFinal };
 };
 
+// Exportamos el modelo para que pueda ser utilizado en los controladores
 export const reportModel = {
   getIncorporationsByMonthAndDepartment,
   getDisincorporationsConcept60ByMonthAndDepartment,

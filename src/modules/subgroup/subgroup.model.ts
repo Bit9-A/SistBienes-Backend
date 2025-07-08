@@ -1,6 +1,8 @@
 import { pool } from "../../database/index";
 
-// CRUD para SubgrupoActivos
+// Este modelo maneja las operaciones relacionadas con los subgrupos de muebles activos
+
+// Este modelo maneja la obtención de todos los subgrupos de muebles activos
 const getAllSubGrupoActivos = async () => {
   const query = `
     SELECT id, nombre, codigo
@@ -10,6 +12,7 @@ const getAllSubGrupoActivos = async () => {
   return rows as any[];
 };
 
+// Este modelo maneja la obtención de un subgrupo de muebles por su ID
 const getSubGrupoActivosById = async (id: number) => {
   const query = `
     SELECT id, nombre, codigo
@@ -20,6 +23,7 @@ const getSubGrupoActivosById = async (id: number) => {
   return (rows as any[])[0];
 };
 
+// Este modelo maneja la creación de un nuevo subgrupo de muebles activos
 const createSubGrupoActivos = async (nombre: string, codigo: string) => {
   const query = `
     INSERT INTO SubgrupoActivos (nombre, codigo)
@@ -33,6 +37,7 @@ const createSubGrupoActivos = async (nombre: string, codigo: string) => {
   };
 };
 
+// Este modelo maneja la actualización de un subgrupo de muebles activos
 const updateSubGrupoActivos = async (id: number, nombre: string, codigo: string) => {
   const query = `
     UPDATE SubgrupoActivos
@@ -43,6 +48,7 @@ const updateSubGrupoActivos = async (id: number, nombre: string, codigo: string)
   return result;
 };
 
+// Este modelo maneja la eliminación de un subgrupo de muebles activos por su ID
 const deleteSubGrupoActivos = async (id: number) => {
   const query = `
     DELETE FROM SubgrupoActivos

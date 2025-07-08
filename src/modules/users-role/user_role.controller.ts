@@ -1,5 +1,8 @@
 import { UserRoleModel } from "./user_role.model";
 
+// Este controlador maneja las operaciones relacionadas con los roles de usuario
+
+// Maneja la obtención de todos los roles de usuario
 const getAllUserRoles = async (req: any, res: any) => {
   try {
     const roles = await UserRoleModel.getAllUserRoles();
@@ -17,6 +20,7 @@ const getAllUserRoles = async (req: any, res: any) => {
   }
 };
 
+// Maneja la obtención de un rol de usuario por su ID
 const getUserRoleById = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -35,6 +39,7 @@ const getUserRoleById = async (req: any, res: any) => {
   }
 };
 
+// Maneja la creación de un nuevo rol de usuario
 const createUserRole = async (req: any, res: any) => {
   try {
     const { name } = req.body;
@@ -55,6 +60,7 @@ const createUserRole = async (req: any, res: any) => {
   }
 };
 
+// Maneja la actualización de un rol de usuario existente
 const updateUserRole = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -81,6 +87,7 @@ const updateUserRole = async (req: any, res: any) => {
   }
 };
 
+// Maneja la eliminación de un rol de usuario por su ID
 const deleteUserRole = async (req: any, res: any) => {
   try {
     const { id } = req.params;
@@ -102,6 +109,7 @@ const deleteUserRole = async (req: any, res: any) => {
   }
 };
 
+// Exportamos los controladores para que puedan ser utilizados en las rutas
 export const UserRoleController = {
   getAllUserRoles,
   getUserRoleById,
