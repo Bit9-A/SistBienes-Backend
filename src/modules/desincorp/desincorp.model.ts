@@ -3,7 +3,7 @@ import { pool } from "../../database/index";
 // Obtener todos los registros de desincorporación
 const getAllDesincorp = async () => {
     const query = `
-        SELECT d.id, d.bien_id, d.fecha, d.valor, d.cantidad, d.concepto_id, d.dept_id,
+        SELECT d.id, d.bien_id, d.fecha, d.valor, d.cantidad, d.concepto_id, d.dept_id, d.observaciones,
                a.nombre_descripcion AS bien_nombre,
                a.numero_identificacion AS numero_identificacion,
                cd.nombre AS concepto_nombre,
@@ -26,7 +26,7 @@ const getAllDesincorp = async () => {
 // Obtener un registro de desincorporación por ID
 const getDesincorpById = async (id: number) => {
     const query = `
-        SELECT d.id, d.bien_id, d.fecha, d.valor, d.cantidad, d.concepto_id, d.dept_id,
+        SELECT d.id, d.bien_id, d.fecha, d.valor, d.cantidad, d.concepto_id, d.dept_id, d.observaciones,
                a.nombre_descripcion AS bien_nombre,
                a.numero_identificacion AS numero_identificacion,
                cd.nombre AS concepto_nombre,
@@ -49,6 +49,7 @@ const createDesincorp = async ({
     cantidad,
     concepto_id,
     dept_id,
+    observaciones,
 }: {
     bien_id: number;
     fecha: Date | string;
@@ -56,10 +57,11 @@ const createDesincorp = async ({
     cantidad: number;
     concepto_id: number;
     dept_id?: number;
+    observaciones?: string;
 }) => {
     const query = `
-        INSERT INTO DesincorporacionActivo (bien_id, fecha, valor, cantidad, concepto_id, dept_id)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO DesincorporacionActivo (bien_id, fecha, valor, cantidad, concepto_id, dept_id, observaciones)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
     const [result]: any = await pool.execute(query, [
         Number(bien_id),
@@ -68,10 +70,11 @@ const createDesincorp = async ({
         Number(cantidad),
         Number(concepto_id),
         dept_id ? Number(dept_id) : null,
+        observaciones || null,
     ]);
     // Recuperar el registro recién creado
     const desincorpQuery = `
-        SELECT id, bien_id, fecha, valor, cantidad, concepto_id, dept_id
+        SELECT id, bien_id, fecha, valor, cantidad, concepto_id, dept_id, observaciones
         FROM DesincorporacionActivo
         WHERE id = ?
     `;
@@ -88,10 +91,11 @@ const updateDesincorp = async (
         cantidad: number;
         concepto_id: number;
         dept_id: number;
+        observaciones: string;
     }>
 ) => {
     // Lista de campos válidos en la tabla DesincorporacionActivo
-    const validFields = ["bien_id", "fecha", "valor", "cantidad", "concepto_id", "dept_id"];
+    const validFields = ["bien_id", "fecha", "valor", "cantidad", "concepto_id", "dept_id", "observaciones"];
 
     // Filtrar solo los campos válidos presentes en updates
     const fieldsToUpdate = Object.keys(updates).filter(key => validFields.includes(key));

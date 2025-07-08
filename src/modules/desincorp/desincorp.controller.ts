@@ -32,7 +32,7 @@ const getDesincorpById = async (req: any, res: any) => {
 
 const createDesincorp = async (req: any, res: any) => {
     try {
-        const { bien_id, fecha, valor, cantidad, concepto_id, dept_id } = req.body;
+        const { bien_id, fecha, valor, cantidad, concepto_id, dept_id, observaciones } = req.body;
         if (!bien_id || !fecha || !valor || !cantidad || !concepto_id) {
             return res.status(400).json({ ok: false, message: "Por favor, complete todos los campos requeridos." });
         }
@@ -43,6 +43,7 @@ const createDesincorp = async (req: any, res: any) => {
             cantidad,
             concepto_id,
             dept_id,
+            observaciones,
         });
         return res.status(201).json({ ok: true, desincorp: newDesincorp });
     } catch (error) {
