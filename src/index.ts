@@ -27,7 +27,9 @@ import componentRoute from "./modules/components/components.route";
 import transferComponent from "./modules/transferComponent/transferComponent.route";
 
 
-import ExcelRoute from "./jobs/ExcelRoute";
+import ExcelRoute from "./routes/ExcelRoute";
+import QRLabels from "./routes/qrLabels.route";
+
 import "./jobs/closeOldSessions.job";
 
 import { config } from "dotenv";
@@ -90,6 +92,7 @@ app.use("/components", componentRoute);
 app.use("/transfer-component", transferComponent);
 app.use("/report", reportRoute);
 app.use("/excel", ExcelRoute);
+app.use("/labels", QRLabels);
 
 const PORT = process.env.PORT || 8000;
 

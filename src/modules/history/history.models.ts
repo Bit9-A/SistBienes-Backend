@@ -7,7 +7,6 @@ const getGoodHistoryById = async (goodId: number) => {
     A.nombre_descripcion AS bien_nombre, 
     CD.nombre AS estado_desincorporacion,
     D.nombre AS dept_actual,
-    CONCAT(U.nombre, ' ', U.apellido) AS funcionario_nombre,
     I.fecha AS fecha_incorporacion,
     D1.nombre AS dept_origen,
     D2.nombre AS dept_destino,
@@ -19,7 +18,6 @@ const getGoodHistoryById = async (goodId: number) => {
     FROM Activos A
     LEFT JOIN Departamento D ON A.dept_id = D.id
     LEFT JOIN IncorporacionActivo I ON A.id = I.bien_id
-    LEFT JOIN Usuarios U ON I.dept_id = U.dept_id
     LEFT JOIN TransferenciaActivo BT ON BT.id_mueble = A.id  
     LEFT JOIN Traslado T ON BT.id_traslado = T.id 
     LEFT JOIN Departamento D1 ON T.origen_id = D1.id
