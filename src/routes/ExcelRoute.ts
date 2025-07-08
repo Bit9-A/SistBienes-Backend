@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
-import { exportBM1ByDepartment } from './ExcelBM1'; // Adjust path if necessary
+import { exportBM1ByDepartment } from '../jobs/ExcelBM1'; // Adjust path if necessary
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
