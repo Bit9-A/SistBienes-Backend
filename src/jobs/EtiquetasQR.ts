@@ -109,9 +109,9 @@ Componentes: ${asset.components_description || ''}
     // Escudo
     page.drawImage(embeddedEscudo, {
       x: x + labelWidth - 45, // Ajuste para posicionar en la parte superior derecha
-      y: y + labelHeight - 40,
+      y: y + labelHeight - 38,
       width: 40,
-      height: 38,
+      height: 36,
     });
 
     // Número de Identificación
@@ -137,7 +137,7 @@ Componentes: ${asset.components_description || ''}
     // QR Code
     page.drawImage(embeddedQrImage, {
       x: x + labelWidth - 90, // Derecha de la etiqueta
-      y: y + labelHeight - 110, // Debajo del escudo
+      y: y + labelHeight - 113, // Debajo del escudo
       width: 70,
       height: 70,
     });
