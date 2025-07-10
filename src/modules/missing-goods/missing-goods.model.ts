@@ -128,6 +128,60 @@ const deleteMissingGoods = async (id: number) => {
     return result;
 };
 
+// Obtener bienes faltantes por departamento y responsable
+const getMissingGoodsByDeptAndResponsible = async (deptId: number, responsableId: number) => {
+    const query = `
+        SELECT af.id, af.unidad AS dept_id, af.existencias, af.diferencia_cantidad, af.diferencia_valor,
+               af.funcionario_id, af.jefe_id, af.observaciones, af.fecha, af.bien_id,
+               a.nombre_descripcion AS bien_nombre,
+               a.numero_identificacion AS numero_identificacion,
+               a.numero_serial, a.valor_unitario,
+               ma.nombre AS marca_nombre,
+               mo.nombre AS modelo_nombre,
+               ea.nombre AS estado_nombre,
+               d.nombre AS departamento
+        FROM ActivosFaltantes af
+        JOIN Activos a ON af.bien_id = a.id
+        LEFT JOIN Departamento d ON af.unidad = d.id
+        LEFT JOIN Marca ma ON a.marca_id = ma.id
+        LEFT JOIN Modelo mo ON a.modelo_id = mo.id
+        LEFT JOIN EstadoActivo ea ON a.estado_id = ea.id
+        WHERE af.unidad = ? AND af.funcionario_id = ?
+    `;
+    const [rows] = await pool.execute(query, [deptId, responsableId]);
+    return rows as any[];
+};
+
+// Obtener bienes faltantes por ID con detalles completos
+const getMissingGoodsByIdWithDetails = async (id: number) => {
+    const query = `
+        SELECT af.id, af.unidad AS dept_id, af.existencias, af.diferencia_cantidad, af.diferencia_valor,
+               af.funcionario_id, af.jefe_id, af.observaciones, af.fecha, af.bien_id,
+               a.nombre_descripcion AS bien_nombre,
+               a.numero_identificacion AS numero_identificacion,
+               a.numero_serial, a.valor_unitario,
+               sg.codigo AS subgrupo_codigo,
+               ma.nombre AS marca_nombre,
+               mo.nombre AS modelo_nombre,
+               ea.nombre AS estado_nombre,
+               d.nombre AS departamento,
+               CONCAT(u.nombre, ' ', u.apellido) AS funcionario_nombre,
+               CONCAT(j.nombre, ' ', j.apellido) AS jefe_nombre
+        FROM ActivosFaltantes af
+        JOIN Activos a ON af.bien_id = a.id
+        LEFT JOIN Departamento d ON af.unidad = d.id
+        LEFT JOIN SubgrupoActivos sg ON a.subgrupo_id = sg.id
+        LEFT JOIN Marca ma ON a.marca_id = ma.id
+        LEFT JOIN Modelo mo ON a.modelo_id = mo.id
+        LEFT JOIN EstadoActivo ea ON a.estado_id = ea.id
+        LEFT JOIN Usuarios u ON af.funcionario_id = u.id
+        LEFT JOIN Usuarios j ON af.jefe_id = j.id
+        WHERE af.id = ?
+    `;
+    const [rows] = await pool.execute(query, [id]);
+    return (rows as any[])[0];
+};
+
 // Exportamos el modelo para que pueda ser utilizado en los controladores
 export const missingGoodsModel = {
     getAllMissingGoods,
@@ -135,4 +189,6 @@ export const missingGoodsModel = {
     createMissingGoods,
     updateMissingGoods,
     deleteMissingGoods,
+    getMissingGoodsByDeptAndResponsible,
+    getMissingGoodsByIdWithDetails,
 };

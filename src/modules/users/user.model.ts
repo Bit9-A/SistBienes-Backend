@@ -103,6 +103,21 @@ const deleteUser = async (id: number) => {
   return result;
 };
 
+// Obtener detalles completos de un usuario por su ID (incluyendo rol y departamento)
+const getUserDetailsById = async (id: number) => {
+  const query = `
+    SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
+           u.dept_id, d.nombre as dept_nombre, u.cedula, u.username, u.isActive,
+           ur.nombre AS rol_nombre
+    FROM Usuarios u
+    LEFT JOIN Departamento d ON u.dept_id = d.id
+    LEFT JOIN TipoUsuario ur ON u.tipo_usuario = ur.id
+    WHERE u.id = ?
+  `;
+  const [rows] = await pool.execute(query, [id]);
+  return (rows as any[])[0];
+};
+
 // Exportamos el modelo para que pueda ser utilizado en los controladores
 export const UserModel = {
   getAllUsers,
@@ -110,4 +125,5 @@ export const UserModel = {
   getUsersByDeptId,
   updateUser,
   deleteUser,
+  getUserDetailsById,
 };
