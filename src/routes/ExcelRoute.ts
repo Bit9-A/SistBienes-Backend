@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { exportBM1ByDepartment } from '../jobs/ExcelBM1';
 import { exportBM2ByDepartment } from '../jobs/ExcelBM2'; // Importar la nueva función
 import { exportBM3ByMissingGoodsId } from '../jobs/ExcelBM3'; // Importar la nueva función
+import { generateBM4Pdf } from '../jobs/BM4'; // Importar la nueva función
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -174,6 +175,55 @@ router.post('/bm3', async (req: any, res: any) => {
       res.status(500).json({ message: 'Error generating BM3 Excel file', error: error.message });
     } else {
       res.status(500).json({ message: 'An unknown error occurred during BM3 Excel file generation.' });
+    }
+  }
+});
+
+// Nueva ruta para generar el BM4 (reporte mensual en PDF)
+router.post('/bm4', async (req: any, res: any) => {
+  const { dept_id, mes, año, responsable_id } = req.body;
+
+  if (!dept_id || !mes || !año || !responsable_id) {
+    return res.status(400).json({ message: 'dept_id, mes, año, and responsable_id are required.' });
+  }
+
+  try {
+    const generatedFilePaths = await generateBM4Pdf(
+      dept_id,
+      mes,
+      año,
+      responsable_id,
+      tempDir
+    );
+
+    if (generatedFilePaths.length === 0) {
+      return res.status(500).json({ message: 'No PDF file was generated for BM4.' });
+    }
+
+    const filePathToSend = generatedFilePaths[0];
+    const fileName = path.basename(filePathToSend);
+
+    res.download(filePathToSend, fileName, (err: Error | null) => {
+      if (err) {
+        console.error('Error sending file:', err);
+      }
+      generatedFilePaths.forEach(file => {
+        fs.unlink(file, (unlinkErr) => {
+          if (unlinkErr) {
+            console.error(`Error deleting temporary file ${file}:`, unlinkErr);
+          } else {
+            console.log(`Temporary file deleted: ${file}`);
+          }
+        });
+      });
+    });
+
+  } catch (error: unknown) {
+    console.error('Error generating BM4 PDF file:', error);
+    if (error instanceof Error) {
+      res.status(500).json({ message: 'Error generating BM4 PDF file', error: error.message });
+    } else {
+      res.status(500).json({ message: 'An unknown error occurred during BM4 PDF file generation.' });
     }
   }
 });

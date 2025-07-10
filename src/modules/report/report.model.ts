@@ -91,5 +91,29 @@ export const reportModel = {
   getDisincorporationsConcept60ByMonthAndDepartment,
   getDisincorporationsExceptConcept60ByMonthAndDepartment,
   getActiveAssetsPreviousMonthByDepartment,
-  getFinalAssetsCountByMonth
+  getFinalAssetsCountByMonth,
+  // Nueva función para obtener todos los datos del reporte mensual
+  getMonthlyReportData: async (month: number, year: number, deptId: number) => {
+    const [
+      totalIncorporations,
+      totalDisincorporationsConcept60,
+      totalDisincorporationsExceptConcept60,
+      previousExistence,
+      finalAssets
+    ] = await Promise.all([
+      reportModel.getIncorporationsByMonthAndDepartment(month, year, deptId),
+      reportModel.getDisincorporationsConcept60ByMonthAndDepartment(month, year, deptId),
+      reportModel.getDisincorporationsExceptConcept60ByMonthAndDepartment(month, year, deptId),
+      reportModel.getActiveAssetsPreviousMonthByDepartment(month, year, deptId),
+      reportModel.getFinalAssetsCountByMonth(month, year, deptId)
+    ]);
+
+    return {
+      total_incorporations: totalIncorporations.total_incorporations,
+      total_disincorporations_concept_60: totalDisincorporationsConcept60.total_disincorporations,
+      total_disincorporations_except_concept_60: totalDisincorporationsExceptConcept60.total_disincorporations,
+      previous_existence: previousExistence.existencia_anterior,
+      final_existence: finalAssets.existencia_final
+    };
+  }
 };
