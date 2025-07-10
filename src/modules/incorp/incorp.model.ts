@@ -147,10 +147,45 @@ const deleteIncorp = async (id: number) => {
 };
 
 // Exportamos el modelo para que pueda ser utilizado en los controladores
+// Obtener registros de incorporación por mes, año y departamento
+const getIncorpsByMonthYearDept = async (mes: number, año: number, deptId: number) => {
+  const query = `
+    SELECT i.id, i.bien_id, i.fecha, i.valor, i.cantidad, i.concepto_id, i.dept_id, i.isActive, i.observaciones,
+           a.nombre_descripcion AS bien_nombre,
+           a.numero_identificacion AS numero_identificacion,
+           ci.nombre AS concepto_nombre,
+           ci.codigo AS concepto_codigo,
+           d.nombre AS dept_nombre,
+           sg.codigo AS subgrupo_codigo,
+           ma.nombre AS marca_nombre,
+           mo.nombre AS modelo_nombre,
+           ea.nombre AS estado_nombre
+    FROM IncorporacionActivo i
+    JOIN Activos a ON i.bien_id = a.id
+    JOIN ConceptoIncorporacion ci ON i.concepto_id = ci.id
+    LEFT JOIN Departamento d ON i.dept_id = d.id
+    LEFT JOIN SubgrupoActivos sg ON a.subgrupo_id = sg.id
+    LEFT JOIN Marca ma ON a.marca_id = ma.id
+    LEFT JOIN Modelo mo ON a.modelo_id = mo.id
+    LEFT JOIN EstadoActivo ea ON a.estado_id = ea.id
+    WHERE MONTH(i.fecha) = ? AND YEAR(i.fecha) = ? AND i.dept_id = ?
+  `;
+  const [rows] = await pool.execute(query, [mes, año, deptId]);
+  return (rows as any[]).map(row => ({
+    ...row,
+    fecha: new Date(row.fecha).toISOString(),
+    bien_nombre: row.bien_nombre || "N/A",
+    numero_identificacion: row.numero_identificacion || "N/A",
+    dept_nombre: row.dept_nombre || "N/A",
+    concepto_codigo: row.concepto_codigo || "N/A", // Asegurar que el código del concepto se mapee
+  }));
+};
+
 export const IncorpModel = {
   createIncorp,
   findIncorpById,
   updateIncorp,
   deleteIncorp,
   getAllIncorps,
+  getIncorpsByMonthYearDept,
 };

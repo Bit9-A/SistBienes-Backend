@@ -8,9 +8,9 @@ const getAllTransfers = async () => {
                COUNT(ta.id) AS cantidad
         FROM Traslado t
         LEFT JOIN TransferenciaActivo ta ON t.id = ta.id_traslado
-        JOIN Departamento d ON t.origen_id = d.id
-        JOIN Departamento d2 ON t.destino_id = d2.id
-        JOIN Usuarios u ON t.responsable_id = u.id
+        LEFT JOIN Departamento d ON t.origen_id = d.id
+        LEFT JOIN Departamento d2 ON t.destino_id = d2.id
+        LEFT JOIN Usuarios u ON t.responsable_id = u.id
         GROUP BY t.id
     `;
     const [rows] = await pool.execute(query);
@@ -23,16 +23,16 @@ const getTransferById = async (id: number) => {
         SELECT t.*, CONCAT(u.nombre,' ',u.apellido) as responsable,
                d.nombre as origen_nombre, d2.nombre as destino_nombre
         FROM Traslado t
-        JOIN Usuarios u ON t.responsable_id = u.id
-        JOIN Departamento d ON t.origen_id = d.id
-        JOIN Departamento d2 ON t.destino_id = d2.id
+        LEFT JOIN Usuarios u ON t.responsable_id = u.id
+        LEFT JOIN Departamento d ON t.origen_id = d.id
+        LEFT JOIN Departamento d2 ON t.destino_id = d2.id
         WHERE t.id = ?
     `;
     const bienesQuery = `
         SELECT ta.*, a.nombre_descripcion, a.numero_identificacion, ea.nombre as estado
         FROM TransferenciaActivo ta
-        JOIN Activos a ON ta.id_mueble = a.id
-        JOIN EstadoActivo ea ON a.estado_id = ea.id
+        LEFT JOIN Activos a ON ta.id_mueble = a.id
+        LEFT JOIN EstadoActivo ea ON a.estado_id = ea.id
         WHERE ta.id_traslado = ?
     `;
     const [trasladoRows] = await pool.execute(trasladoQuery, [id]) as [any[], any];
