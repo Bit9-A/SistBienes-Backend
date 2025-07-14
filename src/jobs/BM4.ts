@@ -95,14 +95,14 @@ export async function generateBM4Pdf(
 
   // Firmas
   page.drawText(`9. Elaborado Por:`, { x: x, y: y, font, size: fontSize });
-  page.drawText(`10. Aprobado Por:`, { x: x + 200, y: y, font, size: fontSize });
-  page.drawText(`11. Firma del Responsable Patrimonial`, { x: x + 400, y: y, font, size: fontSize });
+  page.drawText(`10. Aprobado Por:`, { x: x + 170, y: y, font, size: fontSize });
+  page.drawText(`11. Firma del Responsable Patrimonial`, { x: x + 305, y: y, font, size: fontSize });
   y -= lineHeight * 3; // Espacio para la firma
 
   page.drawText(`_________________________`, { x: x, y: y, font, size: fontSize });
-  page.drawText(`_________________________`, { x: x + 200, y: y, font, size: fontSize });
-  page.drawText(`_________________________`, { x: x + 400, y: y, font, size: fontSize });
-  y -= lineHeight;
+  page.drawText(`_________________________`, { x: x + 160, y: y, font, size: fontSize });
+  page.drawText(`_________________________`, { x: x + 335, y: y, font, size: fontSize });
+  y -= lineHeight; 
 
   page.drawText(`${responsableNombre} ${responsableApellido}`, { x: x, y: y, font, size: fontSize });
   page.drawText(`Cargo: ${responsableRol}`, { x: x, y: y - lineHeight, font, size: fontSize });

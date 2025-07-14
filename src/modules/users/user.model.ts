@@ -118,6 +118,21 @@ const getUserDetailsById = async (id: number) => {
   return (rows as any[])[0];
 };
 
+
+const getUserByDeptJefe = async (deptId: number) => {
+  const query = `
+   SELECT u.id, concat(u.nombre,' ',u.apellido) as nombre, u.email, u.telefono, u.cedula, u.username, d.nombre as departamento
+    FROM Usuarios u
+    JOIN Departamento d ON u.dept_id = d.id
+    JOIN TipoUsuario t ON u.tipo_usuario = t.id
+    WHERE u.tipo_usuario = 3 and d.id = ? AND u.isActive = 1
+    ORDER BY u.nombre, u.apellido
+    LIMIT 1;
+  `;
+  const [rows] = await pool.execute(query, [deptId]);
+  return (rows as any[])[0];
+};
+
 // Exportamos el modelo para que pueda ser utilizado en los controladores
 export const UserModel = {
   getAllUsers,
@@ -126,4 +141,5 @@ export const UserModel = {
   updateUser,
   deleteUser,
   getUserDetailsById,
+  getUserByDeptJefe
 };

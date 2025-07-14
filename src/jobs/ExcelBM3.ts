@@ -24,6 +24,7 @@ export async function exportBM3ByMissingGoodsId(
   let responsableNombre: string = "";
   let responsableRol: string = "";
   let responsableDepartamento: string = "";
+  let jefeNombre: string = ""; // Nuevo: para el nombre del jefe
 
   // 1. Obtener datos del bien faltante específico
   missingAsset = await missingGoodsModel.getMissingGoodsByIdWithDetails(missingGoodsId);
@@ -39,6 +40,14 @@ export async function exportBM3ByMissingGoodsId(
     responsableNombre = `${responsableData.nombre} ${responsableData.apellido}`;
     responsableRol = responsableData.rol_nombre || "N/A";
     responsableDepartamento = responsableData.dept_nombre || "N/A";
+  }
+
+  // 3. Obtener datos del jefe de departamento
+  if (missingAsset.dept_id) { // Usar missingAsset.unidad que se mapea a dept_id
+    const jefeData = await UserModel.getUserByDeptJefe(missingAsset.dept_id);
+    if (jefeData) {
+      jefeNombre = jefeData.nombre || "N/A";
+    }
   }
 
   // Obtener el nombre del departamento del bien faltante
@@ -71,8 +80,8 @@ export async function exportBM3ByMissingGoodsId(
 
   const addImagesToWorksheet = (targetWs: ExcelJS.Worksheet) => {
     targetWs.addImage(logoImpresionImageId, { tl: { col: 0.5, row: 0.2 }, ext: { width: 150, height: 50 } });
-    targetWs.addImage(escudoImageId, { tl: { col: 8.8, row: 0.2 }, ext: { width: 80, height: 80 } });
-    targetWs.addImage(redesImageId, { tl: { col: 0.5, row: 24.5 }, ext: { width: 120, height: 40 } });
+    targetWs.addImage(escudoImageId, { tl: { col: 8.8, row: 0.1 }, ext: { width: 70, height: 70 } });
+    targetWs.addImage(redesImageId, { tl: { col: 0.5, row: 25 }, ext: { width: 120, height: 40 } });
   };
 
   const copyTemplateContent = (sourceWs: ExcelJS.Worksheet, targetWs: ExcelJS.Worksheet) => {
@@ -95,7 +104,7 @@ export async function exportBM3ByMissingGoodsId(
         targetWs.getColumn(index + 1).width = column.width;
       }
     });
-    targetWs.getCell('G1').value = `N° de Hoja {{PAGINAN}}/{{TOTALN}}`; // Ajustar celda para número de hoja
+    // No establecer G1 aquí, se hará después de los reemplazos generales
   };
 
   for (let pagina = 0; pagina < totalPaginas; pagina++) {
@@ -104,7 +113,7 @@ export async function exportBM3ByMissingGoodsId(
       ws = workbook.worksheets[0];
       ws.name = `BM3 - Pagina 1`;
       addImagesToWorksheet(ws);
-      ws.getCell('G1').value = `N° de Hoja {{PAGINAN}}/{{TOTALN}}`;
+      // No establecer G1 aquí, se hará después de los reemplazos generales
     } else {
       ws = workbook.addWorksheet(`BM3 - Pagina ${pagina + 1}`);
       copyTemplateContent(workbook.worksheets[0], ws);
@@ -120,14 +129,19 @@ export async function exportBM3ByMissingGoodsId(
             .replace(/{{DEPARTAMENTO}}/g, departamentoNombre || "")
             .replace(/{{PARROQUIA}}/g, PARROQUIA)
             .replace(/{{FECHA}}/g, FECHA)
-            .replace(/{{PAGINAN}}/g, String(pagina + 1))
-            .replace(/{{TOTALN}}/g, String(totalPaginas))
+            .replace(/{{PAGINAN}}/g, String(pagina + 1)) // Corregido: reemplazar solo el número de página actual
+            .replace(/{{TOTALN}}/g, String(totalPaginas)) // Corregido: reemplazar solo el número total de páginas
             .replace(/{{RESPONSABLE}}/g, responsableNombre || "")
             .replace(/{{ROL}}/g, responsableRol || "")
-            .replace(/{{DEPARTAMENTORESPONSABLE}}/g, responsableDepartamento || "");
+            .replace(/{{DEPARTAMENTORESPONSABLE}}/g, responsableDepartamento || "")
+            .replace(/{{JEFE}}/g, jefeNombre || "")
+            .replace(/{{OBSERVACIONES}}/g, missingAsset.observaciones || "");
         }
       });
     });
+
+    // Establecer el valor de I5
+    ws.getCell('I5').value = `Hoja N° : ${pagina + 1}/${totalPaginas}`;
 
     // Insertar los bienes en la tabla (ajusta la fila de inicio según tu plantilla)
     const startRow = 14; // Fila de inicio de la tabla en plantilla-bm3.xlsx

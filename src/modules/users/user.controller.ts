@@ -106,6 +106,26 @@ const deleteUser = async (req: any, res: any) => {
   }
 };
 
+// Maneja la obtención del jefe de departamento por ID de departamento
+const getUserByDeptJefe = async (req: any, res: any) =>
+  {
+    try {
+      const { deptId } = req.params;
+      const jefe = await UserModel.getUserByDeptJefe(Number(deptId));
+      if (!jefe) {
+        return res.status(404).json({ ok: false, message: "Jefe de departamento no encontrado" });
+      }
+      return res.status(200).json({ ok: true, jefe });
+    } catch (error) { 
+      console.error("Error al obtener el jefe de departamento:", error);
+      return res.status(500).json({
+        ok: false,
+        message: "Error del servidor",
+        error: error instanceof Error ? error.message : "Error desconocido",
+      });
+    }
+  }
+
 // Exportamos los controladores para que puedan ser utilizados en las rutas
 export const UserController = {
   getAllUsers,
@@ -113,4 +133,5 @@ export const UserController = {
   getUsersByDeptId,
   updateUser,
   deleteUser,
+  getUserByDeptJefe
 };

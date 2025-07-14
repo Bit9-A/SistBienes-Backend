@@ -18,4 +18,7 @@ router.put("/:id", UserController.updateUser);
 // Ruta para eliminar un usuario
 router.delete("/:id", UserController.deleteUser);
 
+// Ruta para obtener el jefe de departamento por ID de departamento
+router.get("/jefe/:deptId", UserController.getUserByDeptJefe);
+
 export default router;
