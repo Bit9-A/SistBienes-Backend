@@ -61,7 +61,7 @@ export async function exportBM3ByMissingGoodsId(
   console.log(`[ExcelBM3] Total pages to generate: ${totalPaginas}`);
 
   // Ruta absoluta a la plantilla
-  const plantillaPath = path.resolve(__dirname, "../../plantillas/plantilla-bm3.xlsx");
+  const plantillaPath = path.resolve(__dirname, "../plantillas/plantilla-bm3.xlsx");
   console.log(`[ExcelBM3] Template path: ${plantillaPath}`);
   const plantillaBuffer = fs.readFileSync(plantillaPath);
   const generatedFilePaths: string[] = [];
@@ -70,9 +70,9 @@ export async function exportBM3ByMissingGoodsId(
   await workbook.xlsx.load(plantillaBuffer as any);
 
   // Cargar imágenes una sola vez para el workbook (si aplica, como en BM2)
-  const escudoPath = path.resolve(__dirname, "../../images/Escudo.jpg");
-  const logoImpresionPath = path.resolve(__dirname, "../../images/LogoImpresion.jpg");
-  const redesPath = path.resolve(__dirname, "../../images/Redes.png");
+  const escudoPath = path.resolve(__dirname, "../images/Escudo.jpg");
+  const logoImpresionPath = path.resolve(__dirname, "../images/LogoImpresion.jpg");
+  const redesPath = path.resolve(__dirname, "../images/Redes.png");
 
   const escudoImageId = workbook.addImage({ filename: escudoPath, extension: 'jpeg' });
   const logoImpresionImageId = workbook.addImage({ filename: logoImpresionPath, extension: 'jpeg' });

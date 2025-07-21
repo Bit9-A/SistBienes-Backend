@@ -6,8 +6,16 @@ import { reportModel } from '../modules/report/report.model';
 import { UserModel } from '../modules/users/user.model';
 import { DeptModel } from '../modules/dept/dept.model';
 
+// Cargar y incrustar imágenes una sola vez
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const logoImpresionPath = path.resolve(__dirname, "../images/LogoImpresion.jpg");
+const escudoPath = path.resolve(__dirname, "../images/Escudo.jpg");
+
+const logoImpresionBytes = fs.readFileSync(logoImpresionPath);
+const escudoBytes = fs.readFileSync(escudoPath);
+
 
 /**
  * Genera un reporte BM4 en formato PDF.

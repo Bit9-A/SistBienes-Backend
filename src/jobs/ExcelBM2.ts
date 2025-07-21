@@ -62,7 +62,7 @@ export async function exportBM2ByDepartment(
   console.log(`[ExcelBM2] Total pages to generate: ${totalPaginas}`);
 
   // Ruta absoluta a la plantilla
-  const plantillaPath = path.resolve(__dirname, "../../plantillas/plantilla-bm2.xlsx");
+  const plantillaPath = path.resolve(__dirname, "../plantillas/plantilla-bm2.xlsx");
   console.log(`[ExcelBM2] Template path: ${plantillaPath}`);
   const plantillaBuffer = fs.readFileSync(plantillaPath);
   const generatedFilePaths: string[] = [];
@@ -71,9 +71,9 @@ export async function exportBM2ByDepartment(
   await workbook.xlsx.load(plantillaBuffer as any);
 
   // Cargar imágenes una sola vez para el workbook
-  const escudoPath = path.resolve(__dirname, "../../images/Escudo.jpg");
-  const logoImpresionPath = path.resolve(__dirname, "../../images/LogoImpresion.jpg");
-  const redesPath = path.resolve(__dirname, "../../images/Redes.png");
+  const escudoPath = path.resolve(__dirname, "../images/Escudo.jpg");
+  const logoImpresionPath = path.resolve(__dirname, "../images/LogoImpresion.jpg");
+  const redesPath = path.resolve(__dirname, "../images/Redes.png");
 
   console.log(`[ExcelBM2] Intentando cargar imagen: ${escudoPath}`);
   const escudoImageId = workbook.addImage({ filename: escudoPath, extension: 'jpeg' });

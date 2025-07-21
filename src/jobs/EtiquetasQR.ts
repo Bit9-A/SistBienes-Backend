@@ -41,8 +41,8 @@ export async function generateQRLabelsByDepartment(
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
   // Cargar y incrustar imágenes una sola vez
-  const logoImpresionPath = path.resolve(__dirname, "../../images/LogoImpresion.jpg");
-  const escudoPath = path.resolve(__dirname, "../../images/Escudo.jpg");
+  const logoImpresionPath = path.resolve(__dirname, "../images/LogoImpresion.jpg");
+  const escudoPath = path.resolve(__dirname, "../images/Escudo.jpg");
 
   const logoImpresionBytes = fs.readFileSync(logoImpresionPath);
   const escudoBytes = fs.readFileSync(escudoPath);

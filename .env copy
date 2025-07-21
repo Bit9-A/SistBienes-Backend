@@ -1,0 +1,5 @@
+DB_HOST=tramway.proxy.rlwy.net
+DB_USER=root
+DB_PASSWORD=mCPPNXgtYalSiexfkDveNCvEIVVgWKyh
+DB_NAME=SistBienes
+DB_PORT=25063
