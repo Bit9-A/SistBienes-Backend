@@ -67,13 +67,13 @@ export async function exportBM1ByDepartment(
 
   // Función para añadir imágenes a una hoja de trabajo específica
   const addImagesToWorksheet = (targetWs: ExcelJS.Worksheet) => {
-    targetWs.addImage(logoImpresionImageId, { tl: { col: 0.5, row: 0.5 }, ext: { width: 150, height: 50 } });
-    targetWs.addImage(escudoImageId, { tl: { col: 6.5, row: 0.5 }, ext: { width: 80, height: 80 } });
+    targetWs.addImage(logoImpresionImageId, { tl: { col: 0.5, row: 0.2 }, ext: { width: 150, height: 50 } });
+    targetWs.addImage(escudoImageId, { tl: { col: 6.5, row: 0.05 }, ext: { width: 70, height: 60 } });
     targetWs.addImage(redesImageId, { tl: { col: 0.5, row: 24.5 }, ext: { width: 120, height: 40 } });
     console.log(`[ExcelBM1] Imágenes añadidas a la hoja de trabajo: ${targetWs.name}`);
   };
 
-  // Función para copiar el contenido de la primera hoja a una nueva hoja (sin imágenes)
+  // Función para copiar el contenido de la primera hoja a una nueva hoja 
   const copyTemplateContent = (sourceWs: ExcelJS.Worksheet, targetWs: ExcelJS.Worksheet) => {
     sourceWs.eachRow({ includeEmpty: true }, (row, rowNumber) => {
       const newRow = targetWs.getRow(rowNumber);
@@ -128,8 +128,8 @@ export async function exportBM1ByDepartment(
       });
     });
 
-    // Insertar los bienes en la tabla (ajusta la fila de inicio según tu plantilla)
-    const startRow = 9; // Cambia según tu plantilla (por ejemplo, si la tabla empieza en la fila 10)
+    // Insertar los bienes en la tabla
+    const startRow = 9; // Cambia según la plantilla 
     const bienesPagina = assets.slice(pagina * BIENES_POR_PAGINA, (pagina + 1) * BIENES_POR_PAGINA);
 
     bienesPagina.forEach((asset, idx) => {
@@ -140,6 +140,7 @@ export async function exportBM1ByDepartment(
       row.getCell(4).value = asset.numero_identificacion || "";
       row.getCell(5).value = [
         asset.nombre_descripcion,
+        "S/N: " +
         asset.numero_serial || "",
         asset.marca_nombre,
         asset.modelo_nombre,

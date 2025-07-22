@@ -90,7 +90,7 @@ export async function exportBM2ByDepartment(
   // Función para añadir imágenes a una hoja de trabajo específica
   const addImagesToWorksheet = (targetWs: ExcelJS.Worksheet) => {
     targetWs.addImage(logoImpresionImageId, { tl: { col: 0.5, row: 0.2 }, ext: { width: 150, height: 50 } });
-    targetWs.addImage(escudoImageId, { tl: { col: 8.8, row: 0.2 }, ext: { width: 80, height: 80 } }); // Ajustado a I1 (col 8.5 para centrar en I)
+    targetWs.addImage(escudoImageId, { tl: { col: 8.8, row: 0.05 }, ext: { width: 65, height: 60 } }); // Ajustado a I1 (col 8.5 para centrar en I)
     targetWs.addImage(redesImageId, { tl: { col: 0.5, row: 24.5 }, ext: { width: 120, height: 40 } }); // Ajustado para subir la imagen de redes
     console.log(`[ExcelBM2] Imágenes añadidas a la hoja de trabajo: ${targetWs.name}`);
   };
