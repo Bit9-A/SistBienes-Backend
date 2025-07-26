@@ -52,8 +52,12 @@ console.log("Current directory:", __dirname);
 const app = express();
 
 // Middleware para manejar JSON
+
 app.use(express.json());
 app.use(cors());
+
+
+// Configuración de variables de entorno
 app.use(
   cors({
     //permitir todas las solicitudes de origen
@@ -62,13 +66,13 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
 // Rutas
 
-app.use("/", homeRoute);
+
 app.use("/auth", authRoute);
 
 app.use(verifyToken);
+app.use("/", homeRoute);
 app.use("/user", userRoute);
 app.use("/subgroup", subgroupRoute);
 app.use("/incorp", incorpRoute);

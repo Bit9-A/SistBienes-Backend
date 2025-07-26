@@ -95,7 +95,7 @@ export async function exportBM2ByDepartment(
     console.log(`[ExcelBM2] Imágenes añadidas a la hoja de trabajo: ${targetWs.name}`);
   };
 
-  // Función para copiar el contenido de la primera hoja a una nueva hoja (sin imágenes)
+  // Función para copiar el contenido de la primera hoja a una nueva hoja
   const copyTemplateContent = (sourceWs: ExcelJS.Worksheet, targetWs: ExcelJS.Worksheet) => {
     sourceWs.eachRow({ includeEmpty: true }, (row, rowNumber) => {
       const newRow = targetWs.getRow(rowNumber);

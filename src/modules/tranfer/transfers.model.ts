@@ -29,10 +29,11 @@ const getTransferById = async (id: number) => {
         WHERE t.id = ?
     `;
     const bienesQuery = `
-        SELECT ta.*, a.nombre_descripcion, a.numero_identificacion, ea.nombre as estado
+        SELECT ta.*, a.nombre_descripcion, a.numero_identificacion, ea.nombre as estado, d.nombre as departamento
         FROM TransferenciaActivo ta
         LEFT JOIN Activos a ON ta.id_mueble = a.id
         LEFT JOIN EstadoActivo ea ON a.estado_id = ea.id
+        LEFT JOIN Departamento d ON a.dept_id = d.id
         WHERE ta.id_traslado = ?
     `;
     const [trasladoRows] = await pool.execute(trasladoQuery, [id]) as [any[], any];
