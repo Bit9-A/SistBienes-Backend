@@ -229,33 +229,48 @@ const profile = async (req: any, res: any) => {
 };
 
 // Este controlador maneja el restablecimiento de contraseña
-const resetPassword = async (req: any, res: any) => {
+const changePassword = async (req: any, res: any) => {
   try {
-    const { newPassword, token } = req.body;
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ ok: false, message: "No se proporciona ningún token" });
+    }
 
-    const user = await AuthModel.findUserByResetToken(token);
-    // Validar que se proporcione un nuevo password y un token
+    const [bearer, token] = authHeader.split(" ");
+    if (bearer !== "Bearer" || !token) {
+      return res.status(401).json({ ok: false, message: "Formato de token no válido" });
+    }
+    const userId = req.user?.userId;
+    if (!userId) {
+      return res.status(401).json({ ok: false, message: "Usuario no autenticado" });
+    }
+
+    const user = await AuthModel.findUserPasswordById(userId)
     if (!user) {
-      return res.status(400).json({ ok: false, message: "Token inválido o caducado" });
+      return res.status(403).json({ ok: false, message: "Token no válido" });
     }
-    //  Validar que se proporcione un nuevo password
-    if (user.reset_token_expiration < Date.now()) {
-      return res.status(400).json({ ok: false, message: "El token ha expirado" });
+
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ ok: false, message: "Debe proporcionar la contraseña actual y la nueva." });
     }
-    // Validar que el nuevo password tenga al menos 6 caracteres
+
+    const isMatch = await bcryptjs.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ ok: false, message: "La contraseña actual es incorrecta." });
+    }
+
     const salt = await bcryptjs.genSalt(10);
-    const hashedPassword = await bcryptjs.hash(newPassword, salt);
-    // Actualizar la contraseña del usuario
-    await AuthModel.updateUserPassword(user.id, hashedPassword);
-    // Limpiar el token de restablecimiento de contraseña
-    await AuthModel.clearPasswordResetToken(user.id);
-    // Eliminar la cookie del token de restablecimiento de contraseña
-    res.status(200).json({ ok: true, message: "Restablecimiento de contraseña exitoso" });
+    const hashedNewPassword = await bcryptjs.hash(newPassword, salt);
+
+    await AuthModel.updateUserPassword(user.id, hashedNewPassword);
+
+    return res.json({ ok: true, message: "Contraseña actualizada correctamente." });
   } catch (error) {
-    console.error("Error de restablecimiento de contraseña:", error);
-    res.status(500).json({
+    console.error("Error al cambiar la contraseña:", error);
+    return res.status(500).json({
       ok: false,
-      msg: "Error del servidor",
+      message: "Error del servidor",
       error: error instanceof Error ? error.message : "Error desconocido",
     });
   }
@@ -266,6 +281,6 @@ export const AuthController = {
   register,
   login,
   logout,
-  resetPassword,
+  changePassword,
   profile
 };

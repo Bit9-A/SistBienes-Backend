@@ -14,7 +14,7 @@ router.post("/login", AuthController.login);
 router.post("/logout", AuthController.logout);
 
 // Ruta para restablecer la contraseña
-router.post("/reset-password", AuthController.resetPassword);
+router.post("/change-password", verifyToken, AuthController.changePassword);
 
 // Ruta para obtener el perfil del usuario autenticado
 router.get("/profile", verifyToken, AuthController.profile);

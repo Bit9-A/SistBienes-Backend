@@ -16,7 +16,7 @@ const getAllUsers = async () => {
 // Este modelo maneja la obtención de un usuario por su ID
 const getUserById = async (id: number) => {
   const query = `
-    SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
+    SELECT u.id, u.tipo_usuario, u.email,u.password ,u.nombre, u.apellido, u.telefono, 
            u.dept_id, d.nombre as dept_nombre, u.cedula, u.username, u.isActive
     FROM Usuarios u
     LEFT JOIN Departamento d ON u.dept_id = d.id

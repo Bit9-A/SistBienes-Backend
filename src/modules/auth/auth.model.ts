@@ -59,6 +59,15 @@ const findUserByEmail = async (email: string) => {
   const [rows] = await pool.execute(query, [email]);
   return (rows as any[])[0];
 };
+const findUserPasswordById = async (id: number) => {
+  const query = `
+    SELECT *
+    FROM Usuarios
+    WHERE id = ?
+  `;
+  const [rows] = await pool.execute(query, [id]);
+  return (rows as any[])[0];
+};
 // Funciones para manejar los tokens de autenticación y restablecimiento de contraseña
 const saveLoginToken = async (id: number, token: string, expiration: Date) => {
   const query = `
@@ -156,4 +165,5 @@ export const AuthModel = {
   updateUserPassword,
   findUserByUsername,
   findUserByCedula,
+  findUserPasswordById,
 };
