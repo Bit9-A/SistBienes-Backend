@@ -5,10 +5,16 @@ import { pool } from "../../database/index";
 // Este modelo maneja la obtención de todos los componentes de traslado
 const getAllTransferComponents = async () => {
   const query = `
-    SELECT tc.id, tc.componente_id, tc.bien_origen_id, tc.bien_destino_id, tc.fecha,
-           c.nombre as componente_nombre, c.numero_serial
+   SELECT tc.id, tc.componente_id, tc.bien_origen_id, tc.bien_destino_id, tc.fecha,
+           c.nombre as componente_nombre, c.numero_serial, b.dept_id as dept_origen, b2.dept_id as dept_destino,
+            d.nombre as dept_origen_nombre, d2.nombre as dept_destino_nombre
     FROM ComponentesTraslado tc
     JOIN Componentes c ON tc.componente_id = c.id
+    LEFT JOIN Activos b ON tc.bien_origen_id = b.id 
+    LEFT JOIN Activos b2 ON tc.bien_destino_id = b2.id
+    LEFT JOIN Departamento d ON b.dept_id = d.id
+    LEFT JOIN Departamento d2 ON b2.dept_id = d2.id
+    ORDER BY tc.fecha DESC
   `;
   const [rows] = await pool.execute(query);
   return rows as any[];

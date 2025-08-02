@@ -134,19 +134,30 @@ export async function exportBM1ByDepartment(
 
     bienesPagina.forEach((asset, idx) => {
       const row = ws.getRow(startRow + idx);
+      const baseDescriptionParts = [
+        asset.nombre_descripcion,
+        "S/N: " + (asset.numero_serial || ""),
+        asset.marca_nombre,
+        asset.modelo_nombre,
+        asset.estado_nombre,
+        asset.components_description
+      ].filter(Boolean);
+
+      if (asset.isActive === 0) {
+        row.getCell(5).value = {
+          richText: [
+            { text: baseDescriptionParts.join(' ') },
+            { font: { color: { argb: 'FFFF0000' } }, text: " (Inactivo)" } // Rojo
+          ]
+        };
+      } else {
+        row.getCell(5).value = baseDescriptionParts.join(' ') || "";
+      }
+
       row.getCell(1).value = asset.grupo || "02";
       row.getCell(2).value = asset.subgrupo_codigo || "";
       row.getCell(3).value = asset.cantidad || 1;
       row.getCell(4).value = asset.numero_identificacion || "";
-      row.getCell(5).value = [
-        asset.nombre_descripcion,
-        "S/N: " +
-        asset.numero_serial || "",
-        asset.marca_nombre,
-        asset.modelo_nombre,
-        asset.estado_nombre,
-        asset.components_description // Añadir la descripción de los componentes
-      ].filter(Boolean).join(' ') || "";
       row.getCell(6).value = Number(asset.valor_unitario) || 0;
       row.getCell(7).value = Number(asset.valor_total) || 0;
       row.commit();
