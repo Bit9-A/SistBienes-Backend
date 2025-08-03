@@ -3,7 +3,7 @@ import { pool } from "../../database/index";
 // Obtener todos los componentes
 const getAllComponents = async () => {
   const query = `
-    SELECT c.id, c.bien_id, c.nombre, c.numero_serial, 
+    SELECT c.id, c.bien_id, c.nombre, c.numero_serial 
     FROM Componentes c
   `;
   const [rows] = await pool.execute(query);
