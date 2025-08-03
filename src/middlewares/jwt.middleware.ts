@@ -3,8 +3,6 @@ import { NextFunction } from "express";
 import { AuthModel } from "../modules/auth/auth.model";
 import { UserModel } from "../modules/users/user.model";
 
-const ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwicm9sZV9pZCI6MSwiaWF0IjoxNzM4NjgwNzcwLCJleHAiOjE3Mzg2ODQzNzB9.kHNI4ccrzs1g5vH3HO6y5vdIxpn7sedy3tgQA27qXKs";
-
 export const verifyToken = async (req: any, res: any, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
@@ -18,12 +16,6 @@ export const verifyToken = async (req: any, res: any, next: NextFunction) => {
   }
 
   try {
-    // Verificar si es un token de administrador
-    if (token === ADMIN_TOKEN) {
-      req.user = { admin: true, role_id: 1 };
-      return next();
-    }
-
     // Verificar el token JWT
     const decoded = jwt.verify(token, process.env.SECRET_KEY || "defaultSecret") as JwtPayload;
 
@@ -41,16 +33,16 @@ export const verifyToken = async (req: any, res: any, next: NextFunction) => {
       const newToken = jwt.sign(
         { userId: user.id, email: user.email, role_id: user.role_id },
         process.env.SECRET_KEY || "defaultSecret",
-        { expiresIn: "1h" }
+        { expiresIn: "2h" } // Token dura 2 horas
       );
 
-      const expiration = new Date(Date.now() + 3600000); // 1 hora desde ahora
+      const expiration = new Date(Date.now() + 7200000); // 2 horas desde ahora
       await AuthModel.saveLoginToken(user.id, newToken, expiration);
 
       res.cookie("token", newToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        maxAge: 3600000,
+        maxAge: 7200000, // 2 horas
       });
 
       req.headers.authorization = `Bearer ${newToken}`;
