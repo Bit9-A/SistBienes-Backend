@@ -10,13 +10,25 @@ import { Request, Response } from "express";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const diskStorage = multer.diskStorage({
-    destination: path.join(__dirname, "../../../images"),
+    destination: path.join(process.cwd(), "images"),
     filename: (req, file, cb) => {
         const ext = path.extname(file.originalname);
         let baseName = file.fieldname;
         cb(null, `${baseName}${ext}`);
     }
 });
+
+const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+    if (file.fieldname === "favicon") {
+        if (path.extname(file.originalname).toLowerCase() === ".ico") {
+            cb(null, true);
+        } else {
+            cb(new Error("El favicon debe ser un archivo .ico"));
+        }
+    } else {
+        cb(null, true);
+    }
+};
 
 // Este controlador maneja la obtención de la configuración actual de la aplicación
 const getConfig = async (req: any, res: any) => {
@@ -37,10 +49,11 @@ const getConfig = async (req: any, res: any) => {
 const createConfig = (req: Request, res: Response) => {
     const upload = multer({
         storage: diskStorage,
+        fileFilter: fileFilter,
     }).fields([
         { name: "favicon", maxCount: 1 },
         { name: "banner", maxCount: 1 },
-        { name: "logo", maxCount: 1 },
+        { name: "LogoImpresion", maxCount: 1 },
     ]);
 
     upload(req, res, async function (err) {
@@ -51,21 +64,15 @@ const createConfig = (req: Request, res: Response) => {
             [fieldname: string]: Express.Multer.File[];
         };
 
-        // Lee los archivos recién guardados en disco
-        const pathBase = path.join(__dirname, "../../../images");
+        // Obtiene los nombres de los archivos recién guardados
         const bannerFilename = files?.banner?.[0]?.filename;
         const logoFilename = files?.logo?.[0]?.filename;
         const faviconFilename = files?.favicon?.[0]?.filename;
 
-        const url_banner = bannerFilename
-            ? fs.readFileSync(path.join(pathBase, bannerFilename))
-            : null;
-        const url_logo = logoFilename
-            ? fs.readFileSync(path.join(pathBase, logoFilename))
-            : null;
-        const url_favicon = faviconFilename
-            ? fs.readFileSync(path.join(pathBase, faviconFilename))
-            : null;
+        // Construye las URLs relativas para guardar en la base de datos
+        const url_banner = bannerFilename ? `/images/${bannerFilename}` : null;
+        const url_logo = logoFilename ? `/images/${logoFilename}` : null;
+        const url_favicon = faviconFilename ? `/images/${faviconFilename}` : null;
 
         const { colorprimario, colorsecundario, nombre_institucion } = req.body;
 
@@ -92,6 +99,7 @@ const createConfig = (req: Request, res: Response) => {
 const updateConfig = (req: Request, res: Response) => {
     const upload = multer({
         storage: diskStorage,
+        fileFilter: fileFilter,
     }).fields([
         { name: "favicon", maxCount: 1 },
         { name: "banner", maxCount: 1 },
@@ -106,21 +114,15 @@ const updateConfig = (req: Request, res: Response) => {
             [fieldname: string]: Express.Multer.File[];
         };
 
-        // Lee los archivos recién guardados en disco
-        const pathBase = path.join(__dirname, "../../../images");
+        // Obtiene los nombres de los archivos recién guardados
         const bannerFilename = files?.banner?.[0]?.filename;
         const logoFilename = files?.logo?.[0]?.filename;
         const faviconFilename = files?.favicon?.[0]?.filename;
 
-        const url_banner = bannerFilename
-            ? fs.readFileSync(path.join(pathBase, bannerFilename))
-            : null;
-        const url_logo = logoFilename
-            ? fs.readFileSync(path.join(pathBase, logoFilename))
-            : null;
-        const url_favicon = faviconFilename
-            ? fs.readFileSync(path.join(pathBase, faviconFilename))
-            : null;
+        // Construye las URLs relativas para guardar en la base de datos
+        const url_banner = bannerFilename ? `/images/${bannerFilename}` : null;
+        const url_logo = logoFilename ? `/images/${logoFilename}` : null;
+        const url_favicon = faviconFilename ? `/images/${faviconFilename}` : null;
 
         const { colorprimario, colorsecundario, nombre_institucion } = req.body;
 

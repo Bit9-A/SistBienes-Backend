@@ -22,9 +22,9 @@ const createConfig = async ({
     colorprimario?: string | null;
     colorsecundario?: string | null;
     nombre_institucion?: string | null;
-    url_banner?: Buffer | null;
-    url_logo?: Buffer | null;
-    url_favicon?: Buffer | null;
+    url_banner?: string | null;
+    url_logo?: string | null;
+    url_favicon?: string | null;
 }) => {
     const fechaFinal = fecha || new Date().toISOString().slice(0, 10);
 
@@ -67,9 +67,9 @@ const updateGeneralConfig = async ({
     colorprimario?: string | null;
     colorsecundario?: string | null;
     nombre_institucion?: string | null;
-    url_banner?: Buffer | null;
-    url_logo?: Buffer | null;
-    url_favicon?: Buffer | null;
+    url_banner?: string | null;
+    url_logo?: string | null;
+    url_favicon?: string | null;
 }) => {
     const [result] = await pool.execute(
         `UPDATE Configuracion SET

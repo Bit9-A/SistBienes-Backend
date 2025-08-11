@@ -56,6 +56,9 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// Servir archivos estáticos desde la carpeta 'images'
+app.use("/images", express.static(path.join(process.cwd(), "images")));
+
 
 // Configuración de variables de entorno
 app.use(

@@ -8,7 +8,7 @@
   "scripts": {
     "start": "node dist/index.mjs",
     "dev": "tsx watch --clear-screen=false src/index.ts",
-    "build": "pkgroll"
+    "build": "pkgroll && xcopy /E /I src\\images dist\\images"
   },
   "keywords": [],
   "author": "",
