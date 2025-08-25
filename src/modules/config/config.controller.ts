@@ -10,7 +10,7 @@ import { Request, Response } from "express";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const diskStorage = multer.diskStorage({
-    destination: path.join(process.cwd(), "images"),
+    destination: path.join(process.cwd(), "./images"),
     filename: (req, file, cb) => {
         const ext = path.extname(file.originalname);
         let baseName = file.fieldname;

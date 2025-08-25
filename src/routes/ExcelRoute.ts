@@ -6,6 +6,7 @@ import { exportBM1ByDepartment } from '../jobs/ExcelBM1';
 import { exportBM2ByDepartment } from '../jobs/ExcelBM2'; // Importar la nueva función
 import { exportBM3ByMissingGoodsId } from '../jobs/ExcelBM3'; // Importar la nueva función
 import { generateBM4Pdf } from '../jobs/BM4'; // Importar la nueva función
+import { reportModel } from '../modules/report/report.model'; // Importar reportModel
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -181,18 +182,26 @@ router.post('/bm3', async (req: any, res: any) => {
 
 // Nueva ruta para generar el BM4 (reporte mensual en PDF)
 router.post('/bm4', async (req: any, res: any) => {
-  const { dept_id, mes, año, responsable_id } = req.body;
+  console.log('BM4 Request Body:', req.body);
+  const { deptId, mes, año, responsableId, forceUpdate } = req.body; // Ajustar nombres de variables
 
-  if (!dept_id || !mes || !año || !responsable_id) {
-    return res.status(400).json({ message: 'dept_id, mes, año, and responsable_id are required.' });
+  if (!deptId || !mes || !año || !responsableId) {
+    return res.status(400).json({ message: 'deptId, mes, año, and responsableId are required.' });
   }
 
   try {
+    // Verificar si ya existe un reporte para este mes y departamento
+    const existingReport = await reportModel.getMonthlyReportFromDB(mes, año, deptId);
+
+    if (existingReport && !forceUpdate) {
+      return res.status(409).json({ message: 'Ya existe un reporte BM-4 para este mes y departamento. ¿Desea sobrescribirlo?', reportExists: true });
+    }
+
     const generatedFilePaths = await generateBM4Pdf(
-      dept_id,
+      deptId,
       mes,
       año,
-      responsable_id,
+      responsableId,
       tempDir
     );
 
