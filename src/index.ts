@@ -26,11 +26,11 @@ import reportRoute from "./modules/report/report.route";
 import componentRoute from "./modules/components/components.route";
 import transferComponent from "./modules/transferComponent/transferComponent.route";
 
-
 import ExcelRoute from "./routes/ExcelRoute";
 import QRLabels from "./routes/qrLabels.route";
 
 import "./jobs/closeOldSessions.job";
+import { loadGlobalConfig } from "./variables/globals";
 
 import { config } from "dotenv";
 import { db } from "./database/index";
@@ -39,7 +39,10 @@ import cors from "cors";
 
 // Inicializar la conexión a la base de datos
 db()
-  .then((): void => console.log("Database connected successfully"))
+  .then(async (): Promise<void> => {
+    console.log("Database connected successfully");
+    await loadGlobalConfig(); // Cargar la configuración global después de la conexión a la DB
+  })
   .catch((error: unknown): void =>
     console.error("Database connection failed:", error)
   );
@@ -59,7 +62,6 @@ app.use(cors());
 // Servir archivos estáticos desde la carpeta 'images'
 app.use("/images", express.static(path.join(process.cwd(), "images")));
 
-
 // Configuración de variables de entorno
 app.use(
   cors({
@@ -70,7 +72,6 @@ app.use(
   })
 );
 // Rutas
-
 
 app.use("/auth", authRoute);
 

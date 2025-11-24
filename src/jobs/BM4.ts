@@ -1,21 +1,55 @@
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
-import { reportModel } from '../modules/report/report.model';
-import { UserModel } from '../modules/users/user.model';
-import { DeptModel } from '../modules/dept/dept.model';
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
+import { reportModel } from "../modules/report/report.model";
+import { UserModel } from "../modules/users/user.model";
+import { DeptModel } from "../modules/dept/dept.model";
+import { globalConfig } from "../variables/globals"; // Importar globalConfig
 
-// Cargar y incrustar imágenes una sola vez
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const logoImpresionPath = path.resolve(__dirname, "../images/LogoImpresion.jpg");
-const escudoPath = path.resolve(__dirname, "../images/Escudo.jpg");
+// Función auxiliar para incrustar imágenes de forma segura (copiada de EtiquetasQR.ts)
+const embedImage = async (
+  pdfDoc: PDFDocument,
+  imageUrl: string | null | undefined,
+  defaultImagePath: string,
+  imageName: string
+) => {
+  if (imageUrl) {
+    const imagePath = path.join(process.cwd(), imageUrl);
+    try {
+      const imageBytes = fs.readFileSync(imagePath);
+      const imageExt = path.extname(imageUrl).toLowerCase();
 
-const logoImpresionBytes = fs.readFileSync(logoImpresionPath);
-const escudoBytes = fs.readFileSync(escudoPath);
-
+      if (imageExt === ".jpg" || imageExt === ".jpeg") {
+        return await pdfDoc.embedJpg(imageBytes);
+      } else if (imageExt === ".png") {
+        return await pdfDoc.embedPng(imageBytes);
+      } else {
+        console.warn(
+          `[BM4] Formato de imagen no soportado para ${imageName} (${imageExt}). Usando imagen por defecto.`
+        );
+        const defaultBytes = fs.readFileSync(defaultImagePath);
+        return await pdfDoc.embedJpg(defaultBytes);
+      }
+    } catch (error) {
+      console.error(
+        `[BM4] Error al cargar la imagen ${imageName} desde ${imageUrl}:`,
+        error
+      );
+      const defaultBytes = fs.readFileSync(defaultImagePath);
+      return await pdfDoc.embedJpg(defaultBytes);
+    }
+  } else {
+    console.warn(
+      `[BM4] URL para ${imageName} no disponible en la configuración global. Usando imagen por defecto.`
+    );
+    const defaultBytes = fs.readFileSync(defaultImagePath);
+    return await pdfDoc.embedJpg(defaultBytes);
+  }
+};
 
 /**
  * Genera un reporte BM4 en formato PDF.
@@ -49,27 +83,46 @@ export async function generateBM4Pdf(
   const startX = margin;
   const endX = page.getWidth() - margin;
 
-  // Incrustar imágenes
-  const logoImpresion = await pdfDoc.embedJpg(logoImpresionBytes);
-  const escudo = await pdfDoc.embedJpg(escudoBytes);
+  // Incrustar imágenes usando la configuración global
+  const embeddedLogoImpresion = await embedImage(
+    pdfDoc,
+    globalConfig.url_logo,
+    path.resolve(__dirname, "../images/LogoImpresion.jpg"),
+    "Logo"
+  );
+  const embeddedEscudo = await embedImage(
+    pdfDoc,
+    globalConfig.url_impresion_1, // Asumiendo que url_impresion_1 es para el escudo
+    path.resolve(__dirname, "../images/Escudo.jpg"),
+    "Escudo"
+  );
 
   // Dibujar imágenes en la página
-  page.drawImage(logoImpresion, {
-    x: startX,
-    y: page.getHeight() - margin - 50, // Ajustar posición Y
-    width: 100,
-    height: 50,
-  });
+  if (embeddedLogoImpresion) {
+    page.drawImage(embeddedLogoImpresion, {
+      x: startX,
+      y: page.getHeight() - margin - 50, // Ajustar posición Y
+      width: 100,
+      height: 50,
+    });
+  }
 
-  page.drawImage(escudo, {
-    x: endX - 100, // Ajustar posición X para la derecha
-    y: page.getHeight() - margin - 50, // Ajustar posición Y
-    width: 50,
-    height: 50,
-  });
+  if (embeddedEscudo) {
+    page.drawImage(embeddedEscudo, {
+      x: endX - 100, // Ajustar posición X para la derecha
+      y: page.getHeight() - margin - 50, // Ajustar posición Y
+      width: 50,
+      height: 50,
+    });
+  }
 
   // Obtener datos del reporte
-  const reportData = await reportModel.getMonthlyReportData(mes, año, deptId, responsableId);
+  const reportData = await reportModel.getMonthlyReportData(
+    mes,
+    año,
+    deptId,
+    responsableId
+  );
   const responsableData = await UserModel.getUserDetailsById(responsableId);
   const departmentData = await DeptModel.getDepartmentById(deptId);
 
@@ -83,47 +136,126 @@ export async function generateBM4Pdf(
     total_disincorporations_concept_60, // Ahora es el monto total de desincorporaciones por concepto 60
     total_disincorporations_except_concept_60, // Ahora es el monto total de desincorporaciones excepto concepto 60
     previous_existence, // Ahora es el monto de la existencia anterior
-    final_existence // Ahora es el monto de la existencia final
+    final_existence, // Ahora es el monto de la existencia final
   } = reportData;
 
-  const { nombre: responsableNombre, apellido: responsableApellido, rol_nombre: responsableRol, dept_nombre: responsableDeptNombre } = responsableData;
+  const {
+    nombre: responsableNombre,
+    apellido: responsableApellido,
+    rol_nombre: responsableRol,
+    dept_nombre: responsableDeptNombre,
+  } = responsableData;
   const { nombre: deptNombre } = departmentData;
 
   // Título
-  page.drawText('FORMATO BM-4', { x: endX - 100, y: y, font, size: 10, color: rgb(0, 0, 0) });
+  page.drawText("FORMATO BM-4", {
+    x: endX - 100,
+    y: y,
+    font,
+    size: 10,
+    color: rgb(0, 0, 0),
+  });
   y -= lineHeight * 2;
 
-  page.drawText('RESUMEN DE LA CUENTA DE BIENES MUEBLES', { x: centerX - 150, y: y, font: boldFont, size: 12, color: rgb(0, 0, 0) });
+  page.drawText("RESUMEN DE LA CUENTA DE BIENES MUEBLES", {
+    x: centerX - 150,
+    y: y,
+    font: boldFont,
+    size: 12,
+    color: rgb(0, 0, 0),
+  });
   y -= lineHeight;
-  page.drawText(`DE LA UNIDAD DE: ${deptNombre.toUpperCase()}`, { x: centerX - 150, y: y, font: boldFont, size: 12, color: rgb(0, 0, 0) });
+  page.drawText(`DE LA UNIDAD DE: ${deptNombre.toUpperCase()}`, {
+    x: centerX - 150,
+    y: y,
+    font: boldFont,
+    size: 12,
+    color: rgb(0, 0, 0),
+  });
   y -= lineHeight * 4; // Aumentar el espacio para bajar el contenido
 
   // Información general
-  page.drawText(`Entidad Propietaria: Alcaldía Bolivariana del Municipio Cárdenas RIF G-20005180-9`, { x: startX, y: y, font, size: fontSize });
+  page.drawText(
+    `Entidad Propietaria: Alcaldía Bolivariana del Municipio Cárdenas RIF G-20005180-9`,
+    { x: startX, y: y, font, size: fontSize }
+  );
   y -= lineHeight * 2;
 
-  page.drawText(`1. Estado: Táchira`, { x: startX, y: y, font, size: fontSize });
-  page.drawText(`2. Municipio: Cárdenas`, { x: startX + 200, y: y, font, size: fontSize });
-  page.drawText(`Parroquia: Tariba`, { x: startX + 400, y: y, font, size: fontSize });
+  page.drawText(`1. Estado: Táchira`, {
+    x: startX,
+    y: y,
+    font,
+    size: fontSize,
+  });
+  page.drawText(`2. Municipio: Cárdenas`, {
+    x: startX + 200,
+    y: y,
+    font,
+    size: fontSize,
+  });
+  page.drawText(`Parroquia: Tariba`, {
+    x: startX + 400,
+    y: y,
+    font,
+    size: fontSize,
+  });
   y -= lineHeight * 2;
 
-  page.drawText(`3. Correspondiente al mes de ${mes} del año ${año} (Cifras Convencionales)`, { x: startX, y: y, font, size: fontSize });
+  page.drawText(
+    `3. Correspondiente al mes de ${mes} del año ${año} (Cifras Convencionales)`,
+    { x: startX, y: y, font, size: fontSize }
+  );
   y -= lineHeight * 2;
 
   // Detalles del reporte
-  page.drawText(`4. Existencia anterior: Bs. ${(previous_existence || 0)}`, { x: startX, y: y, font, size: fontSize });
+  page.drawText(`4. Existencia anterior: Bs. ${previous_existence || 0}`, {
+    x: startX,
+    y: y,
+    font,
+    size: fontSize,
+  });
   y -= lineHeight;
-  page.drawText(`5. Incorporaciones en el mes de la cuenta: Bs. ${(total_incorporations || 0)}`, { x: startX, y: y, font, size: fontSize });
+  page.drawText(
+    `5. Incorporaciones en el mes de la cuenta: Bs. ${
+      total_incorporations || 0
+    }`,
+    { x: startX, y: y, font, size: fontSize }
+  );
   y -= lineHeight;
-  page.drawText(`6. Desincorporaciones en el mes de la cuenta por`, { x: startX, y: y, font, size: fontSize });
+  page.drawText(`6. Desincorporaciones en el mes de la cuenta por`, {
+    x: startX,
+    y: y,
+    font,
+    size: fontSize,
+  });
   y -= lineHeight;
-  page.drawText(`   Todos los conceptos, con excepción del 60, "Faltantes de Bienes por Investigar": Bs. ${(total_disincorporations_except_concept_60 || 0)}`, { x: startX, y: y, font, size: fontSize });
+  page.drawText(
+    `   Todos los conceptos, con excepción del 60, "Faltantes de Bienes por Investigar": Bs. ${
+      total_disincorporations_except_concept_60 || 0
+    }`,
+    { x: startX, y: y, font, size: fontSize }
+  );
   y -= lineHeight;
-  page.drawText(`7. Desincorporaciones en el mes de la cuenta por`, { x: startX, y: y, font, size: fontSize });
+  page.drawText(`7. Desincorporaciones en el mes de la cuenta por`, {
+    x: startX,
+    y: y,
+    font,
+    size: fontSize,
+  });
   y -= lineHeight;
-  page.drawText(`   El concepto 60, "Faltantes de Bienes por Investigar": Bs. ${(total_disincorporations_concept_60 || 0)}`, { x: startX, y: y, font, size: fontSize });
+  page.drawText(
+    `   El concepto 60, "Faltantes de Bienes por Investigar": Bs. ${
+      total_disincorporations_concept_60 || 0
+    }`,
+    { x: startX, y: y, font, size: fontSize }
+  );
   y -= lineHeight;
-  page.drawText(`8. Existencia Final: Bs. ${(final_existence || 0)}`, { x: startX, y: y, font, size: fontSize });
+  page.drawText(`8. Existencia Final: Bs. ${final_existence || 0}`, {
+    x: startX,
+    y: y,
+    font,
+    size: fontSize,
+  });
   y -= lineHeight * 3;
 
   // Firmas
@@ -131,23 +263,78 @@ export async function generateBM4Pdf(
   const signatureX2 = startX + 280;
   const signatureX3 = startX + 510;
 
-  page.drawText(`9. Elaborado Por:`, { x: signatureX1, y: y, font, size: fontSize });
-  page.drawText(`10. Aprobado Por:`, { x: signatureX2, y: y, font, size: fontSize });
-  page.drawText(`11. Firma del Responsable Patrimonial`, { x: signatureX3, y: y, font, size: fontSize });
+  page.drawText(`9. Elaborado Por:`, {
+    x: signatureX1,
+    y: y,
+    font,
+    size: fontSize,
+  });
+  page.drawText(`10. Aprobado Por:`, {
+    x: signatureX2,
+    y: y,
+    font,
+    size: fontSize,
+  });
+  page.drawText(`11. Firma del Responsable Patrimonial`, {
+    x: signatureX3,
+    y: y,
+    font,
+    size: fontSize,
+  });
   y -= lineHeight * 3; // Espacio para la firma
 
-  page.drawText(`_________________________`, { x: signatureX1, y: y, font, size: fontSize });
-  page.drawText(`_________________________`, { x: signatureX2, y: y, font, size: fontSize });
-  page.drawText(`_________________________`, { x: signatureX3, y: y, font, size: fontSize });
-  y -= lineHeight; 
+  page.drawText(`_________________________`, {
+    x: signatureX1,
+    y: y,
+    font,
+    size: fontSize,
+  });
+  page.drawText(`_________________________`, {
+    x: signatureX2,
+    y: y,
+    font,
+    size: fontSize,
+  });
+  page.drawText(`_________________________`, {
+    x: signatureX3,
+    y: y,
+    font,
+    size: fontSize,
+  });
+  y -= lineHeight;
 
-  page.drawText(`${responsableNombre} ${responsableApellido}`, { x: signatureX1, y: y, font, size: fontSize });
-  page.drawText(`Cargo: ${responsableRol}`, { x: signatureX1, y: y - lineHeight, font, size: fontSize });
-  page.drawText(`Dependencia: ${responsableDeptNombre}`, { x: signatureX1, y: y - lineHeight * 2, font, size: fontSize });
+  page.drawText(`${responsableNombre} ${responsableApellido}`, {
+    x: signatureX1,
+    y: y,
+    font,
+    size: fontSize,
+  });
+  page.drawText(`Cargo: ${responsableRol}`, {
+    x: signatureX1,
+    y: y - lineHeight,
+    font,
+    size: fontSize,
+  });
+  page.drawText(`Dependencia: ${responsableDeptNombre}`, {
+    x: signatureX1,
+    y: y - lineHeight * 2,
+    font,
+    size: fontSize,
+  });
 
   // Información al pie de página
-  page.drawText('Original: Oficina de Control de Bienes del Municipio', { x: endX - 250, y: margin + 20, font, size: 8 });
-  page.drawText('Elaborado por la Oficina de Bienes Municipio Cárdenas', { x: endX - 250, y: margin + 10, font, size: 8 });
+  page.drawText("Original: Oficina de Control de Bienes del Municipio", {
+    x: endX - 250,
+    y: margin + 20,
+    font,
+    size: 8,
+  });
+  page.drawText("Elaborado por la Oficina de Bienes Municipio Cárdenas", {
+    x: endX - 250,
+    y: margin + 10,
+    font,
+    size: 8,
+  });
 
   const pdfBytes = await pdfDoc.save();
   const fileName = `BM4_ReporteMensual_${deptNombre}_${mes}-${año}.pdf`;

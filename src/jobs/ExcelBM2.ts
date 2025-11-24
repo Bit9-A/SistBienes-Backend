@@ -1,13 +1,76 @@
 import ExcelJS from "exceljs";
 import * as fs from "fs";
 import * as path from "path";
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
 import { IncorpModel } from "../modules/incorp/incorp.model";
 import { desincorpModel } from "../modules/desincorp/desincorp.model";
 import { ComponentsModel } from "../modules/components/components.model"; // Importar ComponentsModel
+import { globalConfig } from "../variables/globals"; // Importar globalConfig
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Función auxiliar para añadir imágenes al workbook de ExcelJS de forma segura (copiada de ExcelBM1.ts)
+const addImageToWorkbook = async (
+  workbook: ExcelJS.Workbook,
+  imageUrl: string | null | undefined,
+  defaultImagePath: string,
+  imageName: string
+): Promise<number | undefined> => {
+  let finalImagePath = defaultImagePath;
+  let extension: "jpeg" | "png" | "gif" | undefined; // Declaración única
+
+  if (imageUrl) {
+    const potentialPath = path.join(process.cwd(), imageUrl);
+    if (fs.existsSync(potentialPath)) {
+      finalImagePath = potentialPath;
+    } else {
+      console.warn(
+        `[ExcelBM2] La imagen ${imageName} no se encontró en la URL configurada: ${imageUrl}. Usando imagen por defecto.`
+      );
+    }
+  } else {
+    console.warn(
+      `[ExcelBM2] URL para ${imageName} no disponible en la configuración global. Usando imagen por defecto.`
+    );
+  }
+
+  const originalExtension = path
+    .extname(finalImagePath)
+    .toLowerCase()
+    .substring(1); // Eliminar el '.' inicial
+
+  // Mapear extensiones comunes a las soportadas por ExcelJS
+  if (originalExtension === "jpg") {
+    extension = "jpeg";
+  } else if (["jpeg", "png", "gif"].includes(originalExtension)) {
+    extension = originalExtension as "jpeg" | "png" | "gif";
+  } else {
+    console.warn(
+      `[ExcelBM2] Formato de imagen no soportado para ${imageName} (${originalExtension}). Intentando usar 'jpeg' como fallback.`
+    );
+    extension = "jpeg"; // Fallback a jpeg si la extensión no es reconocida o soportada por ExcelJS
+  }
+
+  console.log(
+    `[ExcelBM2] Intentando incrustar imagen: ${imageName}, Path: ${finalImagePath}, Extension: ${extension}`
+  );
+
+  try {
+    const imageId = workbook.addImage({
+      filename: finalImagePath,
+      extension: extension,
+    });
+    console.log(`[ExcelBM2] ID de imagen ${imageName}: ${imageId}`);
+    return imageId;
+  } catch (error: any) {
+    console.error(
+      `[ExcelBM2] Error al cargar la imagen ${imageName} desde ${finalImagePath}:`,
+      error
+    );
+    return undefined;
+  }
+};
 
 /**
  * Exporta los bienes incorporados o desincorporados de un departamento a un archivo Excel usando una plantilla BM2.
@@ -23,32 +86,54 @@ export async function exportBM2ByDepartment(
   departamentoNombre: string,
   mes: number,
   año: number,
-  tipo: 'incorporacion' | 'desincorporacion',
+  tipo: "incorporacion" | "desincorporacion",
   outputPath: string
 ): Promise<string[]> {
   let assets: any[] = [];
   let conceptoMovimiento: string = "";
 
-  if (tipo === 'incorporacion') {
+  if (tipo === "incorporacion") {
     assets = await IncorpModel.getIncorpsByMonthYearDept(mes, año, deptId);
     conceptoMovimiento = "Incorporación";
-    console.log(`[ExcelBM2] Incorporaciones recuperadas: ${assets.length} activos.`);
-  } else if (tipo === 'desincorporacion') {
-    assets = await desincorpModel.getDesincorpsByMonthYearDept(mes, año, deptId);
+    console.log(
+      `[ExcelBM2] Incorporaciones recuperadas: ${assets.length} activos.`
+    );
+  } else if (tipo === "desincorporacion") {
+    assets = await desincorpModel.getDesincorpsByMonthYearDept(
+      mes,
+      año,
+      deptId
+    );
     conceptoMovimiento = "Desincorporación";
-    console.log(`[ExcelBM2] Desincorporaciones recuperadas: ${assets.length} activos.`);
+    console.log(
+      `[ExcelBM2] Desincorporaciones recuperadas: ${assets.length} activos.`
+    );
   }
 
-  console.log(`[ExcelBM2] Retrieved ${assets.length} assets for department ${deptId}, month ${mes}, year ${año} (tipo: ${tipo}).`);
+  console.log(
+    `[ExcelBM2] Retrieved ${assets.length} assets for department ${deptId}, month ${mes}, year ${año} (tipo: ${tipo}).`
+  );
   console.log(`[ExcelBM2] Concepto de Movimiento: ${conceptoMovimiento}`);
-  console.log(`[ExcelBM2] Primeros 5 activos recuperados:`, assets.slice(0, 5).map(a => ({ id: a.id, bien_nombre: a.bien_nombre, valor: a.valor, tipo_operacion: tipo })));
-
+  console.log(
+    `[ExcelBM2] Primeros 5 activos recuperados:`,
+    assets.slice(0, 5).map((a) => ({
+      id: a.id,
+      bien_nombre: a.bien_nombre,
+      valor: a.valor,
+      tipo_operacion: tipo,
+    }))
+  );
 
   // Obtener componentes para cada activo (si aplica)
   for (const asset of assets) {
-    if (asset.bien_id) { // Asegurarse de que bien_id exista
-      const components = await ComponentsModel.getComponentsByBienId(asset.bien_id);
-      asset.components_description = components.map((c: any) => c.nombre).join(', ');
+    if (asset.bien_id) {
+      // Asegurarse de que bien_id exista
+      const components = await ComponentsModel.getComponentsByBienId(
+        asset.bien_id
+      );
+      asset.components_description = components
+        .map((c: any) => c.nombre)
+        .join(", ");
       if (asset.components_description) {
         asset.components_description = `Componentes: ${asset.components_description}`;
       }
@@ -62,7 +147,10 @@ export async function exportBM2ByDepartment(
   console.log(`[ExcelBM2] Total pages to generate: ${totalPaginas}`);
 
   // Ruta absoluta a la plantilla
-  const plantillaPath = path.resolve(__dirname, "../plantillas/plantilla-bm2.xlsx");
+  const plantillaPath = path.resolve(
+    __dirname,
+    "../plantillas/plantilla-bm2.xlsx"
+  );
   console.log(`[ExcelBM2] Template path: ${plantillaPath}`);
   const plantillaBuffer = fs.readFileSync(plantillaPath);
   const generatedFilePaths: string[] = [];
@@ -70,33 +158,62 @@ export async function exportBM2ByDepartment(
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(plantillaBuffer as any);
 
-  // Cargar imágenes una sola vez para el workbook
-  const escudoPath = path.resolve(__dirname, "../images/Escudo.jpg");
-  const logoImpresionPath = path.resolve(__dirname, "../images/LogoImpresion.jpg");
-  const redesPath = path.resolve(__dirname, "../images/Redes.png");
-
-  console.log(`[ExcelBM2] Intentando cargar imagen: ${escudoPath}`);
-  const escudoImageId = workbook.addImage({ filename: escudoPath, extension: 'jpeg' });
-  console.log(`[ExcelBM2] ID de imagen Escudo: ${escudoImageId}`);
-
-  console.log(`[ExcelBM2] Intentando cargar imagen: ${logoImpresionPath}`);
-  const logoImpresionImageId = workbook.addImage({ filename: logoImpresionPath, extension: 'jpeg' });
-  console.log(`[ExcelBM2] ID de imagen LogoImpresion: ${logoImpresionImageId}`);
-
-  console.log(`[ExcelBM2] Intentando cargar imagen: ${redesPath}`);
-  const redesImageId = workbook.addImage({ filename: redesPath, extension: 'png' });
-  console.log(`[ExcelBM2] ID de imagen Redes: ${redesImageId}`);
+  // Cargar imágenes una sola vez para el workbook usando la configuración global
+  console.log(
+    `[ExcelBM2] Valor de globalConfig.url_logo para LogoImpresion: ${globalConfig.url_logo}`
+  );
+  const logoImpresionImageId = await addImageToWorkbook(
+    workbook,
+    globalConfig.url_logo,
+    path.resolve(__dirname, "../images/logo.jpg"),
+    "LogoImpresion"
+  );
+  const escudoImageId = await addImageToWorkbook(
+    workbook,
+    globalConfig.url_impresion_1, // Asumiendo que url_impresion_1 es para el escudo
+    path.resolve(__dirname, "../images/Escudo.jpg"),
+    "Escudo"
+  );
+  const redesImageId = await addImageToWorkbook(
+    workbook,
+    globalConfig.url_impresion_2, // Asumiendo que url_impresion_2 es para redes
+    path.resolve(__dirname, "../images/Redes.png"),
+    "Redes"
+  );
 
   // Función para añadir imágenes a una hoja de trabajo específica
   const addImagesToWorksheet = (targetWs: ExcelJS.Worksheet) => {
-    targetWs.addImage(logoImpresionImageId, { tl: { col: 0.5, row: 0.2 }, ext: { width: 150, height: 50 } });
-    targetWs.addImage(escudoImageId, { tl: { col: 8.8, row: 0.05 }, ext: { width: 65, height: 60 } }); // Ajustado a I1 (col 8.5 para centrar en I)
-    targetWs.addImage(redesImageId, { tl: { col: 0.5, row: 24.5 }, ext: { width: 120, height: 40 } }); // Ajustado para subir la imagen de redes
-    console.log(`[ExcelBM2] Imágenes añadidas a la hoja de trabajo: ${targetWs.name}`);
+    console.log(
+      `[ExcelBM2] logoImpresionImageId antes de añadir a la hoja: ${logoImpresionImageId}`
+    );
+    if (logoImpresionImageId !== undefined && logoImpresionImageId !== null) {
+      targetWs.addImage(logoImpresionImageId, {
+        tl: { col: 0.1, row: 0.1 }, // Posición muy visible (casi A1)
+        ext: { width: 150, height: 50 }, // Tamaño grande
+      });
+    }
+    if (escudoImageId) {
+      targetWs.addImage(escudoImageId, {
+        tl: { col: 8.8, row: 0.05 },
+        ext: { width: 65, height: 60 },
+      }); // Ajustado a I1 (col 8.5 para centrar en I)
+    }
+    if (redesImageId) {
+      targetWs.addImage(redesImageId, {
+        tl: { col: 0.5, row: 24.5 },
+        ext: { width: 120, height: 40 },
+      }); // Ajustado para subir la imagen de redes
+    }
+    console.log(
+      `[ExcelBM2] Imágenes añadidas a la hoja de trabajo: ${targetWs.name}`
+    );
   };
 
   // Función para copiar el contenido de la primera hoja a una nueva hoja
-  const copyTemplateContent = (sourceWs: ExcelJS.Worksheet, targetWs: ExcelJS.Worksheet) => {
+  const copyTemplateContent = (
+    sourceWs: ExcelJS.Worksheet,
+    targetWs: ExcelJS.Worksheet
+  ) => {
     sourceWs.eachRow({ includeEmpty: true }, (row, rowNumber) => {
       const newRow = targetWs.getRow(rowNumber);
       row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
@@ -107,7 +224,7 @@ export async function exportBM2ByDepartment(
       newRow.height = row.height;
     });
 
-    sourceWs.model.merges.forEach(merge => {
+    sourceWs.model.merges.forEach((merge) => {
       targetWs.mergeCells(merge);
     });
 
@@ -118,19 +235,25 @@ export async function exportBM2ByDepartment(
     });
 
     // Asegurar que los marcadores de página estén presentes para el reemplazo
-    targetWs.getCell('G6').value = `HOJA {{PAGINAN}}/{{TOTALN}}`;
+    targetWs.getCell("G6").value = `HOJA {{PAGINAN}}/{{TOTALN}}`;
   };
 
   for (let pagina = 0; pagina < totalPaginas; pagina++) {
     let ws: ExcelJS.Worksheet;
     if (pagina === 0) {
       ws = workbook.worksheets[0];
-      ws.name = `BM2 ${tipo === 'incorporacion' ? 'Inc.' : 'Desinc.'} - Pagina 1`;
+      ws.name = `BM2 ${
+        tipo === "incorporacion" ? "Inc." : "Desinc."
+      } - Pagina 1`;
       addImagesToWorksheet(ws); // Añadir imágenes a la primera hoja
       // Asegurar que los marcadores de página estén presentes para el reemplazo en la primera hoja
-      ws.getCell('G6').value = `HOJA {{PAGINAN}}/{{TOTALN}}`;
+      ws.getCell("G6").value = `HOJA {{PAGINAN}}/{{TOTALN}}`;
     } else {
-      ws = workbook.addWorksheet(`BM2 ${tipo === 'incorporacion' ? 'Inc.' : 'Desinc.'} - Pagina ${pagina + 1}`);
+      ws = workbook.addWorksheet(
+        `BM2 ${tipo === "incorporacion" ? "Inc." : "Desinc."} - Pagina ${
+          pagina + 1
+        }`
+      );
       copyTemplateContent(workbook.worksheets[0], ws);
       addImagesToWorksheet(ws); // Añadir imágenes a las nuevas hojas
     }
@@ -151,55 +274,75 @@ export async function exportBM2ByDepartment(
     });
 
     // Reemplazar el concepto de movimiento
-    ws.getCell('H8').value = conceptoMovimiento; // Celda para el concepto de movimiento
+    ws.getCell("H8").value = conceptoMovimiento; // Celda para el concepto de movimiento
 
     // Insertar los bienes en la tabla (ajusta la fila de inicio según tu plantilla)
     const startRow = 11; // Fila de inicio de la tabla en plantilla-bm2.xlsx
-    const bienesPagina = assets.slice(pagina * BIENES_POR_PAGINA, (pagina + 1) * BIENES_POR_PAGINA);
+    const bienesPagina = assets.slice(
+      pagina * BIENES_POR_PAGINA,
+      (pagina + 1) * BIENES_POR_PAGINA
+    );
 
     bienesPagina.forEach((asset, idx) => {
-      console.log(`[ExcelBM2] Procesando activo: ${asset.bien_nombre}, Valor: ${asset.valor}, Tipo: ${typeof asset.valor}`);
+      console.log(
+        `[ExcelBM2] Procesando activo: ${asset.bien_nombre}, Valor: ${
+          asset.valor
+        }, Tipo: ${typeof asset.valor}`
+      );
       const row = ws.getRow(startRow + idx);
-      
+
       row.getCell(1).value = asset.grupo || "02"; // Columna A
       console.log(`[ExcelBM2] Col 1 (Grupo): ${row.getCell(1).value}`);
-      
+
       row.getCell(2).value = asset.subgrupo_codigo || ""; // Columna B
       console.log(`[ExcelBM2] Col 2 (Subgrupo): ${row.getCell(2).value}`);
-      
+
       row.getCell(3).value = asset.concepto_codigo || ""; // Columna C (Concepto de Movimiento - ahora usa el código)
       console.log(`[ExcelBM2] Col 3 (Concepto): ${row.getCell(3).value}`);
-      
+
       row.getCell(4).value = asset.cantidad || 1; // Columna D
       console.log(`[ExcelBM2] Col 4 (Cantidad): ${row.getCell(4).value}`);
-      
+
       row.getCell(5).value = asset.numero_identificacion || ""; // Columna E
-      console.log(`[ExcelBM2] Col 5 (N° Identificación): ${row.getCell(5).value}`);
-      
-      const descripcion = [ // Columna F (Descripción de los Bienes)
-        asset.bien_nombre,
-        asset.numero_serial || "",
-        asset.marca_nombre,
-        asset.modelo_nombre,
-        asset.estado_nombre,
-        asset.components_description // Añadir la descripción de los componentes
-      ].filter(Boolean).join(' ') || "";
+      console.log(
+        `[ExcelBM2] Col 5 (N° Identificación): ${row.getCell(5).value}`
+      );
+
+      const descripcion =
+        [
+          // Columna F (Descripción de los Bienes)
+          asset.bien_nombre,
+          asset.numero_serial || "",
+          asset.marca_nombre,
+          asset.modelo_nombre,
+          asset.estado_nombre,
+          asset.components_description, // Añadir la descripción de los componentes
+        ]
+          .filter(Boolean)
+          .join(" ") || "";
       row.getCell(6).value = descripcion;
       console.log(`[ExcelBM2] Col 6 (Descripción): ${row.getCell(6).value}`);
-      
-      console.log(`[ExcelBM2] Tipo actual para asignación de celda: ${tipo}, Valor del activo: ${asset.valor}`);
-      if (tipo === 'incorporacion') {
+
+      console.log(
+        `[ExcelBM2] Tipo actual para asignación de celda: ${tipo}, Valor del activo: ${asset.valor}`
+      );
+      if (tipo === "incorporacion") {
         const incorpCell = row.getCell(8); // Columna G (Incorporaciones Bs.)
         incorpCell.value = Number(asset.valor) || 0;
-        incorpCell.numFmt = '#,##0.00'; // Formato numérico con dos decimales
-        console.log(`[ExcelBM2] Asignando a Incorporaciones (Col 8): ${incorpCell.value}`);
+        incorpCell.numFmt = "#,##0.00"; // Formato numérico con dos decimales
+        console.log(
+          `[ExcelBM2] Asignando a Incorporaciones (Col 8): ${incorpCell.value}`
+        );
         row.getCell(9).value = ""; // Columna H (Desincorporaciones Bs.)
-      } else { // tipo === 'desincorporacion'
+      } else {
+        // tipo === 'desincorporacion'
         row.getCell(8).value = ""; // Columna G (Incorporaciones Bs.)
         const desincorpCell = row.getCell(9); // Columna H (Desincorporaciones Bs.)
         desincorpCell.value = Number(asset.valor) || 0;
-        desincorpCell.numFmt = '#,##0.00'; // Formato numérico con dos decimales
-        console.log(`[ExcelBM2] Asignando a Desincorporaciones (Col 9): ${desincorpCell.value}`);
+        desincorpCell.numFmt = "#,##0.00"; // Formato numérico con dos decimales
+        console.log(
+          `[ExcelBM2] Asignando a Desincorporaciones (Col 9): ${desincorpCell.value}`
+        );
       }
       row.commit();
     });
@@ -213,7 +356,9 @@ export async function exportBM2ByDepartment(
   }
 
   // Guardar el único archivo generado al final
-  const nombreArchivo = `BM2_${tipo === 'incorporacion' ? 'Incorporaciones' : 'Desincorporaciones'}_${departamentoNombre}_${mes}-${año}.xlsx`;
+  const nombreArchivo = `BM2_${
+    tipo === "incorporacion" ? "Incorporaciones" : "Desincorporaciones"
+  }_${departamentoNombre}_${mes}-${año}.xlsx`;
   const rutaArchivo = path.join(outputPath, nombreArchivo);
 
   // Guardar el workbook en un buffer y luego escribir el buffer al archivo
@@ -224,6 +369,8 @@ export async function exportBM2ByDepartment(
   console.log(`[ExcelBM2] Archivo final generado: ${rutaArchivo}`);
   generatedFilePaths.push(rutaArchivo);
 
-  console.log(`[ExcelBM2] Finished generating files. Total generated: ${generatedFilePaths.length}`);
+  console.log(
+    `[ExcelBM2] Finished generating files. Total generated: ${generatedFilePaths.length}`
+  );
   return generatedFilePaths;
 }

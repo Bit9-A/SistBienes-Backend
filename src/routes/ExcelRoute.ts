@@ -1,12 +1,12 @@
-import { Router, Request, Response } from 'express';
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
-import { exportBM1ByDepartment } from '../jobs/ExcelBM1';
-import { exportBM2ByDepartment } from '../jobs/ExcelBM2'; // Importar la nueva función
-import { exportBM3ByMissingGoodsId } from '../jobs/ExcelBM3'; // Importar la nueva función
-import { generateBM4Pdf } from '../jobs/BM4'; // Importar la nueva función
-import { reportModel } from '../modules/report/report.model'; // Importar reportModel
+import { Router, Request, Response } from "express";
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
+import { exportBM1ByDepartment } from "../jobs/ExcelBM1";
+import { exportBM2ByDepartment } from "../jobs/ExcelBM2"; // Importar la nueva función
+import { exportBM3ByMissingGoodsId } from "../jobs/ExcelBM3"; // Importar la nueva función
+import { generateBM4Pdf } from "../jobs/BM4"; // Importar la nueva función
+import { reportModel } from "../modules/report/report.model"; // Importar reportModel
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -14,16 +14,18 @@ const __dirname = path.dirname(__filename);
 const router = Router();
 
 // Define a temporary directory for generated Excel files
-const tempDir = path.join(__dirname, '../../temp_excel_exports');
+const tempDir = path.join(__dirname, "../../temp_excel_exports");
 if (!fs.existsSync(tempDir)) {
   fs.mkdirSync(tempDir, { recursive: true });
 }
 
-router.post('/bm1', async (req: any, res: any) => {
+router.post("/bm1", async (req: any, res: any) => {
   const { dept_id, dept_nombre } = req.body;
 
   if (!dept_id || !dept_nombre) {
-    return res.status(400).json({ message: 'deptId and departamentoNombre are required.' });
+    return res
+      .status(400)
+      .json({ message: "deptId and departamentoNombre are required." });
   }
 
   try {
@@ -34,7 +36,9 @@ router.post('/bm1', async (req: any, res: any) => {
     );
 
     if (generatedFilePaths.length === 0) {
-      return res.status(500).json({ message: 'No Excel files were generated.' });
+      return res
+        .status(500)
+        .json({ message: "No Excel files were generated." });
     }
 
     const filePathToSend = generatedFilePaths[0];
@@ -42,8 +46,10 @@ router.post('/bm1', async (req: any, res: any) => {
 
     res.download(filePathToSend, fileName, (err: Error | null) => {
       if (err) {
-        console.error('Error sending file:', err);
+        console.error("Error sending file:", err);
       }
+      // Comentado temporalmente para depuración: no eliminar archivos generados
+      /*
       generatedFilePaths.forEach(file => {
         fs.unlink(file, (unlinkErr) => {
           if (unlinkErr) {
@@ -53,55 +59,73 @@ router.post('/bm1', async (req: any, res: any) => {
           }
         });
       });
+      */
     });
-
   } catch (error: unknown) {
-    console.error('Error generating Excel file:', error);
+    console.error("Error generating Excel file:", error);
     if (error instanceof Error) {
-      res.status(500).json({ message: 'Error generating Excel file', error: error.message });
+      res
+        .status(500)
+        .json({ message: "Error generating Excel file", error: error.message });
     } else {
-      res.status(500).json({ message: 'An unknown error occurred during Excel file generation.' });
+      res
+        .status(500)
+        .json({
+          message: "An unknown error occurred during Excel file generation.",
+        });
     }
   }
 });
 
 // Nueva ruta para generar el BM2 (incorporaciones y desincorporaciones)
-router.post('/bm2', async (req: any, res: any) => {
+router.post("/bm2", async (req: any, res: any) => {
   const { dept_id, dept_nombre, mes, año, tipo } = req.body; // Añadir 'tipo'
 
   if (!dept_id || !dept_nombre || !mes || !año || !tipo) {
-    return res.status(400).json({ message: 'deptId, departamentoNombre, mes, año, and tipo are required.' });
+    return res
+      .status(400)
+      .json({
+        message: "deptId, departamentoNombre, mes, año, and tipo are required.",
+      });
   }
 
-  if (tipo !== 'incorporacion' && tipo !== 'desincorporacion') {
-    return res.status(400).json({ message: 'Invalid type. Must be "incorporacion" or "desincorporacion".' });
+  if (tipo !== "incorporacion" && tipo !== "desincorporacion") {
+    return res
+      .status(400)
+      .json({
+        message: 'Invalid type. Must be "incorporacion" or "desincorporacion".',
+      });
   }
 
   try {
     let generatedFilePaths: string[] = [];
 
-    if (tipo === 'incorporacion') {
+    if (tipo === "incorporacion") {
       generatedFilePaths = await exportBM2ByDepartment(
         dept_id,
         dept_nombre,
         mes,
         año,
-        'incorporacion',
+        "incorporacion",
         tempDir
       );
-    } else if (tipo === 'desincorporacion') {
+    } else if (tipo === "desincorporacion") {
       generatedFilePaths = await exportBM2ByDepartment(
         dept_id,
         dept_nombre,
         mes,
         año,
-        'desincorporacion',
+        "desincorporacion",
         tempDir
       );
     }
 
     if (generatedFilePaths.length === 0) {
-      return res.status(500).json({ message: `No Excel files were generated for BM2 type: ${tipo}.` });
+      return res
+        .status(500)
+        .json({
+          message: `No Excel files were generated for BM2 type: ${tipo}.`,
+        });
     }
 
     const filePathToSend = generatedFilePaths[0];
@@ -109,9 +133,10 @@ router.post('/bm2', async (req: any, res: any) => {
 
     res.download(filePathToSend, fileName, (err: Error | null) => {
       if (err) {
-        console.error('Error sending file:', err);
+        console.error("Error sending file:", err);
       }
-      // Limpiar los archivos generados después de enviarlos
+      // Comentado temporalmente para depuración: no eliminar archivos generados
+      /*
       generatedFilePaths.forEach(file => {
         fs.unlink(file, (unlinkErr) => {
           if (unlinkErr) {
@@ -121,24 +146,36 @@ router.post('/bm2', async (req: any, res: any) => {
           }
         });
       });
+      */
     });
-
   } catch (error: unknown) {
-    console.error('Error generating BM2 Excel file:', error);
+    console.error("Error generating BM2 Excel file:", error);
     if (error instanceof Error) {
-      res.status(500).json({ message: 'Error generating BM2 Excel file', error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Error generating BM2 Excel file",
+          error: error.message,
+        });
     } else {
-      res.status(500).json({ message: 'An unknown error occurred during BM2 Excel file generation.' });
+      res
+        .status(500)
+        .json({
+          message:
+            "An unknown error occurred during BM2 Excel file generation.",
+        });
     }
   }
 });
 
 // Nueva ruta para generar el BM3 (bienes faltantes)
-router.post('/bm3', async (req: any, res: any) => {
+router.post("/bm3", async (req: any, res: any) => {
   const { missing_goods_id, responsable_id } = req.body; // Cambiar a missing_goods_id
 
   if (!missing_goods_id || !responsable_id) {
-    return res.status(400).json({ message: 'missing_goods_id and responsable_id are required.' });
+    return res
+      .status(400)
+      .json({ message: "missing_goods_id and responsable_id are required." });
   }
 
   try {
@@ -149,7 +186,11 @@ router.post('/bm3', async (req: any, res: any) => {
     );
 
     if (generatedFilePaths.length === 0) {
-      return res.status(500).json({ message: `No Excel file was generated for missing goods ID: ${missing_goods_id}.` });
+      return res
+        .status(500)
+        .json({
+          message: `No Excel file was generated for missing goods ID: ${missing_goods_id}.`,
+        });
     }
 
     const filePathToSend = generatedFilePaths[0];
@@ -157,8 +198,10 @@ router.post('/bm3', async (req: any, res: any) => {
 
     res.download(filePathToSend, fileName, (err: Error | null) => {
       if (err) {
-        console.error('Error sending file:', err);
+        console.error("Error sending file:", err);
       }
+      // Comentado temporalmente para depuración: no eliminar archivos generados
+      /*
       generatedFilePaths.forEach(file => {
         fs.unlink(file, (unlinkErr) => {
           if (unlinkErr) {
@@ -168,33 +211,55 @@ router.post('/bm3', async (req: any, res: any) => {
           }
         });
       });
+      */
     });
-
   } catch (error: unknown) {
-    console.error('Error generating BM3 Excel file:', error);
+    console.error("Error generating BM3 Excel file:", error);
     if (error instanceof Error) {
-      res.status(500).json({ message: 'Error generating BM3 Excel file', error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Error generating BM3 Excel file",
+          error: error.message,
+        });
     } else {
-      res.status(500).json({ message: 'An unknown error occurred during BM3 Excel file generation.' });
+      res
+        .status(500)
+        .json({
+          message:
+            "An unknown error occurred during BM3 Excel file generation.",
+        });
     }
   }
 });
 
 // Nueva ruta para generar el BM4 (reporte mensual en PDF)
-router.post('/bm4', async (req: any, res: any) => {
-  console.log('BM4 Request Body:', req.body);
+router.post("/bm4", async (req: any, res: any) => {
+  console.log("BM4 Request Body:", req.body);
   const { deptId, mes, año, responsableId, forceUpdate } = req.body; // Ajustar nombres de variables
 
   if (!deptId || !mes || !año || !responsableId) {
-    return res.status(400).json({ message: 'deptId, mes, año, and responsableId are required.' });
+    return res
+      .status(400)
+      .json({ message: "deptId, mes, año, and responsableId are required." });
   }
 
   try {
     // Verificar si ya existe un reporte para este mes y departamento
-    const existingReport = await reportModel.getMonthlyReportFromDB(mes, año, deptId);
+    const existingReport = await reportModel.getMonthlyReportFromDB(
+      mes,
+      año,
+      deptId
+    );
 
     if (existingReport && !forceUpdate) {
-      return res.status(409).json({ message: 'Ya existe un reporte BM-4 para este mes y departamento. ¿Desea sobrescribirlo?', reportExists: true });
+      return res
+        .status(409)
+        .json({
+          message:
+            "Ya existe un reporte BM-4 para este mes y departamento. ¿Desea sobrescribirlo?",
+          reportExists: true,
+        });
     }
 
     const generatedFilePaths = await generateBM4Pdf(
@@ -206,7 +271,9 @@ router.post('/bm4', async (req: any, res: any) => {
     );
 
     if (generatedFilePaths.length === 0) {
-      return res.status(500).json({ message: 'No PDF file was generated for BM4.' });
+      return res
+        .status(500)
+        .json({ message: "No PDF file was generated for BM4." });
     }
 
     const filePathToSend = generatedFilePaths[0];
@@ -214,8 +281,10 @@ router.post('/bm4', async (req: any, res: any) => {
 
     res.download(filePathToSend, fileName, (err: Error | null) => {
       if (err) {
-        console.error('Error sending file:', err);
+        console.error("Error sending file:", err);
       }
+      // Comentado temporalmente para depuración: no eliminar archivos generados
+      /*
       generatedFilePaths.forEach(file => {
         fs.unlink(file, (unlinkErr) => {
           if (unlinkErr) {
@@ -225,14 +294,23 @@ router.post('/bm4', async (req: any, res: any) => {
           }
         });
       });
+      */
     });
-
   } catch (error: unknown) {
-    console.error('Error generating BM4 PDF file:', error);
+    console.error("Error generating BM4 PDF file:", error);
     if (error instanceof Error) {
-      res.status(500).json({ message: 'Error generating BM4 PDF file', error: error.message });
+      res
+        .status(500)
+        .json({
+          message: "Error generating BM4 PDF file",
+          error: error.message,
+        });
     } else {
-      res.status(500).json({ message: 'An unknown error occurred during BM4 PDF file generation.' });
+      res
+        .status(500)
+        .json({
+          message: "An unknown error occurred during BM4 PDF file generation.",
+        });
     }
   }
 });

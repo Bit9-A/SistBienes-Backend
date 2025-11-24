@@ -6,30 +6,50 @@ import { AuthModel } from "./auth.model";
 // Este controlador maneja el registro de nuevos usuarios
 const register = async (req: any, res: any) => {
   try {
-    const { tipo_usuario, email, password, nombre, apellido, telefono, dept_id, cedula, username, isActive } = req.body;
+    const {
+      tipo_usuario,
+      email,
+      password,
+      nombre,
+      apellido,
+      telefono,
+      dept_id,
+      cedula,
+      username,
+      isActive,
+    } = req.body;
 
     // Validar que todos los campos obligatorios estén presentes
     if (!nombre || !apellido || !email || !password || !cedula || !username) {
-      return res.status(400).json({ ok: false, message: "Por favor, rellene todos los campos obligatorios." });
+      return res.status(400).json({
+        ok: false,
+        message: "Por favor, rellene todos los campos obligatorios.",
+      });
     }
 
     // Validar que el tipo de usuario sea válido
     const existingUser = await AuthModel.findUserByEmail(email);
     if (existingUser) {
-      return res.status(400).json({ ok: false, message: "El correo electrónico ya existe" });
+      return res
+        .status(400)
+        .json({ ok: false, message: "El correo electrónico ya existe" });
     }
 
     // Validar que el username sea único
-    const existingUsername = await AuthModel.findUserByUsername
+    const existingUsername = (await AuthModel.findUserByUsername)
       ? await AuthModel.findUserByUsername(username)
       : null;
     if (existingUsername) {
-      return res.status(400).json({ ok: false, message: "El nombre de usuario ya existe" });
+      return res
+        .status(400)
+        .json({ ok: false, message: "El nombre de usuario ya existe" });
     }
     // Validar que la cédula sea única
     const existingCedula = await AuthModel.findUserByCedula(cedula);
     if (existingCedula) {
-      return res.status(400).json({ ok: false, message: "La cédula ya existe." });
+      return res
+        .status(400)
+        .json({ ok: false, message: "La cédula ya existe." });
     }
 
     // Validar que el teléfono sea único
@@ -49,9 +69,13 @@ const register = async (req: any, res: any) => {
       isActive: isActive !== undefined ? isActive : true,
     });
     // Generar un token JWT para el nuevo usuario
-    const token = jwt.sign({ email: newUser.email }, process.env.SECRET_KEY || "defaultSecret", {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { email: newUser.email },
+      process.env.SECRET_KEY || "defaultSecret",
+      {
+        expiresIn: "1h",
+      }
+    );
 
     res.cookie("token", token, {
       httpOnly: true,
@@ -77,26 +101,43 @@ const register = async (req: any, res: any) => {
 const login = async (req: any, res: any) => {
   try {
     const { username, password } = req.body;
-    // Validar que se proporcionen el nombre de usuario y la contraseña
+
+    // Validar que se proporcionen el nombre de usuario/correo y la contraseña
     if (!username || !password) {
-      return res.status(400).json({ ok: false, message: "Se requieren nombre de usuario y contraseña" });
+      return res.status(400).json({
+        ok: false,
+        message: "Se requieren nombre de usuario/correo y contraseña",
+      });
     }
-    // Buscar el usuario por nombre de usuario
-    const user = await AuthModel.findUserByUsername(username);
+
+    let user;
+    // Determinar si el identificador es un correo electrónico o un nombre de usuario
+    if (username.includes("@")) {
+      user = await AuthModel.findUserByEmail(username);
+    } else {
+      user = await AuthModel.findUserByUsername(username);
+    }
 
     // Primero verifica si existe el usuario
     if (!user) {
-      return res.status(400).json({ ok: false, message: "El nombre de usuario o la contraseña no son válidos" });
+      return res.status(400).json({
+        ok: false,
+        message: "El nombre de usuario/correo o la contraseña no son válidos",
+      });
     }
 
     // Luego verifica si está activo (acepta 0 o false)
     if (user.isActive === 0 || user.isActive === false) {
-      return res.status(403).json({ ok: false, message: "El usuario está inactivo" });
+      return res
+        .status(403)
+        .json({ ok: false, message: "El usuario está inactivo" });
     }
 
     const validPassword = await bcryptjs.compare(password, user.password);
     if (!validPassword) {
-      return res.status(400).json({ ok: false, message: "La contraseña no es válida" });
+      return res
+        .status(400)
+        .json({ ok: false, message: "La contraseña no es válida" });
     }
     // Generar un token JWT para el usuario
     const token = jwt.sign(
@@ -117,20 +158,7 @@ const login = async (req: any, res: any) => {
     res.json({
       ok: true,
       token,
-      user: {
-        id: user.id,
-        tipo_usuario: user.tipo_usuario,
-        email: user.email,
-        username: user.username,
-        nombre: user.nombre,
-        apellido: user.apellido,
-        telefono: user.telefono,
-        dept_id: user.dept_id,
-        cedula: user.cedula,
-        isActive: user.isActive,
-      }
     });
-
   } catch (error) {
     console.error("Error de inicio de sesión:", error);
     res.status(500).json({
@@ -146,7 +174,9 @@ const logout = async (req: any, res: any) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      return res.status(401).json({ message: "No se proporciona ningún token" });
+      return res
+        .status(401)
+        .json({ message: "No se proporciona ningún token" });
     }
     // Verificar el formato del token
     const [bearer, token] = authHeader.split(" ");
@@ -182,12 +212,16 @@ const profile = async (req: any, res: any) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      return res.status(401).json({ ok: false, message: "No se proporciona ningún token" });
+      return res
+        .status(401)
+        .json({ ok: false, message: "No se proporciona ningún token" });
     }
     // Verificar el formato del token
     const [bearer, token] = authHeader.split(" ");
     if (bearer !== "Bearer" || !token) {
-      return res.status(401).json({ ok: false, message: "Formato de token no válido" });
+      return res
+        .status(401)
+        .json({ ok: false, message: "Formato de token no válido" });
     }
     // Buscar al usuario por el token de inicio de sesión
     const user = await AuthModel.findUserByLoginToken(token);
@@ -196,8 +230,13 @@ const profile = async (req: any, res: any) => {
     }
 
     // Verificar si el token ha expirado
-    if (user.login_token_expiration && new Date(user.login_token_expiration) < new Date()) {
-      return res.status(403).json({ ok: false, message: "El token ha expirado" });
+    if (
+      user.login_token_expiration &&
+      new Date(user.login_token_expiration) < new Date()
+    ) {
+      return res
+        .status(403)
+        .json({ ok: false, message: "El token ha expirado" });
     }
 
     // Combinar nombre y apellido en un solo campo
@@ -233,31 +272,42 @@ const changePassword = async (req: any, res: any) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
-      return res.status(401).json({ ok: false, message: "No se proporciona ningún token" });
+      return res
+        .status(401)
+        .json({ ok: false, message: "No se proporciona ningún token" });
     }
 
     const [bearer, token] = authHeader.split(" ");
     if (bearer !== "Bearer" || !token) {
-      return res.status(401).json({ ok: false, message: "Formato de token no válido" });
+      return res
+        .status(401)
+        .json({ ok: false, message: "Formato de token no válido" });
     }
     const userId = req.user?.userId;
     if (!userId) {
-      return res.status(401).json({ ok: false, message: "Usuario no autenticado" });
+      return res
+        .status(401)
+        .json({ ok: false, message: "Usuario no autenticado" });
     }
 
-    const user = await AuthModel.findUserPasswordById(userId)
+    const user = await AuthModel.findUserPasswordById(userId);
     if (!user) {
       return res.status(403).json({ ok: false, message: "Token no válido" });
     }
 
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ ok: false, message: "Debe proporcionar la contraseña actual y la nueva." });
+      return res.status(400).json({
+        ok: false,
+        message: "Debe proporcionar la contraseña actual y la nueva.",
+      });
     }
 
     const isMatch = await bcryptjs.compare(currentPassword, user.password);
     if (!isMatch) {
-      return res.status(400).json({ ok: false, message: "La contraseña actual es incorrecta." });
+      return res
+        .status(400)
+        .json({ ok: false, message: "La contraseña actual es incorrecta." });
     }
 
     const salt = await bcryptjs.genSalt(10);
@@ -265,7 +315,10 @@ const changePassword = async (req: any, res: any) => {
 
     await AuthModel.updateUserPassword(user.id, hashedNewPassword);
 
-    return res.json({ ok: true, message: "Contraseña actualizada correctamente." });
+    return res.json({
+      ok: true,
+      message: "Contraseña actualizada correctamente.",
+    });
   } catch (error) {
     console.error("Error al cambiar la contraseña:", error);
     return res.status(500).json({
@@ -282,5 +335,5 @@ export const AuthController = {
   login,
   logout,
   changePassword,
-  profile
+  profile,
 };

@@ -1,12 +1,69 @@
 import ExcelJS from "exceljs";
 import * as fs from "fs";
 import * as path from "path";
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
 import { missingGoodsModel } from "../modules/missing-goods/missing-goods.model";
 import { UserModel } from "../modules/users/user.model"; // Asumiendo que existe o se creará
+import { globalConfig } from "../variables/globals"; // Importar globalConfig
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Función auxiliar para añadir imágenes al workbook de ExcelJS de forma segura (copiada de ExcelBM1.ts)
+const addImageToWorkbook = async (
+  workbook: ExcelJS.Workbook,
+  imageUrl: string | null | undefined,
+  defaultImagePath: string,
+  imageName: string
+): Promise<number | undefined> => {
+  let finalImagePath = defaultImagePath;
+  let extension: "jpeg" | "png" | "gif" | undefined;
+
+  if (imageUrl) {
+    const potentialPath = path.join(process.cwd(), imageUrl);
+    if (fs.existsSync(potentialPath)) {
+      finalImagePath = potentialPath;
+    } else {
+      console.warn(
+        `[ExcelBM3] La imagen ${imageName} no se encontró en la URL configurada: ${imageUrl}. Usando imagen por defecto.`
+      );
+    }
+  } else {
+    console.warn(
+      `[ExcelBM3] URL para ${imageName} no disponible en la configuración global. Usando imagen por defecto.`
+    );
+  }
+
+  const detectedExtension = path
+    .extname(finalImagePath)
+    .toLowerCase()
+    .substring(1);
+  if (["jpeg", "png", "gif"].includes(detectedExtension)) {
+    extension = detectedExtension as "jpeg" | "png" | "gif";
+  } else {
+    console.warn(
+      `[ExcelBM3] Formato de imagen no soportado para ${imageName} (${detectedExtension}). Intentando con 'jpeg' por defecto.`
+    );
+    extension = "jpeg"; // Fallback a jpeg si la extensión no es reconocida o soportada por ExcelJS
+  }
+
+  try {
+    const imageId = workbook.addImage({
+      filename: finalImagePath,
+      extension: extension,
+    });
+    console.log(
+      `[ExcelBM3] ID de imagen ${imageName}: ${imageId} (Extensión usada: ${extension})`
+    );
+    return imageId;
+  } catch (error: any) {
+    console.error(
+      `[ExcelBM3] Error al cargar la imagen ${imageName} desde ${finalImagePath} con extensión ${extension}:`,
+      error
+    );
+    return undefined;
+  }
+};
 
 /**
  * Exporta un bien faltante específico a un archivo Excel usando una plantilla BM3.
@@ -27,9 +84,13 @@ export async function exportBM3ByMissingGoodsId(
   let jefeNombre: string = ""; // Nuevo: para el nombre del jefe
 
   // 1. Obtener datos del bien faltante específico
-  missingAsset = await missingGoodsModel.getMissingGoodsByIdWithDetails(missingGoodsId);
+  missingAsset = await missingGoodsModel.getMissingGoodsByIdWithDetails(
+    missingGoodsId
+  );
   if (!missingAsset) {
-    console.log(`[ExcelBM3] No se encontró el bien faltante con ID: ${missingGoodsId}`);
+    console.log(
+      `[ExcelBM3] No se encontró el bien faltante con ID: ${missingGoodsId}`
+    );
     return [];
   }
   console.log(`[ExcelBM3] Retrieved missing asset with ID ${missingGoodsId}.`);
@@ -43,7 +104,8 @@ export async function exportBM3ByMissingGoodsId(
   }
 
   // 3. Obtener datos del jefe de departamento
-  if (missingAsset.dept_id) { // Usar missingAsset.unidad que se mapea a dept_id
+  if (missingAsset.dept_id) {
+    // Usar missingAsset.unidad que se mapea a dept_id
     const jefeData = await UserModel.getUserByDeptJefe(missingAsset.dept_id);
     if (jefeData) {
       jefeNombre = jefeData.nombre || "N/A";
@@ -53,7 +115,6 @@ export async function exportBM3ByMissingGoodsId(
   // Obtener el nombre del departamento del bien faltante
   departamentoNombre = missingAsset.departamento || "Departamento Desconocido";
 
-
   const PARROQUIA = "Tariba"; // Asumiendo que es fijo o se obtiene de otro lado
   const FECHA = new Date().toLocaleDateString("es-VE");
   const BIENES_POR_PAGINA = 6; // Ajustar según la plantilla BM3
@@ -61,7 +122,10 @@ export async function exportBM3ByMissingGoodsId(
   console.log(`[ExcelBM3] Total pages to generate: ${totalPaginas}`);
 
   // Ruta absoluta a la plantilla
-  const plantillaPath = path.resolve(__dirname, "../plantillas/plantilla-bm3.xlsx");
+  const plantillaPath = path.resolve(
+    __dirname,
+    "../plantillas/plantilla-bm3.xlsx"
+  );
   console.log(`[ExcelBM3] Template path: ${plantillaPath}`);
   const plantillaBuffer = fs.readFileSync(plantillaPath);
   const generatedFilePaths: string[] = [];
@@ -69,22 +133,51 @@ export async function exportBM3ByMissingGoodsId(
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(plantillaBuffer as any);
 
-  // Cargar imágenes una sola vez para el workbook (si aplica, como en BM2)
-  const escudoPath = path.resolve(__dirname, "../images/Escudo.jpg");
-  const logoImpresionPath = path.resolve(__dirname, "../images/LogoImpresion.jpg");
-  const redesPath = path.resolve(__dirname, "../images/Redes.png");
-
-  const escudoImageId = workbook.addImage({ filename: escudoPath, extension: 'jpeg' });
-  const logoImpresionImageId = workbook.addImage({ filename: logoImpresionPath, extension: 'jpeg' });
-  const redesImageId = workbook.addImage({ filename: redesPath, extension: 'png' });
+  // Cargar imágenes una sola vez para el workbook usando la configuración global
+  const logoImpresionImageId = await addImageToWorkbook(
+    workbook,
+    globalConfig.url_logo,
+    path.resolve(__dirname, "../images/LogoImpresion.jpg"),
+    "LogoImpresion"
+  );
+  const escudoImageId = await addImageToWorkbook(
+    workbook,
+    globalConfig.url_impresion_1, // Asumiendo que url_impresion_1 es para el escudo
+    path.resolve(__dirname, "../images/Escudo.jpg"),
+    "Escudo"
+  );
+  const redesImageId = await addImageToWorkbook(
+    workbook,
+    globalConfig.url_impresion_2, // Asumiendo que url_impresion_2 es para redes
+    path.resolve(__dirname, "../images/Redes.png"),
+    "Redes"
+  );
 
   const addImagesToWorksheet = (targetWs: ExcelJS.Worksheet) => {
-    targetWs.addImage(logoImpresionImageId, { tl: { col: 0.5, row: 0.2 }, ext: { width: 150, height: 50 } });
-    targetWs.addImage(escudoImageId, { tl: { col: 8.8, row: 0.1 }, ext: { width: 70, height: 70 } });
-    targetWs.addImage(redesImageId, { tl: { col: 0.5, row: 25 }, ext: { width: 120, height: 40 } });
+    if (logoImpresionImageId !== undefined && logoImpresionImageId !== null) {
+      targetWs.addImage(logoImpresionImageId, {
+        tl: { col: 0.5, row: 0.2 },
+        ext: { width: 150, height: 50 },
+      });
+    }
+    if (escudoImageId) {
+      targetWs.addImage(escudoImageId, {
+        tl: { col: 9.4, row: 0.1 },
+        ext: { width: 70, height: 70 },
+      });
+    }
+    if (redesImageId) {
+      targetWs.addImage(redesImageId, {
+        tl: { col: 0.5, row: 25 },
+        ext: { width: 120, height: 40 },
+      });
+    }
   };
 
-  const copyTemplateContent = (sourceWs: ExcelJS.Worksheet, targetWs: ExcelJS.Worksheet) => {
+  const copyTemplateContent = (
+    sourceWs: ExcelJS.Worksheet,
+    targetWs: ExcelJS.Worksheet
+  ) => {
     sourceWs.eachRow({ includeEmpty: true }, (row, rowNumber) => {
       const newRow = targetWs.getRow(rowNumber);
       row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
@@ -95,7 +188,7 @@ export async function exportBM3ByMissingGoodsId(
       newRow.height = row.height;
     });
 
-    sourceWs.model.merges.forEach(merge => {
+    sourceWs.model.merges.forEach((merge) => {
       targetWs.mergeCells(merge);
     });
 
@@ -133,7 +226,10 @@ export async function exportBM3ByMissingGoodsId(
             .replace(/{{TOTALN}}/g, String(totalPaginas)) // Corregido: reemplazar solo el número total de páginas
             .replace(/{{RESPONSABLE}}/g, responsableNombre || "")
             .replace(/{{ROL}}/g, responsableRol || "")
-            .replace(/{{DEPARTAMENTORESPONSABLE}}/g, responsableDepartamento || "")
+            .replace(
+              /{{DEPARTAMENTORESPONSABLE}}/g,
+              responsableDepartamento || ""
+            )
             .replace(/{{JEFE}}/g, jefeNombre || "")
             .replace(/{{OBSERVACIONES}}/g, missingAsset.observaciones || "");
         }
@@ -141,7 +237,7 @@ export async function exportBM3ByMissingGoodsId(
     });
 
     // Establecer el valor de I5
-    ws.getCell('I5').value = `Hoja N° : ${pagina + 1}/${totalPaginas}`;
+    ws.getCell("I5").value = `Hoja N° : ${pagina + 1}/${totalPaginas}`;
 
     // Insertar los bienes en la tabla (ajusta la fila de inicio según tu plantilla)
     const startRow = 14; // Fila de inicio de la tabla en plantilla-bm3.xlsx
@@ -153,24 +249,28 @@ export async function exportBM3ByMissingGoodsId(
     row.getCell(3).value = ""; // Columna C (Sección - no disponible en missing-goods)
     row.getCell(4).value = asset.numero_identificacion || ""; // Columna D (Número de Identificación)
     row.getCell(5).value = asset.cantidad || 0; // Columna E (Cantidad)
-    
-    const descripcion = [ // Columna F (Descripción de los Bienes)
-      asset.bien_nombre,
-      asset.numero_serial || "",
-      asset.marca_nombre,
-      asset.modelo_nombre,
-      asset.estado_nombre,
-    ].filter(Boolean).join(' ') || "";
+
+    const descripcion =
+      [
+        // Columna F (Descripción de los Bienes)
+        asset.bien_nombre,
+        asset.numero_serial || "",
+        asset.marca_nombre,
+        asset.modelo_nombre,
+        asset.estado_nombre,
+      ]
+        .filter(Boolean)
+        .join(" ") || "";
     row.getCell(6).value = descripcion;
 
     row.getCell(7).value = asset.existencias || 0; // Columna G (Existencia Física)
     row.getCell(9).value = asset.cantidad || 0; // Columna H (Registros Contables - asumiendo que es la cantidad registrada)
-    
+
     row.getCell(10).value = asset.valor_unitario || 0; // Columna I (Valor Unitario)
-    row.getCell(10).numFmt = '#,##0.00';
+    row.getCell(10).numFmt = "#,##0.00";
 
     row.getCell(11).value = asset.diferencia_valor || 0; // Columna J (Diferencia Cantidad Valor Total)
-    row.getCell(11).numFmt = '#,##0.00';
+    row.getCell(11).numFmt = "#,##0.00";
 
     row.commit();
 
@@ -183,7 +283,10 @@ export async function exportBM3ByMissingGoodsId(
   }
 
   // Guardar el único archivo generado al final
-  const nombreArchivo = `BM3_BienesFaltantes_${departamentoNombre}_${FECHA.replace(/\//g, '-')}.xlsx`;
+  const nombreArchivo = `BM3_BienesFaltantes_${departamentoNombre}_${FECHA.replace(
+    /\//g,
+    "-"
+  )}.xlsx`;
   const rutaArchivo = path.join(outputPath, nombreArchivo);
 
   const buffer = await workbook.xlsx.writeBuffer();
@@ -193,6 +296,8 @@ export async function exportBM3ByMissingGoodsId(
   console.log(`[ExcelBM3] Archivo final generado: ${rutaArchivo}`);
   generatedFilePaths.push(rutaArchivo);
 
-  console.log(`[ExcelBM3] Finished generating files. Total generated: ${generatedFilePaths.length}`);
+  console.log(
+    `[ExcelBM3] Finished generating files. Total generated: ${generatedFilePaths.length}`
+  );
   return generatedFilePaths;
 }

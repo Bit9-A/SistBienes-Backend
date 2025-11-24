@@ -118,10 +118,9 @@ const getUserDetailsById = async (id: number) => {
   return (rows as any[])[0];
 };
 
-
 const getUserByDeptJefe = async (deptId: number) => {
   const query = `
-   SELECT u.id, concat(u.nombre,' ',u.apellido) as nombre, u.email, u.telefono, u.cedula, u.username, d.nombre as departamento
+   SELECT u.id, concat(u.nombre,' ',u.apellido) as nombre_completo, u.email, u.telefono, u.cedula, u.username, d.nombre as departamento
     FROM Usuarios u
     JOIN Departamento d ON u.dept_id = d.id
     JOIN TipoUsuario t ON u.tipo_usuario = t.id
@@ -141,5 +140,5 @@ export const UserModel = {
   updateUser,
   deleteUser,
   getUserDetailsById,
-  getUserByDeptJefe
+  getUserByDeptJefe,
 };
