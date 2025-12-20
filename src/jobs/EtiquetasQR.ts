@@ -147,14 +147,14 @@ export async function generateQRLabelsByDepartment(
 
     // Datos para el QR (formato de texto simple)
     const qrData = `
-Departamento: ${asset.dept_nombre || ""}
-N° Identificación: ${asset.numero_identificacion || ""}
-Descripción: ${asset.nombre_descripcion || ""}
-Marca: ${asset.marca_nombre || ""}
-Modelo: ${asset.modelo_nombre || ""}
-Estado: ${asset.estado_nombre || ""}
-Componentes: ${asset.components_description || ""}
-`.trim();
+        Departamento: ${asset.dept_nombre || ""}
+        N° Identificación: ${asset.numero_identificacion || ""}
+        Descripción: ${asset.nombre_descripcion || ""}
+        Marca: ${asset.marca_nombre || ""}
+        Modelo: ${asset.modelo_nombre || ""}
+        Estado: ${asset.estado_nombre || ""}
+        Componentes: ${asset.components_description || ""}
+        `.trim();
 
     // Generar QR como PNG Buffer
     const qrPngBuffer = await QRCode.toBuffer(qrData, {
@@ -165,52 +165,132 @@ Componentes: ${asset.components_description || ""}
     const embeddedQrImage = await pdfDoc.embedPng(qrPngBuffer);
 
     // Dibujar elementos en la etiqueta
-    // Logo
-    if (embeddedLogoImpresion) {
-      page.drawImage(embeddedLogoImpresion, {
-        x: x + 5,
-        y: y + labelHeight - 40, // Ajuste para posicionar en la parte superior izquierda
-        width: 80,
-        height: 30,
-      });
-    }
-
-    // Impresión 1 (Escudo)
-    if (embeddedImpresion1) {
-      page.drawImage(embeddedImpresion1, {
-        x: x + labelWidth - 45, // Ajuste para posicionar en la parte superior derecha
-        y: y + labelHeight - 38,
-        width: 40,
-        height: 36,
-      });
-    }
-
-    // Dibujar borde rojo de la etiqueta
+    // 1. Dibujar borde rojo
     page.drawRectangle({
       x: x,
       y: y,
       width: labelWidth,
       height: labelHeight,
-      borderColor: rgb(0.8, 0, 0), // Borde rojo
+      borderColor: rgb(0.8, 0, 0),
       borderWidth: 2,
     });
 
-    // Número de Identificación
-    page.drawText(`N° ${asset.numero_identificacion || ""}`, {
-      x: x + 10,
-      y: y + labelHeight - 90, // Debajo del logo
+    // Definir zona de cabecera
+    const headerHeight = 40;
+    const headerYBase = y + labelHeight - headerHeight;
+
+    // 2. Logo Izquierdo (Marta Gallo)
+    if (embeddedLogoImpresion) {
+      page.drawImage(embeddedLogoImpresion, {
+        x: x + 8, // Margen izquierdo ligero
+        y: y + labelHeight - 35, // Centrado verticalmente en el header
+        width: 70, // Reducido un poco para dar espacio al texto central
+        height: 26,
+      });
+    }
+
+    // 3. Logo Derecho (Escudo)
+    if (embeddedImpresion1) {
+      page.drawImage(embeddedImpresion1, {
+        x: x + labelWidth - 40, // Alineado a la derecha
+        y: y + labelHeight - 36,
+        width: 32,
+        height: 30,
+      });
+    }
+
+    // 4. Texto Central: "Alcaldía Bolivariana del Municipio Cárdenas"
+    // Calculamos el centro exacto de la etiqueta para alinear el texto
+    const centerX = x + labelWidth / 2;
+
+    // Usamos Helvetica Bold para que destaque y tamaño pequeño (7 o 8) para que quepa
+    const titleSize = 7;
+    const titleColor = rgb(0, 0, 0);
+
+    // Línea 1
+    const textLine1 = "Alcaldía Bolivariana";
+    const widthLine1 = boldFont.widthOfTextAtSize(textLine1, titleSize);
+    page.drawText(textLine1, {
+      x: centerX - (widthLine1 / 2), // Centrado matemático
+      y: y + labelHeight - 18,       // Parte superior del header
       font: boldFont,
-      size: 26, // Fuente más grande
+      size: titleSize,
+      color: titleColor,
+    });
+
+    // Línea 2
+    const textLine2 = "del Municipio Cárdenas";
+    const widthLine2 = boldFont.widthOfTextAtSize(textLine2, titleSize);
+    page.drawText(textLine2, {
+      x: centerX - (widthLine2 / 2), // Centrado matemático
+      y: y + labelHeight - 28,       // Debajo de la línea 1
+      font: boldFont,
+      size: titleSize,
+      color: titleColor,
+    });
+
+    // 5. Línea Divisoria (Separador Header/Cuerpo)
+    page.drawLine({
+      start: { x: x + 5, y: headerYBase },
+      end: { x: x + labelWidth - 5, y: headerYBase },
+      thickness: 1,
+      color: rgb(0.85, 0.85, 0.85), // Gris muy suave
+    });
+
+    // 6. QR Code (Alineado a la derecha inferior)
+    const qrSize = 62; // Tamaño ajustado
+    const qrX = x + labelWidth - qrSize - 8;
+    const qrY = y + 8; // Margen inferior
+
+    page.drawImage(embeddedQrImage, {
+      x: qrX,
+      y: qrY,
+      width: qrSize,
+      height: qrSize,
+    });
+
+    // 7. Información del Bien (Columna Izquierda)
+
+    // ID Principal
+    page.drawText(`N° ${asset.numero_identificacion || "S/N"}`, {
+      x: x + 12,
+      y: headerYBase - 20, // Debajo de la línea divisoria
+      font: boldFont,
+      size: 18, // Tamaño prominente pero equilibrado
       color: rgb(0, 0, 0),
     });
 
-    // QR Code
-    page.drawImage(embeddedQrImage, {
-      x: x + labelWidth - 90, // Derecha de la etiqueta
-      y: y + labelHeight - 113, // Debajo del escudo
-      width: 70,
-      height: 70,
+    // Función para cortar texto largo (truncar)
+    const truncateText = (text: string, maxLength: number) => {
+      if (!text) return "";
+      return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+    };
+
+    // Descripción del Activo (Ej: "Silla de oficina...")
+    const descripcion = asset.nombre_descripcion || "Sin descripción";
+    const descripcionCorta = truncateText(descripcion, 30); // Max 30 caracteres aprox
+
+    page.drawText(descripcionCorta, {
+      x: x + 12,
+      y: headerYBase - 35,
+      font: font,
+      size: 9,
+      color: rgb(0.2, 0.2, 0.2),
     });
+
+    // Ubicación / Departamento (Texto pequeño al pie)
+    const ubicacion = asset.dept_nombre || "";
+    const ubicacionCorta = truncateText(ubicacion, 35);
+
+    if (ubicacionCorta) {
+      page.drawText(`Ubicación: ${ubicacionCorta}`, {
+        x: x + 12,
+        y: y + 12, // A la altura de la base del QR
+        font: font,
+        size: 7,
+        color: rgb(0.5, 0.5, 0.5), // Gris para info secundaria
+      });
+    }
 
     currentLabelIndex++;
   }
