@@ -224,7 +224,10 @@ export async function exportBM1ByDepartment(
         row.eachCell((cell) => {
           if (typeof cell.value === "string") {
             cell.value = cell.value
-              .replace(/{{DEPARTAMENTO}}/g, departamentoNombre || "")
+              .replace(
+                /{{DEPARTAMENTO}}/g,
+                "Oficina de " + departamentoNombre || ""
+              )
               .replace(/{{PARROQUIA}}/g, PARROQUIA)
               .replace(/{{FECHA}}/g, FECHA)
               .replace(/{{NPAGINA}}/g, String(pagina + 1)) // Usar NPAGINA

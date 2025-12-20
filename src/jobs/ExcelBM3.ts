@@ -219,7 +219,10 @@ export async function exportBM3ByMissingGoodsId(
       row.eachCell((cell) => {
         if (typeof cell.value === "string") {
           cell.value = cell.value
-            .replace(/{{DEPARTAMENTO}}/g, departamentoNombre || "")
+            .replace(
+              /{{DEPARTAMENTO}}/g,
+              "Oficina de " + departamentoNombre || ""
+            )
             .replace(/{{PARROQUIA}}/g, PARROQUIA)
             .replace(/{{FECHA}}/g, FECHA)
             .replace(/{{PAGINAN}}/g, String(pagina + 1)) // Corregido: reemplazar solo el número de página actual

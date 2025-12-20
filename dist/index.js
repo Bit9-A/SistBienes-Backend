@@ -8,7 +8,6 @@ import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import * as fs from 'fs';
-import fs__default from 'fs';
 import ExcelJS from 'exceljs';
 import { PDFDocument, StandardFonts, rgb, PageSizes } from 'pdf-lib';
 import QRCode from 'qrcode';
@@ -322,6 +321,15 @@ const findUserByEmail = (email) => __async$S(void 0, null, function* () {
   const [rows] = yield pool.execute(query, [email]);
   return rows[0];
 });
+const findUserPasswordById = (id) => __async$S(void 0, null, function* () {
+  const query = `
+    SELECT *
+    FROM Usuarios
+    WHERE id = ?
+  `;
+  const [rows] = yield pool.execute(query, [id]);
+  return rows[0];
+});
 const saveLoginToken = (id, token, expiration) => __async$S(void 0, null, function* () {
   const query = `
     UPDATE Usuarios
@@ -408,7 +416,8 @@ const AuthModel = {
   clearPasswordResetToken,
   updateUserPassword,
   findUserByUsername,
-  findUserByCedula
+  findUserByCedula,
+  findUserPasswordById
 };
 
 var __defProp$4 = Object.defineProperty;
@@ -628,26 +637,42 @@ const profile = (req, res) => __async$R(void 0, null, function* () {
     });
   }
 });
-const resetPassword = (req, res) => __async$R(void 0, null, function* () {
+const changePassword = (req, res) => __async$R(void 0, null, function* () {
+  var _a;
   try {
-    const { newPassword, token } = req.body;
-    const user = yield AuthModel.findUserByResetToken(token);
-    if (!user) {
-      return res.status(400).json({ ok: false, message: "Token inv\xE1lido o caducado" });
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ ok: false, message: "No se proporciona ning\xFAn token" });
     }
-    if (user.reset_token_expiration < Date.now()) {
-      return res.status(400).json({ ok: false, message: "El token ha expirado" });
+    const [bearer, token] = authHeader.split(" ");
+    if (bearer !== "Bearer" || !token) {
+      return res.status(401).json({ ok: false, message: "Formato de token no v\xE1lido" });
+    }
+    const userId = (_a = req.user) == null ? void 0 : _a.userId;
+    if (!userId) {
+      return res.status(401).json({ ok: false, message: "Usuario no autenticado" });
+    }
+    const user = yield AuthModel.findUserPasswordById(userId);
+    if (!user) {
+      return res.status(403).json({ ok: false, message: "Token no v\xE1lido" });
+    }
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ ok: false, message: "Debe proporcionar la contrase\xF1a actual y la nueva." });
+    }
+    const isMatch = yield bcryptjs.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ ok: false, message: "La contrase\xF1a actual es incorrecta." });
     }
     const salt = yield bcryptjs.genSalt(10);
-    const hashedPassword = yield bcryptjs.hash(newPassword, salt);
-    yield AuthModel.updateUserPassword(user.id, hashedPassword);
-    yield AuthModel.clearPasswordResetToken(user.id);
-    res.status(200).json({ ok: true, message: "Restablecimiento de contrase\xF1a exitoso" });
+    const hashedNewPassword = yield bcryptjs.hash(newPassword, salt);
+    yield AuthModel.updateUserPassword(user.id, hashedNewPassword);
+    return res.json({ ok: true, message: "Contrase\xF1a actualizada correctamente." });
   } catch (error) {
-    console.error("Error de restablecimiento de contrase\xF1a:", error);
-    res.status(500).json({
+    console.error("Error al cambiar la contrase\xF1a:", error);
+    return res.status(500).json({
       ok: false,
-      msg: "Error del servidor",
+      message: "Error del servidor",
       error: error instanceof Error ? error.message : "Error desconocido"
     });
   }
@@ -656,7 +681,7 @@ const AuthController = {
   register,
   login,
   logout,
-  resetPassword,
+  changePassword,
   profile
 };
 
@@ -680,7 +705,6 @@ var __async$Q = (__this, __arguments, generator) => {
     step((generator = generator.apply(__this, __arguments)).next());
   });
 };
-const ADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhZG1pbiI6dHJ1ZSwicm9sZV9pZCI6MSwiaWF0IjoxNzM4NjgwNzcwLCJleHAiOjE3Mzg2ODQzNzB9.kHNI4ccrzs1g5vH3HO6y5vdIxpn7sedy3tgQA27qXKs";
 const verifyToken = (req, res, next) => __async$Q(void 0, null, function* () {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
@@ -691,10 +715,6 @@ const verifyToken = (req, res, next) => __async$Q(void 0, null, function* () {
     return res.status(401).json({ message: "Invalid token format" });
   }
   try {
-    if (token === ADMIN_TOKEN) {
-      req.user = { admin: true, role_id: 1 };
-      return next();
-    }
     const decoded = jwt.verify(token, process.env.SECRET_KEY || "defaultSecret");
     const user = yield AuthModel.findUserByLoginToken(token);
     if (!user) {
@@ -706,14 +726,16 @@ const verifyToken = (req, res, next) => __async$Q(void 0, null, function* () {
       const newToken = jwt.sign(
         { userId: user.id, email: user.email, role_id: user.role_id },
         process.env.SECRET_KEY || "defaultSecret",
-        { expiresIn: "1h" }
+        { expiresIn: "2h" }
+        // Token dura 2 horas
       );
-      const expiration = new Date(Date.now() + 36e5);
+      const expiration = new Date(Date.now() + 72e5);
       yield AuthModel.saveLoginToken(user.id, newToken, expiration);
       res.cookie("token", newToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        maxAge: 36e5
+        maxAge: 72e5
+        // 2 horas
       });
       req.headers.authorization = `Bearer ${newToken}`;
     }
@@ -734,7 +756,7 @@ const router$o = Router();
 router$o.post("/register", AuthController.register);
 router$o.post("/login", AuthController.login);
 router$o.post("/logout", AuthController.logout);
-router$o.post("/reset-password", AuthController.resetPassword);
+router$o.post("/change-password", verifyToken, AuthController.changePassword);
 router$o.get("/profile", verifyToken, AuthController.profile);
 
 var __async$P = (__this, __arguments, generator) => {
@@ -769,7 +791,7 @@ const getAllUsers$1 = () => __async$P(void 0, null, function* () {
 });
 const getUserById$1 = (id) => __async$P(void 0, null, function* () {
   const query = `
-    SELECT u.id, u.tipo_usuario, u.email, u.nombre, u.apellido, u.telefono, 
+    SELECT u.id, u.tipo_usuario, u.email,u.password ,u.nombre, u.apellido, u.telefono, 
            u.dept_id, d.nombre as dept_nombre, u.cedula, u.username, u.isActive
     FROM Usuarios u
     LEFT JOIN Departamento d ON u.dept_id = d.id
@@ -3312,10 +3334,11 @@ const getTransferById$1 = (id) => __async$t(void 0, null, function* () {
         WHERE t.id = ?
     `;
   const bienesQuery = `
-        SELECT ta.*, a.nombre_descripcion, a.numero_identificacion, ea.nombre as estado
+        SELECT ta.*, a.nombre_descripcion, a.numero_identificacion, ea.nombre as estado, d.nombre as departamento
         FROM TransferenciaActivo ta
         LEFT JOIN Activos a ON ta.id_mueble = a.id
         LEFT JOIN EstadoActivo ea ON a.estado_id = ea.id
+        LEFT JOIN Departamento d ON a.dept_id = d.id
         WHERE ta.id_traslado = ?
     `;
   const [trasladoRows] = yield pool.execute(trasladoQuery, [id]);
@@ -4117,15 +4140,26 @@ var __async$m = (__this, __arguments, generator) => {
   });
 };
 const __filename$8 = fileURLToPath(import.meta.url);
-const __dirname$8 = path__default.dirname(__filename$8);
+path__default.dirname(__filename$8);
 const diskStorage = multer.diskStorage({
-  destination: path__default.join(__dirname$8, "../../../images"),
+  destination: path__default.join(process.cwd(), "./images"),
   filename: (req, file, cb) => {
     const ext = path__default.extname(file.originalname);
     let baseName = file.fieldname;
     cb(null, `${baseName}${ext}`);
   }
 });
+const fileFilter = (req, file, cb) => {
+  if (file.fieldname === "favicon") {
+    if (path__default.extname(file.originalname).toLowerCase() === ".ico") {
+      cb(null, true);
+    } else {
+      cb(new Error("El favicon debe ser un archivo .ico"));
+    }
+  } else {
+    cb(null, true);
+  }
+};
 const getConfig = (req, res) => __async$m(void 0, null, function* () {
   try {
     const config = yield configModel.getConfig();
@@ -4141,11 +4175,12 @@ const getConfig = (req, res) => __async$m(void 0, null, function* () {
 });
 const createConfig = (req, res) => {
   const upload = multer({
-    storage: diskStorage
+    storage: diskStorage,
+    fileFilter
   }).fields([
     { name: "favicon", maxCount: 1 },
     { name: "banner", maxCount: 1 },
-    { name: "logo", maxCount: 1 }
+    { name: "LogoImpresion", maxCount: 1 }
   ]);
   upload(req, res, function(err) {
     return __async$m(this, null, function* () {
@@ -4154,13 +4189,12 @@ const createConfig = (req, res) => {
         return res.status(500).json({ ok: false, message: "Error al subir la imagen", error: err.message });
       }
       const files = req.files;
-      const pathBase = path__default.join(__dirname$8, "../../../images");
       const bannerFilename = (_b = (_a = files == null ? void 0 : files.banner) == null ? void 0 : _a[0]) == null ? void 0 : _b.filename;
       const logoFilename = (_d = (_c = files == null ? void 0 : files.logo) == null ? void 0 : _c[0]) == null ? void 0 : _d.filename;
       const faviconFilename = (_f = (_e = files == null ? void 0 : files.favicon) == null ? void 0 : _e[0]) == null ? void 0 : _f.filename;
-      const url_banner = bannerFilename ? fs__default.readFileSync(path__default.join(pathBase, bannerFilename)) : null;
-      const url_logo = logoFilename ? fs__default.readFileSync(path__default.join(pathBase, logoFilename)) : null;
-      const url_favicon = faviconFilename ? fs__default.readFileSync(path__default.join(pathBase, faviconFilename)) : null;
+      const url_banner = bannerFilename ? `/images/${bannerFilename}` : null;
+      const url_logo = logoFilename ? `/images/${logoFilename}` : null;
+      const url_favicon = faviconFilename ? `/images/${faviconFilename}` : null;
       const { colorprimario, colorsecundario, nombre_institucion } = req.body;
       yield configModel.createConfig({
         fecha: (/* @__PURE__ */ new Date()).toISOString().slice(0, 10),
@@ -4180,7 +4214,8 @@ const createConfig = (req, res) => {
 };
 const updateConfig = (req, res) => {
   const upload = multer({
-    storage: diskStorage
+    storage: diskStorage,
+    fileFilter
   }).fields([
     { name: "favicon", maxCount: 1 },
     { name: "banner", maxCount: 1 },
@@ -4193,13 +4228,12 @@ const updateConfig = (req, res) => {
         return res.status(500).json({ ok: false, message: "Error al subir la imagen", error: err.message });
       }
       const files = req.files;
-      const pathBase = path__default.join(__dirname$8, "../../../images");
       const bannerFilename = (_b = (_a = files == null ? void 0 : files.banner) == null ? void 0 : _a[0]) == null ? void 0 : _b.filename;
       const logoFilename = (_d = (_c = files == null ? void 0 : files.logo) == null ? void 0 : _c[0]) == null ? void 0 : _d.filename;
       const faviconFilename = (_f = (_e = files == null ? void 0 : files.favicon) == null ? void 0 : _e[0]) == null ? void 0 : _f.filename;
-      const url_banner = bannerFilename ? fs__default.readFileSync(path__default.join(pathBase, bannerFilename)) : null;
-      const url_logo = logoFilename ? fs__default.readFileSync(path__default.join(pathBase, logoFilename)) : null;
-      const url_favicon = faviconFilename ? fs__default.readFileSync(path__default.join(pathBase, faviconFilename)) : null;
+      const url_banner = bannerFilename ? `/images/${bannerFilename}` : null;
+      const url_logo = logoFilename ? `/images/${logoFilename}` : null;
+      const url_favicon = faviconFilename ? `/images/${faviconFilename}` : null;
       const { colorprimario, colorsecundario, nombre_institucion } = req.body;
       yield configModel.updateGeneralConfig({
         fecha: (/* @__PURE__ */ new Date()).toISOString().slice(0, 10),
@@ -4851,36 +4885,98 @@ var __async$h = (__this, __arguments, generator) => {
 };
 const getGoodHistoryById = (goodId) => __async$h(void 0, null, function* () {
   const query = `
+    -- Incorporaciones
     SELECT
-    A.id AS bien_id,
-    A.nombre_descripcion AS bien_nombre, 
-    CD.nombre AS estado_desincorporacion,
-    D.nombre AS dept_actual,
-    I.fecha AS fecha_incorporacion,
-    D1.nombre AS dept_origen,
-    D2.nombre AS dept_destino,
-    T.fecha AS fecha_traslado,
-    DES.fecha AS fecha_desincorporacion,
-    DES.valor AS valor_desincorporacion,
-    DES.cantidad AS cantidad_desincorporacion,
-    DDES.nombre AS dept_desincorporacion
+        A.id AS bien_id,
+        A.nombre_descripcion AS bien_nombre,
+        'Incorporacion' AS tipo_evento,
+        I.fecha AS fecha_evento,
+        D_actual.nombre AS departamento_relacionado,
+        NULL AS departamento_origen,
+        NULL AS departamento_destino,
+        NULL AS concepto_desincorporacion,
+        NULL AS valor_desincorporacion,
+        NULL AS cantidad_desincorporacion,
+        NULL AS campo_modificado,
+        NULL AS valor_anterior,
+        NULL AS valor_nuevo
     FROM Activos A
-    LEFT JOIN Departamento D ON A.dept_id = D.id
-    LEFT JOIN IncorporacionActivo I ON A.id = I.bien_id
-    LEFT JOIN TransferenciaActivo BT ON BT.id_mueble = A.id  
-    LEFT JOIN Traslado T ON BT.id_traslado = T.id 
+    JOIN IncorporacionActivo I ON A.id = I.bien_id
+    LEFT JOIN Departamento D_actual ON A.dept_id = D_actual.id
+    WHERE A.id = ?
+
+    UNION ALL
+
+    -- Traslados
+    SELECT
+        A.id AS bien_id,
+        A.nombre_descripcion AS bien_nombre,
+        'Traslado' AS tipo_evento,
+        T.fecha AS fecha_evento,
+        NULL AS departamento_relacionado,
+        D1.nombre AS departamento_origen,
+        D2.nombre AS departamento_destino,
+        NULL AS concepto_desincorporacion,
+        NULL AS valor_desincorporacion,
+        NULL AS cantidad_desincorporacion,
+        NULL AS campo_modificado,
+        NULL AS valor_anterior,
+        NULL AS valor_nuevo
+    FROM Activos A
+    JOIN TransferenciaActivo BT ON A.id = BT.id_mueble
+    JOIN Traslado T ON BT.id_traslado = T.id
     LEFT JOIN Departamento D1 ON T.origen_id = D1.id
     LEFT JOIN Departamento D2 ON T.destino_id = D2.id
-    LEFT JOIN DesincorporacionActivo DES ON A.id = DES.bien_id
+    WHERE A.id = ?
+
+    UNION ALL
+
+    -- Desincorporaciones
+    SELECT
+        A.id AS bien_id,
+        A.nombre_descripcion AS bien_nombre,
+        'Desincorporacion' AS tipo_evento,
+        DES.fecha AS fecha_evento,
+        DDES.nombre AS departamento_relacionado,
+        NULL AS departamento_origen,
+        NULL AS departamento_destino,
+        CD.nombre AS concepto_desincorporacion,
+        DES.valor AS valor_desincorporacion,
+        DES.cantidad AS cantidad_desincorporacion,
+        NULL AS campo_modificado,
+        NULL AS valor_anterior,
+        NULL AS valor_nuevo
+    FROM Activos A
+    JOIN DesincorporacionActivo DES ON A.id = DES.bien_id
     LEFT JOIN ConceptoDesincorporacion CD ON DES.concepto_id = CD.id
     LEFT JOIN Departamento DDES ON DES.dept_id = DDES.id
     WHERE A.id = ?
-    ORDER BY 
-    I.fecha ASC,
-    T.fecha ASC,
-    DES.fecha ASC;
+
+    UNION ALL
+
+    -- Activos Faltantes
+    SELECT
+        AF.bien_id AS bien_id,
+        A.nombre_descripcion AS bien_nombre,
+        'Activo Faltante' AS tipo_evento,
+        AF.fecha AS fecha_evento,
+        D_actual.nombre AS departamento_relacionado,
+        NULL AS departamento_origen,
+        NULL AS departamento_destino,
+        NULL AS concepto_desincorporacion,
+        AF.diferencia_valor AS valor_desincorporacion,
+        AF.diferencia_cantidad AS cantidad_desincorporacion,
+        NULL AS campo_modificado,
+        NULL AS valor_anterior,
+        NULL AS valor_nuevo
+    FROM ActivosFaltantes AF
+    JOIN Activos A ON AF.bien_id = A.id
+    LEFT JOIN Departamento D_actual ON AF.unidad = D_actual.id
+    WHERE AF.bien_id = ?
+
+    ORDER BY fecha_evento ASC;
   `;
-  const [rows] = yield pool.execute(query, [goodId]);
+  const [rows] = yield pool.execute(query, [goodId, goodId, goodId, goodId]);
   return rows;
 });
 const goodHistoryModel = {
@@ -4917,9 +5013,11 @@ const getGoodHistory = (req, res) => __async$g(void 0, null, function* () {
     if (history.length === 0) {
       return res.status(404).json({ ok: false, message: "No se encontr\xF3 historial para este ID de bien" });
     }
-    const hasTransfersOrDecompositions = history.some((item) => item.fecha_traslado || item.fecha_desincorporacion);
-    if (!hasTransfersOrDecompositions) {
-      return res.status(200).json({ ok: true, message: "No se encontraron traslados o desincorporaciones para este ID de bien", history });
+    const hasRelevantHistory = history.some(
+      (item) => item.tipo_evento === "Traslado" || item.tipo_evento === "Desincorporacion" || item.tipo_evento === "Activo Faltante"
+    );
+    if (!hasRelevantHistory) {
+      return res.status(200).json({ ok: true, message: "No se encontraron traslados, desincorporaciones o activos faltantes para este ID de bien", history });
     }
     res.status(200).json({ ok: true, history });
   } catch (error) {
@@ -5240,7 +5338,7 @@ var __async$b = (__this, __arguments, generator) => {
 };
 const getAllComponents$1 = () => __async$b(void 0, null, function* () {
   const query = `
-    SELECT c.id, c.bien_id, c.nombre, c.numero_serial
+    SELECT c.id, c.bien_id, c.nombre, c.numero_serial 
     FROM Componentes c
   `;
   const [rows] = yield pool.execute(query);
@@ -5285,25 +5383,31 @@ const createComponent$1 = (_0) => __async$b(void 0, [_0], function* ({
     numero_serial: numero_serial || null
   };
 });
-const updateComponent$1 = (_0, _1) => __async$b(void 0, [_0, _1], function* (id, {
-  bien_id,
-  nombre,
-  numero_serial
-}) {
+const updateComponent$1 = (id, data) => __async$b(void 0, null, function* () {
+  const setClauses = [];
+  const params = [];
+  if (data.bien_id !== void 0) {
+    setClauses.push("bien_id = ?");
+    params.push(data.bien_id);
+  }
+  if (data.nombre !== void 0) {
+    setClauses.push("nombre = ?");
+    params.push(data.nombre);
+  }
+  if (data.numero_serial !== void 0) {
+    setClauses.push("numero_serial = ?");
+    params.push(data.numero_serial || null);
+  }
+  if (setClauses.length === 0) {
+    return { affectedRows: 0 };
+  }
   const query = `
     UPDATE Componentes
-    SET 
-      bien_id = COALESCE(?, bien_id),
-      nombre = COALESCE(?, nombre),
-      numero_serial = COALESCE(?, numero_serial)
+    SET ${setClauses.join(", ")}
     WHERE id = ?
   `;
-  const [result] = yield pool.execute(query, [
-    bien_id != null ? bien_id : null,
-    nombre != null ? nombre : null,
-    numero_serial != null ? numero_serial : null,
-    id
-  ]);
+  params.push(id);
+  const [result] = yield pool.execute(query, params);
   return result;
 });
 const deleteComponent$1 = (id) => __async$b(void 0, null, function* () {
@@ -5454,10 +5558,16 @@ var __async$9 = (__this, __arguments, generator) => {
 };
 const getAllTransferComponents$1 = () => __async$9(void 0, null, function* () {
   const query = `
-    SELECT tc.id, tc.componente_id, tc.bien_origen_id, tc.bien_destino_id, tc.fecha,
-           c.nombre as componente_nombre, c.numero_serial
+   SELECT tc.id, tc.componente_id, tc.bien_origen_id, tc.bien_destino_id, tc.fecha,
+           c.nombre as componente_nombre, c.numero_serial, b.dept_id as dept_origen, b2.dept_id as dept_destino,
+            d.nombre as dept_origen_nombre, d2.nombre as dept_destino_nombre
     FROM ComponentesTraslado tc
     JOIN Componentes c ON tc.componente_id = c.id
+    LEFT JOIN Activos b ON tc.bien_origen_id = b.id 
+    LEFT JOIN Activos b2 ON tc.bien_destino_id = b2.id
+    LEFT JOIN Departamento d ON b.dept_id = d.id
+    LEFT JOIN Departamento d2 ON b2.dept_id = d2.id
+    ORDER BY tc.fecha DESC
   `;
   const [rows] = yield pool.execute(query);
   return rows;
@@ -5682,25 +5792,55 @@ function exportBM1ByDepartment(deptId, departamentoNombre, outputPath) {
     console.log(`[ExcelBM1] Total pages to generate: ${totalPaginas}`);
     const plantillaPath = path.resolve(__dirname$7, "../plantillas/plantilla-bm1.xlsx");
     console.log(`[ExcelBM1] Template path: ${plantillaPath}`);
-    const plantillaBuffer = fs.readFileSync(plantillaPath);
+    let plantillaBuffer;
+    try {
+      plantillaBuffer = fs.readFileSync(plantillaPath);
+    } catch (error) {
+      console.error(`[ExcelBM1] Error al leer la plantilla en ${plantillaPath}:`, error);
+      throw new Error(`No se pudo leer la plantilla Excel: ${error.message}`);
+    }
     const generatedFilePaths = [];
     const workbook = new ExcelJS.Workbook();
-    yield workbook.xlsx.load(plantillaBuffer);
-    const escudoPath = path.resolve(__dirname$7, "../images/Escudo.jpg");
-    const logoImpresionPath = path.resolve(__dirname$7, "../images/LogoImpresion.jpg");
-    const redesPath = path.resolve(__dirname$7, "../images/Redes.png");
+    try {
+      yield workbook.xlsx.load(plantillaBuffer);
+    } catch (error) {
+      console.error(`[ExcelBM1] Error al cargar la plantilla Excel desde el buffer:`, error);
+      throw new Error(`No se pudo cargar la plantilla Excel: ${error.message}`);
+    }
+    const escudoPath = path.resolve(__dirname$7, "./images/Escudo.jpg");
+    const logoImpresionPath = path.resolve(__dirname$7, "./images/LogoImpresion.jpg");
+    const redesPath = path.resolve(__dirname$7, "./images/Redes.png");
     console.log(`[ExcelBM1] Intentando cargar imagen: ${escudoPath}`);
-    const escudoImageId = workbook.addImage({ filename: escudoPath, extension: "jpeg" });
-    console.log(`[ExcelBM1] ID de imagen Escudo: ${escudoImageId}`);
+    console.log(`[ExcelBM1] Intentando cargar imagen: ${escudoPath}`);
+    let escudoImageId;
+    try {
+      escudoImageId = workbook.addImage({ filename: escudoPath, extension: "jpeg" });
+      console.log(`[ExcelBM1] ID de imagen Escudo: ${escudoImageId}`);
+    } catch (error) {
+      console.error(`[ExcelBM1] Error al cargar la imagen del escudo en ${escudoPath}:`, error);
+      throw new Error(`No se pudo cargar la imagen del escudo: ${error.message}`);
+    }
     console.log(`[ExcelBM1] Intentando cargar imagen: ${logoImpresionPath}`);
-    const logoImpresionImageId = workbook.addImage({ filename: logoImpresionPath, extension: "jpeg" });
-    console.log(`[ExcelBM1] ID de imagen LogoImpresion: ${logoImpresionImageId}`);
+    let logoImpresionImageId;
+    try {
+      logoImpresionImageId = workbook.addImage({ filename: logoImpresionPath, extension: "jpeg" });
+      console.log(`[ExcelBM1] ID de imagen LogoImpresion: ${logoImpresionImageId}`);
+    } catch (error) {
+      console.error(`[ExcelBM1] Error al cargar la imagen del logo de impresi\xF3n en ${logoImpresionPath}:`, error);
+      throw new Error(`No se pudo cargar la imagen del logo de impresi\xF3n: ${error.message}`);
+    }
     console.log(`[ExcelBM1] Intentando cargar imagen: ${redesPath}`);
-    const redesImageId = workbook.addImage({ filename: redesPath, extension: "png" });
-    console.log(`[ExcelBM1] ID de imagen Redes: ${redesImageId}`);
+    let redesImageId;
+    try {
+      redesImageId = workbook.addImage({ filename: redesPath, extension: "png" });
+      console.log(`[ExcelBM1] ID de imagen Redes: ${redesImageId}`);
+    } catch (error) {
+      console.error(`[ExcelBM1] Error al cargar la imagen de redes en ${redesPath}:`, error);
+      throw new Error(`No se pudo cargar la imagen de redes: ${error.message}`);
+    }
     const addImagesToWorksheet = (targetWs) => {
-      targetWs.addImage(logoImpresionImageId, { tl: { col: 0.5, row: 0.5 }, ext: { width: 150, height: 50 } });
-      targetWs.addImage(escudoImageId, { tl: { col: 6.5, row: 0.5 }, ext: { width: 80, height: 80 } });
+      targetWs.addImage(logoImpresionImageId, { tl: { col: 0.5, row: 0.2 }, ext: { width: 150, height: 50 } });
+      targetWs.addImage(escudoImageId, { tl: { col: 6.5, row: 0.05 }, ext: { width: 70, height: 60 } });
       targetWs.addImage(redesImageId, { tl: { col: 0.5, row: 24.5 }, ext: { width: 120, height: 40 } });
       console.log(`[ExcelBM1] Im\xE1genes a\xF1adidas a la hoja de trabajo: ${targetWs.name}`);
     };
@@ -5748,19 +5888,29 @@ function exportBM1ByDepartment(deptId, departamentoNombre, outputPath) {
       const bienesPagina = assets.slice(pagina * BIENES_POR_PAGINA, (pagina + 1) * BIENES_POR_PAGINA);
       bienesPagina.forEach((asset, idx) => {
         const row = ws.getRow(startRow + idx);
-        row.getCell(1).value = asset.grupo || "02";
-        row.getCell(2).value = asset.subgrupo_codigo || "";
-        row.getCell(3).value = asset.cantidad || 1;
-        row.getCell(4).value = asset.numero_identificacion || "";
-        row.getCell(5).value = [
+        const baseDescriptionParts = [
           asset.nombre_descripcion,
-          asset.numero_serial || "",
+          "S/N: " + (asset.numero_serial || ""),
           asset.marca_nombre,
           asset.modelo_nombre,
           asset.estado_nombre,
           asset.components_description
-          // Añadir la descripción de los componentes
-        ].filter(Boolean).join(" ") || "";
+        ].filter(Boolean);
+        if (asset.isActive === 0) {
+          row.getCell(5).value = {
+            richText: [
+              { text: baseDescriptionParts.join(" ") },
+              { font: { color: { argb: "FFFF0000" } }, text: " (Inactivo)" }
+              // Rojo
+            ]
+          };
+        } else {
+          row.getCell(5).value = baseDescriptionParts.join(" ") || "";
+        }
+        row.getCell(1).value = asset.grupo || "02";
+        row.getCell(2).value = asset.subgrupo_codigo || "";
+        row.getCell(3).value = asset.cantidad || 1;
+        row.getCell(4).value = asset.numero_identificacion || "";
         row.getCell(6).value = Number(asset.valor_unitario) || 0;
         row.getCell(7).value = Number(asset.valor_total) || 0;
         row.commit();
@@ -5773,9 +5923,14 @@ function exportBM1ByDepartment(deptId, departamentoNombre, outputPath) {
     }
     const nombreArchivo = `BM1_${departamentoNombre}.xlsx`;
     const rutaArchivo = path.join(outputPath, nombreArchivo);
-    yield workbook.xlsx.writeFile(rutaArchivo);
-    console.log(`[ExcelBM1] Archivo final generado: ${rutaArchivo}`);
-    generatedFilePaths.push(rutaArchivo);
+    try {
+      yield workbook.xlsx.writeFile(rutaArchivo);
+      console.log(`[ExcelBM1] Archivo final generado: ${rutaArchivo}`);
+      generatedFilePaths.push(rutaArchivo);
+    } catch (error) {
+      console.error(`[ExcelBM1] Error al escribir el archivo Excel en ${rutaArchivo}:`, error);
+      throw new Error(`No se pudo escribir el archivo Excel: ${error.message}`);
+    }
     console.log(`[ExcelBM1] Finished generating files. Total generated: ${generatedFilePaths.length}`);
     return generatedFilePaths;
   });
@@ -5853,7 +6008,7 @@ function exportBM2ByDepartment(deptId, departamentoNombre, mes, a\u00F1o, tipo, 
     console.log(`[ExcelBM2] ID de imagen Redes: ${redesImageId}`);
     const addImagesToWorksheet = (targetWs) => {
       targetWs.addImage(logoImpresionImageId, { tl: { col: 0.5, row: 0.2 }, ext: { width: 150, height: 50 } });
-      targetWs.addImage(escudoImageId, { tl: { col: 8.8, row: 0.2 }, ext: { width: 80, height: 80 } });
+      targetWs.addImage(escudoImageId, { tl: { col: 8.8, row: 0.05 }, ext: { width: 65, height: 60 } });
       targetWs.addImage(redesImageId, { tl: { col: 0.5, row: 24.5 }, ext: { width: 120, height: 40 } });
       console.log(`[ExcelBM2] Im\xE1genes a\xF1adidas a la hoja de trabajo: ${targetWs.name}`);
     };
@@ -6655,6 +6810,7 @@ console.log("Current directory:", __dirname);
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use("/images", express.static(path__default.join(process.cwd(), "images")));
 app.use(
   cors({
     //permitir todas las solicitudes de origen
@@ -6663,9 +6819,9 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
-app.use("/", router$p);
 app.use("/auth", router$o);
 app.use(verifyToken);
+app.use("/", router$p);
 app.use("/user", router$n);
 app.use("/subgroup", router$m);
 app.use("/incorp", router$k);

@@ -185,25 +185,14 @@ Componentes: ${asset.components_description || ""}
       });
     }
 
-    // Impresión 2 (Redes/Info Adicional) - Eliminado según solicitud del usuario
-    // if (embeddedImpresion2) {
-    //   page.drawImage(embeddedImpresion2, {
-    //     x: x + 5, // Posición de ejemplo
-    //     y: y + 5, // Posición de ejemplo
-    //     width: 50,
-    //     height: 20,
-    //   });
-    // }
-
-    // Número de Identificación
-    // Dibujar bordes de la etiqueta
+    // Dibujar borde rojo de la etiqueta
     page.drawRectangle({
       x: x,
       y: y,
       width: labelWidth,
       height: labelHeight,
-      borderColor: rgb(0, 0, 0),
-      borderWidth: 1,
+      borderColor: rgb(0.8, 0, 0), // Borde rojo
+      borderWidth: 2,
     });
 
     // Número de Identificación
