@@ -1,0 +1,61 @@
+# Configuración de Nginx para SistBienes Backend
+# Ubicación: /etc/nginx/sites-available/sistbienes-backend
+
+server {
+    listen 80;
+    server_name api.tu-dominio.com;  # Cambia esto por tu dominio o IP
+
+    # Aumentar tamaño máximo de archivos para uploads
+    client_max_body_size 50M;
+
+    # Logs específicos para este sitio
+    access_log /var/log/nginx/sistbienes-backend-access.log;
+    error_log /var/log/nginx/sistbienes-backend-error.log;
+
+    location / {
+        # Proxy pass al backend Node.js
+        proxy_pass http://localhost:3000;
+        
+        # Headers para WebSocket y HTTP/1.1
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        
+        # Headers para información del cliente
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Cache bypass
+        proxy_cache_bypass $http_upgrade;
+        
+        # Timeouts para operaciones largas (generación de PDFs, Excel, etc.)
+        proxy_connect_timeout 600;
+        proxy_send_timeout 600;
+        proxy_read_timeout 600;
+        send_timeout 600;
+    }
+
+    # Servir archivos estáticos directamente (si aplica)
+    location /uploads/ {
+        alias /var/www/sistbienes/backend/uploads/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+}
+
+# Configuración HTTPS (se genera automáticamente con certbot)
+# Descomentar después de ejecutar: sudo certbot --nginx -d api.tu-dominio.com
+#
+# server {
+#     listen 443 ssl http2;
+#     server_name api.tu-dominio.com;
+#
+#     ssl_certificate /etc/letsencrypt/live/api.tu-dominio.com/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/api.tu-dominio.com/privkey.pem;
+#     include /etc/letsencrypt/options-ssl-nginx.conf;
+#     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+#
+#     # ... resto de la configuración igual que arriba
+# }
